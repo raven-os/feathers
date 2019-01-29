@@ -1,8 +1,8 @@
 #include "XdgShell.hpp"
 #include "Server.hpp"
 
-XdgShell::XdgShell(struct wl_display *display)
-  : xdg_shell(wlr_xdg_shell_create(display))
+XdgShell::XdgShell(struct wl_display *display, Server *server)
+  : server(server), xdg_shell(wlr_xdg_shell_create(display))
 {
   static const auto xdg_surface_map = [](struct wl_listener *listener, void *data)
   {
@@ -55,7 +55,8 @@ XdgShell::XdgShell(struct wl_display *display)
   {
     /* This event is raised when wlr_xdg_shell receives a new xdg surface from a
      * client, either a toplevel (application window) or popup. */
-    Server *server = wl_container_of(listener, server, views);
+    XdgShell *xdgShell = wl_container_of(listener, xdgShell, new_xdg_surface);
+    Server *server = xdgShell->server;
     struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
     if (xdg_surface->role != WLR_XDG_SURFACE_ROLE_TOPLEVEL)
       {

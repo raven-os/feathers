@@ -180,7 +180,7 @@ Server::Server()
 
   wl_list_init(&views);
   // TODO Unique ptr
-  xdgShell = new XdgShell(display);
+  xdgShell = new XdgShell(display, this);
   // xdg_shell = wlr_xdg_shell_create(display);
   // new_xdg_surface.notify = server_new_xdg_surface;
   // wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
