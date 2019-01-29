@@ -4,13 +4,19 @@ INCLUDE :=	include/
 
 CXX_SRC :=	main.cpp \
 		Server.cpp \
-		XdgShell.cpp
+		XdgShell.cpp \
+		Seat.cpp \
+		View.cpp \
+		ServerCursor.cpp \
+		ServerInput.cpp \
+		ServerOutput.cpp
 
 C_SRC :=	xdg-shell-protocol.c
 
 CXX :=		g++
 CXXFLAGS :=	-W -Wall -Wextra -g -std=c++17 \
-		-lwayland-server -lwlroots -DWLR_USE_UNSTABLE
+		-lwayland-server -lwlroots -lxkbcommon \
+		-DWLR_USE_UNSTABLE
 
 CXX_SRC :=	$(addprefix $(SRCDIR), $(CXX_SRC))
 C_SRC :=	$(addprefix $(SRCDIR), $(C_SRC))
