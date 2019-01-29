@@ -1,10 +1,9 @@
 #include "XdgShell.hpp"
 #include "Server.hpp"
 
-XdgShell::XdgShell(struct wl_display *display, Server *server)
-  : server(server), xdg_shell(wlr_xdg_shell_create(display))
+namespace XdgShell
 {
-  static const auto xdg_surface_map = [](struct wl_listener *listener, void *data)
+  void xdg_surface_map(struct wl_listener *listener, void *data)
   {
     /* Called when the surface is mapped, or ready to display on-screen. */
     View *view = wl_container_of(listener, view, map);
@@ -13,14 +12,14 @@ XdgShell::XdgShell(struct wl_display *display, Server *server)
     // focus_view(view, view->xdg_surface->surface);
   };
 
-  static const auto xdg_surface_unmap = [](struct wl_listener *listener, void *data)
+  void xdg_surface_unmap(struct wl_listener *listener, void *data)
   {
     /* Called when the surface is unmapped, and should no longer be shown. */
     View *view = wl_container_of(listener, view, unmap);
     view->mapped = false;
   };
 
-  static const auto xdg_surface_destroy = [](struct wl_listener *listener, void *data)
+  void xdg_surface_destroy(struct wl_listener *listener, void *data)
   {
     /* Called when the surface is destroyed and should never be shown again. */
     View *view = wl_container_of(listener, view, destroy);
@@ -28,7 +27,7 @@ XdgShell::XdgShell(struct wl_display *display, Server *server)
     free(view);
   };
 
-  static const auto xdg_toplevel_request_move = [](struct wl_listener *listener, void *data)
+  void xdg_toplevel_request_move(struct wl_listener *listener, void *data)
   {
     /* This event is raised when a client would like to begin an interactive
      * move, typically because the user clicked on their client-side
@@ -40,7 +39,8 @@ XdgShell::XdgShell(struct wl_display *display, Server *server)
     // begin_interactive(view, TINYWL_CURSOR_MOVE, 0);
   };
 
-  static const auto xdg_toplevel_request_resize = [](struct wl_listener *listener, void *data) {
+  void xdg_toplevel_request_resize(struct wl_listener *listener, void *data)
+  {
     /* This event is raised when a client would like to begin an interactive
      * resize, typically because the user clicked on their client-side
      * decorations. Note that a more sophisticated compositor should check the
@@ -51,12 +51,11 @@ XdgShell::XdgShell(struct wl_display *display, Server *server)
     // begin_interactive(view, TINYWL_CURSOR_RESIZE, event->edges);
   };
 
-  static const auto server_new_xdg_surface = [](struct wl_listener *listener, void *data)
+  void server_new_xdg_surface(struct wl_listener *listener, void *data)
   {
     /* This event is raised when wlr_xdg_shell receives a new xdg surface from a
      * client, either a toplevel (application window) or popup. */
-    XdgShell *xdgShell = wl_container_of(listener, xdgShell, new_xdg_surface);
-    Server *server = xdgShell->server;
+    Server *server = wl_container_of(listener, server, new_xdg_surface);
     struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
     if (xdg_surface->role != WLR_XDG_SURFACE_ROLE_TOPLEVEL)
       {
@@ -86,12 +85,4 @@ XdgShell::XdgShell(struct wl_display *display, Server *server)
     /* Add it to the list of views. */
     wl_list_insert(&server->views, &view->link);
   };
-
-  new_xdg_surface.notify = server_new_xdg_surface;
-  wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
-}
-
-XdgShell::~XdgShell()
-{
-
 }

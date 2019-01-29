@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "Server.hpp"
+#include "XdgShell.hpp"
 
 static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
 {
@@ -180,10 +181,9 @@ Server::Server()
 
   wl_list_init(&views);
   // TODO Unique ptr
-  xdgShell = new XdgShell(display, this);
-  // xdg_shell = wlr_xdg_shell_create(display);
-  // new_xdg_surface.notify = server_new_xdg_surface;
-  // wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
+  xdg_shell = wlr_xdg_shell_create(display);
+  new_xdg_surface.notify = XdgShell::server_new_xdg_surface;
+  wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 
   // TODO Cursor
   // cursor = wlr_cursor_create();

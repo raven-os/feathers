@@ -2,7 +2,6 @@
 # define SERVER_HPP_
 
 # include "Wlroots.hpp"
-# include "XdgShell.hpp"
 
 class Server
 {
@@ -14,9 +13,8 @@ public:
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
 
-  XdgShell *xdgShell;
-  // struct wlr_xdg_shell *xdg_shell;
-  // struct wl_listener new_xdg_surface;
+  struct wlr_xdg_shell *xdg_shell;
+  struct wl_listener new_xdg_surface;
   struct wl_list views;
 
   struct wlr_cursor *cursor;
