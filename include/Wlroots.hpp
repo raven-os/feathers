@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <libinput.h>
 #include <libudev.h>
-#include <pixman.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
