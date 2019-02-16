@@ -1,5 +1,4 @@
-#ifndef VIEW_HPP_
-# define VIEW_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 # include "ServerCursor.hpp"
@@ -29,5 +28,3 @@ namespace ServerView
 			struct wlr_surface **surface, double *sx, double *sy);
   void begin_interactive(View *view, CursorMode mode, uint32_t edges);
 }
-
-#endif /* !VIEW_HPP_ */

@@ -1,5 +1,4 @@
-#ifndef SERVERINPUT_HPP_
-# define SERVERINPUT_HPP_
+#pragma once
 
 # include "Server.hpp"
 

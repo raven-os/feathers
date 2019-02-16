@@ -1,5 +1,4 @@
-#ifndef SERVEROUTPUT_HPP_
-# define SERVEROUTPUT_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 
@@ -19,5 +18,3 @@ struct render_data
   struct View *view;
   struct timespec *when;
 };
-
-#endif /* !SERVEROUTPUT_HPP_ */
