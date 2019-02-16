@@ -5,6 +5,7 @@
 # include "View.hpp"
 # include "Output.hpp"
 # include "Keyboard.hpp"
+# include "ServerCursor.hpp"
 
 class Server
 {
@@ -22,18 +23,20 @@ public:
   struct wl_listener new_xdg_surface;
   struct wl_list views;
 
-  struct wlr_cursor *cursor;
-  struct wlr_xcursor_manager *cursor_mgr;
-  struct wl_listener cursor_motion;
-  struct wl_listener cursor_motion_absolute;
-  struct wl_listener cursor_button;
-  struct wl_listener cursor_axis;
+  ServerCursor *cursor;
+
+  // struct wlr_cursor *cursor;
+  // struct wlr_xcursor_manager *cursor_mgr;
+  // struct wl_listener cursor_motion;
+  // struct wl_listener cursor_motion_absolute;
+  // struct wl_listener cursor_button;
+  // struct wl_listener cursor_axis;
+  // CursorMode cursor_mode;
 
   struct wlr_seat *seat;
   struct wl_listener new_input;
   struct wl_listener request_cursor;
   struct wl_list keyboards;
-  CursorMode cursor_mode;
   View *grabbed_view;
   double grab_x, grab_y;
   int grab_width, grab_height;

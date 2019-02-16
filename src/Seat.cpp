@@ -10,7 +10,7 @@ namespace Seat
     struct wlr_seat_client *focused_client = server->seat->pointer_state.focused_client;
     if (focused_client == event->seat_client)
       {
-	wlr_cursor_set_surface(server->cursor, event->surface, event->hotspot_x, event->hotspot_y);
+	wlr_cursor_set_surface(server->cursor->cursor, event->surface, event->hotspot_x, event->hotspot_y);
       }
   }
 }

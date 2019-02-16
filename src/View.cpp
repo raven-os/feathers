@@ -76,18 +76,18 @@ namespace ServerView
 	return;
       }
     server->grabbed_view = view;
-    server->cursor_mode = mode;
+    server->cursor->cursor_mode = mode;
     struct wlr_box geo_box;
     wlr_xdg_surface_get_geometry(view->xdg_surface, &geo_box);
     if (mode == CursorMode::CURSOR_MOVE)
       {
-	server->grab_x = server->cursor->x - view->x;
-	server->grab_y = server->cursor->y - view->y;
+	server->grab_x = server->cursor->cursor->x - view->x;
+	server->grab_y = server->cursor->cursor->y - view->y;
       }
     else
       {
-	server->grab_x = server->cursor->x + geo_box.x;
-	server->grab_y = server->cursor->y + geo_box.y;
+	server->grab_x = server->cursor->cursor->x + geo_box.x;
+	server->grab_y = server->cursor->cursor->y + geo_box.y;
       }
     server->grab_width = geo_box.width;
     server->grab_height = geo_box.height;

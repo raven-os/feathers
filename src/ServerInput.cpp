@@ -93,7 +93,7 @@ namespace ServerInput
 
   static void server_new_pointer(Server *server, struct wlr_input_device *device)
   {
-    wlr_cursor_attach_input_device(server->cursor, device);
+    wlr_cursor_attach_input_device(server->cursor->cursor, device);
   }
 
   void server_new_input(struct wl_listener *listener, void *data)

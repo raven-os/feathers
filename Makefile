@@ -1,4 +1,4 @@
-NAME :=		a.out
+NAME :=		feathers
 SRCDIR :=	src/
 INCLUDE :=	include/
 
