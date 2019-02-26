@@ -1,5 +1,4 @@
-#ifndef OUTPUT_HPP_
-# define OUTPUT_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 
@@ -12,5 +11,3 @@ struct Output
   struct wlr_output *wlr_output;
   struct wl_listener frame;
 };
-
-#endif /* !OUTPUT_HPP_ */

@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_HPP_
-# define KEYBOARD_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 
@@ -14,5 +13,3 @@ struct Keyboard
   struct wl_listener modifiers;
   struct wl_listener key;
 };
-
-#endif /* !KEYBOARD_HPP_ */

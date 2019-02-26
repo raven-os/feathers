@@ -1,5 +1,4 @@
-#ifndef SERVER_HPP_
-# define SERVER_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 # include "View.hpp"
@@ -43,5 +42,3 @@ public:
   struct wl_list outputs;
   struct wl_listener new_output;
 };
-
-#endif /* !SERVER_HPP_ */

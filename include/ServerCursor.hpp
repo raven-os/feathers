@@ -1,5 +1,4 @@
-#ifndef CURSOR_HPP_
-# define CURSOR_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
 
@@ -17,5 +16,3 @@ namespace ServerCursor
   void server_cursor_button(struct wl_listener *listener, void *data);
   void server_cursor_axis(struct wl_listener *listener, void *data);
 };
-
-#endif /* !CURSOR_HPP_ */
