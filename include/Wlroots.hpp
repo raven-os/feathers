@@ -1,5 +1,4 @@
-#ifndef WLROOTS_HPP_
-# define WLROOTS_HPP_
+#pragma once
 
 #include <EGL/egl.h>
 #include <errno.h>
@@ -81,6 +80,3 @@ extern "C" {
 #undef namespace
 #undef static
 #undef delete
-
-
-#endif /* !WLROOTS_HPP_ */

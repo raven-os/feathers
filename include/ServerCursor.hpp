@@ -18,10 +18,10 @@ public:
   ServerCursor(Server *server);
   ~ServerCursor();
 
-  static void server_cursor_motion(struct wl_listener *listener, void *data);
-  static void server_cursor_motion_absolute(struct wl_listener *listener, void *data);
-  static void server_cursor_button(struct wl_listener *listener, void *data);
-  static void server_cursor_axis(struct wl_listener *listener, void *data);
+  void server_cursor_motion(struct wl_listener *listener, void *data);
+  void server_cursor_motion_absolute(struct wl_listener *listener, void *data);
+  void server_cursor_button(struct wl_listener *listener, void *data);
+  void server_cursor_axis(struct wl_listener *listener, void *data);
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;
