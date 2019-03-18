@@ -19,12 +19,14 @@ file(GLOB_RECURSE HEADERS_FILE "${HEADER_DIRECTORY}/*.hpp")
 find_package(Wayland REQUIRED)
 find_package(Wlroots REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(Pixman REQUIRED)
 
 include_directories(
   ${HEADER_DIRECTORY}
   ${WAYLAND_CLIENT_INCLUDE_DIR}
   ${WAYLAND_SERVER_INCLUDE_DIR}
   ${WLR_INCLUDE_DIRS}
+  ${PIXMAN_INCLUDE_DIRS}
   )
 
 add_executable(
@@ -37,5 +39,6 @@ target_link_libraries(${PROJECT_NAME}
   ${WAYLAND_CLIENT_LIBRARIES}
   ${WAYLAND_SERVER_LIBRARIES}
   ${WLR_LIBRARIES}
+  ${PIXMAN_LIBRARIES}
   xkbcommon
   )
