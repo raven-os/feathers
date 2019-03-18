@@ -12,11 +12,27 @@ enum CursorMode
    CURSOR_RESIZE,
   };
 
-class ServerCursor
+#define SET_LISTENER(TYPE, SUBTYPE, NAME, TARGET)			\
+  NAME.notify = [](wl_listener *listener, void *data)			\
+		{							\
+		  TYPE *that(static_cast<TYPE *>(wl_container_of(listener, static_cast<SUBTYPE *>(nullptr), NAME))); \
+		  that->TARGET(listener, data);				\
+		};							\
+
+
+struct ServerCursorListeners
+{
+  struct wl_listener cursor_motion;
+  struct wl_listener cursor_motion_absolute;
+  struct wl_listener cursor_button;
+  struct wl_listener cursor_axis;
+};
+
+class ServerCursor : public ServerCursorListeners
 {
 public:
   ServerCursor(Server *server);
-  ~ServerCursor();
+  ~ServerCursor() = default;
 
   void server_cursor_motion(struct wl_listener *listener, void *data);
   void server_cursor_motion_absolute(struct wl_listener *listener, void *data);
@@ -25,10 +41,6 @@ public:
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;
-  struct wl_listener cursor_motion;
-  struct wl_listener cursor_motion_absolute;
-  struct wl_listener cursor_button;
-  struct wl_listener cursor_axis;
   CursorMode cursor_mode;
 
 private:
