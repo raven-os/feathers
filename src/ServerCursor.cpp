@@ -20,7 +20,7 @@ ServerCursor::ServerCursor(Server *server)
 
 }
 
-void ServerCursor::process_cursor_move(uint32_t time)
+void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 {
   server->grabbed_view->x = cursor->x - server->grab_x;
   server->grabbed_view->y = cursor->y - server->grab_y;

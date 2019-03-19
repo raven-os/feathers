@@ -106,10 +106,10 @@ namespace ServerInput
     switch (device->type)
       {
       case WLR_INPUT_DEVICE_KEYBOARD:
-	server_new_keyboard(server, device);
+	server_new_keyboard(device);
 	break;
       case WLR_INPUT_DEVICE_POINTER:
-	server_new_pointer(server, device);
+	server_new_pointer(device);
 	break;
       default:
 	break;

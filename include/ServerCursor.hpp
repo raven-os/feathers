@@ -1,7 +1,7 @@
-#ifndef CURSOR_HPP_
-# define CURSOR_HPP_
+#pragma once
 
 # include "Wlroots.hpp"
+# include "Listeners.hpp"
 
 class Server;
 
@@ -12,23 +12,7 @@ enum CursorMode
    CURSOR_RESIZE,
   };
 
-#define SET_LISTENER(TYPE, SUBTYPE, NAME, TARGET)			\
-  NAME.notify = [](wl_listener *listener, void *data)			\
-		{							\
-		  TYPE *that(static_cast<TYPE *>(wl_container_of(listener, static_cast<SUBTYPE *>(nullptr), NAME))); \
-		  that->TARGET(listener, data);				\
-		};							\
-
-
-struct ServerCursorListeners
-{
-  struct wl_listener cursor_motion;
-  struct wl_listener cursor_motion_absolute;
-  struct wl_listener cursor_button;
-  struct wl_listener cursor_axis;
-};
-
-class ServerCursor : public ServerCursorListeners
+class ServerCursor : public Listeners::ServerCursorListeners
 {
 public:
   ServerCursor(Server *server);
@@ -51,5 +35,3 @@ private:
   void process_cursor_motion(uint32_t time);
 
 };
-
-#endif /* !CURSOR_HPP_ */
