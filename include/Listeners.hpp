@@ -22,4 +22,10 @@ namespace Listeners {
     {
         struct wl_listener new_input;
     };
+
+    struct KeyboardListeners
+    {
+      struct wl_listener modifiers;
+      struct wl_listener key;
+    };
 }
