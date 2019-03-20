@@ -5,7 +5,7 @@ ServerCursor::ServerCursor(Server *server)
   : server(server)
 {
   cursor = wlr_cursor_create();
-  wlr_cursor_attach_output_layout(cursor, server->output_layout);
+  wlr_cursor_attach_output_layout(cursor, server->output->getLayout());
 
   cursor_mgr = wlr_xcursor_manager_create(nullptr, 24);
   wlr_xcursor_manager_load(cursor_mgr, 1);

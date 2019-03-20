@@ -45,9 +45,9 @@ void ServerInput::server_new_keyboard(struct wlr_input_device *device)
   wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
 
   keyboard->setModifiersListener();
-  wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
+//  wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
   keyboard->setKeyListener();
-  wl_signal_add(&device->keyboard->events.key, &keyboard->key);
+//  wl_signal_add(&device->keyboard->events.key, &keyboard->key);
 
   wlr_seat_set_keyboard(server->seat, device);
 

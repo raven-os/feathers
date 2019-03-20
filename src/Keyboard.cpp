@@ -70,8 +70,10 @@ void Keyboard::keyboard_handle_key(struct wl_listener *listener, void *data)
 
 void Keyboard::setModifiersListener() {
   SET_LISTENER(Keyboard, KeyboardListeners, modifiers, keyboard_handle_modifiers);
+  wl_signal_add(&device->keyboard->events.modifiers, &modifiers);
 }
 
 void Keyboard::setKeyListener() {
   SET_LISTENER(Keyboard, KeyboardListeners, key, keyboard_handle_key);
+  wl_signal_add(&device->keyboard->events.key, &key);
 }

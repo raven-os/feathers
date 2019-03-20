@@ -23,6 +23,16 @@ namespace Listeners {
         struct wl_listener new_input;
     };
 
+    struct ServerOutputListeners
+    {
+        struct wl_listener new_output;
+    };
+
+    struct OutputListeners
+    {
+        struct wl_listener frame;
+    };
+
     struct KeyboardListeners
     {
       struct wl_listener modifiers;

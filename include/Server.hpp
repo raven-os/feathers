@@ -5,6 +5,7 @@
 # include "Output.hpp"
 # include "ServerCursor.hpp"
 # include "ServerInput.hpp"
+# include "ServerOutput.hpp"
 
 class Server
 {
@@ -23,20 +24,19 @@ public:
   struct wl_list views;
 
   ServerCursor *cursor;
+  ServerInput *input;
+  ServerOutput *output;
 
   struct wlr_seat *seat;
   struct wl_listener request_cursor;
 
-  ServerInput *input;
-  // struct wl_listener new_input;
-  // struct wl_list keyboards;
 
   View *grabbed_view;
   double grab_x, grab_y;
   int grab_width, grab_height;
   uint32_t resize_edges;
 
-  struct wlr_output_layout *output_layout;
-  struct wl_list outputs;
-  struct wl_listener new_output;
+  // struct wlr_output_layout *output_layout;
+  // struct wl_list outputs;
+  // struct wl_listener new_output;
 };
