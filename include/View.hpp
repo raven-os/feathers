@@ -5,18 +5,21 @@
 
 class Server;
 
-struct View
+class View : public Listeners::ViewListeners
 {
+public:
+  View(Server *server, struct wlr_xdg_surface *xdg_surface);
+  ~View() = default;
+
   struct wl_list link;
+
+  //void setMapListeners(void (*func)(struct wl_listener *listener, void *data));
+
   Server *server;
   struct wlr_xdg_surface *xdg_surface;
-  struct wl_listener map;
-  struct wl_listener unmap;
-  struct wl_listener destroy;
-  struct wl_listener request_move;
-  struct wl_listener request_resize;
   bool mapped;
   int x, y;
+private:
 };
 
 namespace ServerView

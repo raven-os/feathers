@@ -39,8 +39,22 @@ namespace Listeners {
       struct wl_listener key;
     };
 
-    struct SeatListener
+    struct SeatListeners
     {
       struct wl_listener request_cursor;
+    };
+
+    struct XdgShellListeners
+    {
+      struct wl_listener new_xdg_surface;
+    };
+
+    struct ViewListeners
+    {
+      struct wl_listener map;
+      struct wl_listener unmap;
+      struct wl_listener destroy;
+      struct wl_listener request_move;
+      struct wl_listener request_resize;
     };
 }

@@ -28,17 +28,14 @@ Server::Server()
 
 
   wl_list_init(&views);
-  xdg_shell = wlr_xdg_shell_create(display);
-  new_xdg_surface.notify = XdgShell::server_new_xdg_surface;
-  wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
+  xdgShell = new XdgShell(this, display);
+  // xdg_shell = wlr_xdg_shell_create(display);
+  // new_xdg_surface.notify = XdgShell::server_new_xdg_surface;
+  // wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 
   cursor = new ServerCursor(this);
   input = new ServerInput(this);
   seat = new Seat(this);
-
-  // seat = wlr_seat_create(display, "seat0");
-  // request_cursor.notify = Seat::seat_request_cursor;
-  // wl_signal_add(&seat->events.request_set_cursor, &request_cursor);
 }
 
 Server::~Server()

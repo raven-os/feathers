@@ -5,7 +5,7 @@
 
 class Server;
 
-class Seat : public Listeners::SeatListener
+class Seat : public Listeners::SeatListeners
 {
 public:
   Seat(Server *server);

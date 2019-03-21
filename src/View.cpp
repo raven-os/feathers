@@ -1,6 +1,16 @@
 #include "View.hpp"
 #include "Server.hpp"
 
+View::View(Server *server, struct wlr_xdg_surface *xdg_surface) :
+  server(server), xdg_surface(xdg_surface)
+{
+
+}
+
+// void View::setMapListeners(void (*listener_func)(struct wl_listener *listener, void *data)) {
+//   SET_LISTENER(View, ViewListeners, map, listener_func);
+// }
+
 namespace ServerView
 {
   void focus_view(View *view, struct wlr_surface *surface)

@@ -2,6 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "View.hpp"
+# include "XdgShell.hpp"
 # include "Output.hpp"
 # include "ServerCursor.hpp"
 # include "ServerInput.hpp"
@@ -20,23 +21,19 @@ public:
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
 
-  struct wlr_xdg_shell *xdg_shell;
-  struct wl_listener new_xdg_surface;
+  // struct wlr_xdg_shell *xdg_shell;
+  // struct wl_listener new_xdg_surface;
+  XdgShell *xdgShell;
   struct wl_list views;
 
   ServerCursor *cursor;
   ServerInput *input;
   ServerOutput *output;
   Seat *seat;
-  // struct wlr_seat *seat;
-  // struct wl_listener request_cursor;
 
   View *grabbed_view;
   double grab_x, grab_y;
   int grab_width, grab_height;
   uint32_t resize_edges;
 
-  // struct wlr_output_layout *output_layout;
-  // struct wl_list outputs;
-  // struct wl_listener new_output;
 };
