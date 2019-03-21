@@ -34,10 +34,11 @@ Server::Server()
 
   cursor = new ServerCursor(this);
   input = new ServerInput(this);
+  seat = new Seat(this);
 
-  seat = wlr_seat_create(display, "seat0");
-  request_cursor.notify = Seat::seat_request_cursor;
-  wl_signal_add(&seat->events.request_set_cursor, &request_cursor);
+  // seat = wlr_seat_create(display, "seat0");
+  // request_cursor.notify = Seat::seat_request_cursor;
+  // wl_signal_add(&seat->events.request_set_cursor, &request_cursor);
 }
 
 Server::~Server()

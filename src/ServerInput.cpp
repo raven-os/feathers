@@ -28,7 +28,7 @@ void ServerInput::server_new_input(struct wl_listener *listener, void *data)
     caps |= WL_SEAT_CAPABILITY_KEYBOARD;
   }
 
-  wlr_seat_set_capabilities(server->seat, caps);
+  wlr_seat_set_capabilities(server->seat->getSeat(), caps);
 }
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
@@ -49,7 +49,7 @@ void ServerInput::server_new_keyboard(struct wlr_input_device *device)
   keyboard->setKeyListener();
 //  wl_signal_add(&device->keyboard->events.key, &keyboard->key);
 
-  wlr_seat_set_keyboard(server->seat, device);
+  wlr_seat_set_keyboard(server->seat->getSeat(), device);
 
   wl_list_insert(&keyboards, &keyboard->link);
 }

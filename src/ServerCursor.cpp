@@ -80,7 +80,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     }
 
   double sx, sy;
-  struct wlr_seat *seat = server->seat;
+  struct wlr_seat *seat = server->seat->getSeat();
   struct wlr_surface *surface = NULL;
   View *view = ServerView::desktop_view_at(server, cursor->x,
 					   cursor->y, &surface, &sx, &sy);
@@ -120,10 +120,11 @@ void ServerCursor::process_cursor_motion(uint32_t time)
   void ServerCursor::server_cursor_button(struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
-    wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button, event->state);
+    struct wlr_seat *seat = server->seat->getSeat();
     double sx, sy;
-    struct wlr_seat *seat = server->seat;
     struct wlr_surface *surface;
+
+    wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
     View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
     if (event->state == WLR_BUTTON_RELEASED)
       {
@@ -138,7 +139,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
   void ServerCursor::server_cursor_axis(struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
-    wlr_seat_pointer_notify_axis(server->seat,
+    wlr_seat_pointer_notify_axis(server->seat->getSeat(),
 				 event->time_msec, event->orientation, event->delta,
 				 event->delta_discrete, event->source);
   }

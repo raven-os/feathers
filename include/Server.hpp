@@ -6,6 +6,7 @@
 # include "ServerCursor.hpp"
 # include "ServerInput.hpp"
 # include "ServerOutput.hpp"
+# include "Seat.hpp"
 
 class Server
 {
@@ -26,10 +27,9 @@ public:
   ServerCursor *cursor;
   ServerInput *input;
   ServerOutput *output;
-
-  struct wlr_seat *seat;
-  struct wl_listener request_cursor;
-
+  Seat *seat;
+  // struct wlr_seat *seat;
+  // struct wl_listener request_cursor;
 
   View *grabbed_view;
   double grab_x, grab_y;

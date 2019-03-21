@@ -10,7 +10,7 @@ namespace ServerView
 	return;
       }
     Server *server = view->server;
-    struct wlr_seat *seat = server->seat;
+    struct wlr_seat *seat = server->seat->getSeat();
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
     if (prev_surface == surface)
       {
@@ -70,7 +70,7 @@ namespace ServerView
   void begin_interactive(View *view, CursorMode mode, uint32_t edges)
   {
     Server *server = view->server;
-    struct wlr_surface *focused_surface = server->seat->pointer_state.focused_surface;
+    struct wlr_surface *focused_surface = server->seat->getSeat()->pointer_state.focused_surface;
     if (view->xdg_surface->surface != focused_surface)
       {
 	return;

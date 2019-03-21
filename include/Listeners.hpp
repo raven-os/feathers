@@ -38,4 +38,9 @@ namespace Listeners {
       struct wl_listener modifiers;
       struct wl_listener key;
     };
+
+    struct SeatListener
+    {
+      struct wl_listener request_cursor;
+    };
 }

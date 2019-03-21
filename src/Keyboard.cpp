@@ -34,8 +34,9 @@ bool Keyboard::handle_keybinding(xkb_keysym_t sym)
 void Keyboard::keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
   // Keyboard *keyboard = wl_container_of(listener, keyboard, modifiers);
-  wlr_seat_set_keyboard(server->seat, device);
-  wlr_seat_keyboard_notify_modifiers(server->seat,
+  struct wlr_seat *seat = server->seat->getSeat();
+  wlr_seat_set_keyboard(seat, device);
+  wlr_seat_keyboard_notify_modifiers(seat,
 				     &device->keyboard->modifiers);
 }
 
@@ -44,7 +45,7 @@ void Keyboard::keyboard_handle_key(struct wl_listener *listener, void *data)
   // Keyboard *keyboard = wl_container_of(listener, keyboard, key);
   // Server *server = keyboard->server;
   struct wlr_event_keyboard_key *event = static_cast<struct wlr_event_keyboard_key *>(data);
-  struct wlr_seat *seat = server->seat;
+  struct wlr_seat *seat = server->seat->getSeat();
 
   uint32_t keycode = event->keycode + 8;
   const xkb_keysym_t *syms;
