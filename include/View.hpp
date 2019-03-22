@@ -5,7 +5,7 @@
 
 class Server;
 
-class View : public Listeners::ViewListeners
+struct View : public Listeners::ViewListeners
 {
 public:
   View(Server *server, struct wlr_xdg_surface *xdg_surface);
@@ -13,13 +13,12 @@ public:
 
   struct wl_list link;
 
-  //void setMapListeners(void (*func)(struct wl_listener *listener, void *data));
+  void setListeners();
 
   Server *server;
   struct wlr_xdg_surface *xdg_surface;
   bool mapped;
   int x, y;
-private:
 };
 
 namespace ServerView

@@ -9,7 +9,6 @@ namespace Listeners {
   		  that->TARGET(listener, data);				\
   		};							\
 
-
     struct ServerCursorListeners
     {
       struct wl_listener cursor_motion;
@@ -20,17 +19,17 @@ namespace Listeners {
 
     struct ServerInputListeners
     {
-        struct wl_listener new_input;
+      struct wl_listener new_input;
     };
 
     struct ServerOutputListeners
     {
-        struct wl_listener new_output;
+      struct wl_listener new_output;
     };
 
     struct OutputListeners
     {
-        struct wl_listener frame;
+      struct wl_listener frame;
     };
 
     struct KeyboardListeners

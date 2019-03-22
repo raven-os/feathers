@@ -7,9 +7,20 @@ View::View(Server *server, struct wlr_xdg_surface *xdg_surface) :
 
 }
 
-// void View::setMapListeners(void (*listener_func)(struct wl_listener *listener, void *data)) {
-//   SET_LISTENER(View, ViewListeners, map, listener_func);
-// }
+void View::setListeners() {
+  struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
+
+  SET_LISTENER(View, ViewListeners, map, server->xdgShell->xdg_surface_map);
+  wl_signal_add(&xdg_surface->events.map, &map);
+  SET_LISTENER(View, ViewListeners, unmap, server->xdgShell->xdg_surface_unmap);
+  wl_signal_add(&xdg_surface->events.unmap, &unmap);
+  SET_LISTENER(View, ViewListeners, destroy, server->xdgShell->xdg_surface_destroy);
+  wl_signal_add(&xdg_surface->events.destroy, &destroy);
+  SET_LISTENER(View, ViewListeners, request_move, server->xdgShell->xdg_toplevel_request_move);
+  wl_signal_add(&toplevel->events.request_move, &request_move);
+  SET_LISTENER(View, ViewListeners, request_resize, server->xdgShell->xdg_toplevel_request_resize);
+  wl_signal_add(&toplevel->events.request_resize, &request_resize);
+}
 
 namespace ServerView
 {
