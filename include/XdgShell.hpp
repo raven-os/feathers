@@ -6,7 +6,12 @@
 
 class Server;
 
-class XdgShell : public Listeners::XdgShellListeners
+struct XdgShellListeners
+{
+  struct wl_listener new_xdg_surface;
+};
+
+class XdgShell : public XdgShellListeners
 {
 public:
   XdgShell(Server *server, struct wl_display *display);

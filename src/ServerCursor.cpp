@@ -26,7 +26,7 @@ void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
   server->grabbed_view->y = cursor->y - server->grab_y;
 }
 
-void ServerCursor::process_cursor_resize(uint32_t time)
+void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 {
   View *view = server->grabbed_view;
   double dx = cursor->x - server->grab_x;
@@ -103,21 +103,21 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     }
 }
 
-  void ServerCursor::server_cursor_motion(struct wl_listener *listener, void *data)
+  void ServerCursor::server_cursor_motion([[maybe_unused]]struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_motion *event = static_cast<struct wlr_event_pointer_motion *>(data);
     wlr_cursor_move(cursor, event->device, event->delta_x, event->delta_y);
     process_cursor_motion(event->time_msec);
   }
 
-  void ServerCursor::server_cursor_motion_absolute(struct wl_listener *listener, void *data)
+  void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_motion_absolute *event = static_cast<struct wlr_event_pointer_motion_absolute *>(data);
     wlr_cursor_warp_absolute(cursor, event->device, event->x, event->y);
     process_cursor_motion(event->time_msec);
   }
 
-  void ServerCursor::server_cursor_button(struct wl_listener *listener, void *data)
+  void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
     struct wlr_seat *seat = server->seat->getSeat();
@@ -136,7 +136,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
       }
   }
 
-  void ServerCursor::server_cursor_axis(struct wl_listener *listener, void *data)
+  void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
   {
     struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
     wlr_seat_pointer_notify_axis(server->seat->getSeat(),

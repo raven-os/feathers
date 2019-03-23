@@ -19,19 +19,10 @@ Server::Server()
   wlr_compositor_create(display, renderer);
   wlr_data_device_manager_create(display);
 
-//  output_layout = wlr_output_layout_create();
-
-  // wl_list_init(&outputs);
-  // new_output.notify = ServerOutput::server_new_output;
-  // wl_signal_add(&backend->events.new_output, &new_output);
   output = new ServerOutput(this);
-
 
   wl_list_init(&views);
   xdgShell = new XdgShell(this, display);
-  // xdg_shell = wlr_xdg_shell_create(display);
-  // new_xdg_surface.notify = XdgShell::server_new_xdg_surface;
-  // wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 
   cursor = new ServerCursor(this);
   input = new ServerInput(this);

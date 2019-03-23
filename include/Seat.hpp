@@ -5,7 +5,12 @@
 
 class Server;
 
-class Seat : public Listeners::SeatListeners
+struct SeatListeners
+{
+  struct wl_listener request_cursor;
+};
+
+class Seat : public SeatListeners
 {
 public:
   Seat(Server *server);

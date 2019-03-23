@@ -12,7 +12,15 @@ enum CursorMode
    CURSOR_RESIZE,
   };
 
-class ServerCursor : public Listeners::ServerCursorListeners
+struct ServerCursorListeners
+{
+  struct wl_listener cursor_motion;
+  struct wl_listener cursor_motion_absolute;
+  struct wl_listener cursor_button;
+  struct wl_listener cursor_axis;
+};
+
+class ServerCursor : public ServerCursorListeners
 {
 public:
   ServerCursor(Server *server);

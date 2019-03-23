@@ -26,7 +26,7 @@ namespace ServerView
 {
   void focus_view(View *view, struct wlr_surface *surface)
   {
-    if (view == NULL)
+    if (!view)
       {
 	return;
       }
@@ -63,7 +63,7 @@ namespace ServerView
     struct wlr_surface *_surface = NULL;
     _surface = wlr_xdg_surface_surface_at(view->xdg_surface, view_sx, view_sy, &_sx, &_sy);
 
-    if (_surface != NULL)
+    if (_surface )
       {
 	*sx = _sx;
 	*sy = _sy;

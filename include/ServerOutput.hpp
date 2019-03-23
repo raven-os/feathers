@@ -14,7 +14,12 @@ struct render_data
   struct timespec *when;
 };
 
-class ServerOutput : public Listeners::ServerOutputListeners
+struct ServerOutputListeners
+{
+  struct wl_listener new_output;
+};
+
+class ServerOutput : public ServerOutputListeners
 {
 public:
   ServerOutput(Server *server);

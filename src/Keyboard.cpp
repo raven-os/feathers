@@ -1,7 +1,8 @@
 #include "Keyboard.hpp"
 #include "Server.hpp"
 
-Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device) {
+Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
+{
 
 }
 
@@ -31,19 +32,16 @@ bool Keyboard::handle_keybinding(xkb_keysym_t sym)
   return true;
 }
 
-void Keyboard::keyboard_handle_modifiers(struct wl_listener *listener, void *data)
+void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  // Keyboard *keyboard = wl_container_of(listener, keyboard, modifiers);
   struct wlr_seat *seat = server->seat->getSeat();
   wlr_seat_set_keyboard(seat, device);
   wlr_seat_keyboard_notify_modifiers(seat,
 				     &device->keyboard->modifiers);
 }
 
-void Keyboard::keyboard_handle_key(struct wl_listener *listener, void *data)
+void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener, void *data)
 {
-  // Keyboard *keyboard = wl_container_of(listener, keyboard, key);
-  // Server *server = keyboard->server;
   struct wlr_event_keyboard_key *event = static_cast<struct wlr_event_keyboard_key *>(data);
   struct wlr_seat *seat = server->seat->getSeat();
 
@@ -69,12 +67,14 @@ void Keyboard::keyboard_handle_key(struct wl_listener *listener, void *data)
   }
 }
 
-void Keyboard::setModifiersListener() {
+void Keyboard::setModifiersListener()
+{
   SET_LISTENER(Keyboard, KeyboardListeners, modifiers, keyboard_handle_modifiers);
   wl_signal_add(&device->keyboard->events.modifiers, &modifiers);
 }
 
-void Keyboard::setKeyListener() {
+void Keyboard::setKeyListener()
+{
   SET_LISTENER(Keyboard, KeyboardListeners, key, keyboard_handle_key);
   wl_signal_add(&device->keyboard->events.key, &key);
 }

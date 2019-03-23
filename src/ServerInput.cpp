@@ -9,7 +9,6 @@ ServerInput::ServerInput(Server *server) : server(server) {
 
 void ServerInput::server_new_input(struct wl_listener *listener, void *data)
 {
-  // Server *server = wl_container_of(listener, server, new_input);
   struct wlr_input_device *device = static_cast<struct wlr_input_device *>(data);
   switch (device->type)
   {
@@ -45,12 +44,9 @@ void ServerInput::server_new_keyboard(struct wlr_input_device *device)
   wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
 
   keyboard->setModifiersListener();
-//  wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
   keyboard->setKeyListener();
-//  wl_signal_add(&device->keyboard->events.key, &keyboard->key);
-
+  
   wlr_seat_set_keyboard(server->seat->getSeat(), device);
-
   wl_list_insert(&keyboards, &keyboard->link);
 }
 

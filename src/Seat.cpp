@@ -8,7 +8,7 @@ Seat::Seat(Server *server) : server(server)
   wl_signal_add(&seat->events.request_set_cursor, &request_cursor);
 }
 
-void Seat::seat_request_cursor(struct wl_listener *listener, void *data)
+void Seat::seat_request_cursor([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_seat_pointer_request_set_cursor_event *event = static_cast<struct wlr_seat_pointer_request_set_cursor_event *>(data);
   struct wlr_seat_client *focused_client = seat->pointer_state.focused_client;

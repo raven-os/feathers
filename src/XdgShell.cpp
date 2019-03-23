@@ -7,35 +7,35 @@ XdgShell::XdgShell(Server *server, struct wl_display *display) : server(server) 
   wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 }
 
-void XdgShell::xdg_surface_map(struct wl_listener *listener, void *data)
+void XdgShell::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   view->mapped = true;
   ServerView::focus_view(view, view->xdg_surface->surface);
 };
 
-void XdgShell::xdg_surface_unmap(struct wl_listener *listener, void *data)
+void XdgShell::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   view->mapped = false;
 };
 
-void XdgShell::xdg_surface_destroy(struct wl_listener *listener, void *data)
+void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   wl_list_remove(&view->link);
   // TODO: Maybe delete the view here ?
 };
 
-void XdgShell::xdg_toplevel_request_move(struct wl_listener *listener, void *data)
+void XdgShell::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   ServerView::begin_interactive(view, CursorMode::CURSOR_MOVE, 0);
 };
 
-void XdgShell::xdg_toplevel_request_resize(struct wl_listener *listener, void *data)
+void XdgShell::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_toplevel_resize_event *event = static_cast<struct wlr_xdg_toplevel_resize_event *>(data);
   ServerView::begin_interactive(view, CursorMode::CURSOR_RESIZE, event->edges);
 };
 
-void XdgShell::server_new_xdg_surface(struct wl_listener *listener, void *data)
+void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
 

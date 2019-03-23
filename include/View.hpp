@@ -5,7 +5,16 @@
 
 class Server;
 
-struct View : public Listeners::ViewListeners
+struct ViewListeners
+{
+  struct wl_listener map;
+  struct wl_listener unmap;
+  struct wl_listener destroy;
+  struct wl_listener request_move;
+  struct wl_listener request_resize;
+};
+
+struct View : public ViewListeners
 {
 public:
   View(Server *server, struct wlr_xdg_surface *xdg_surface);

@@ -5,8 +5,12 @@
 
 class Server;
 
+struct OutputListeners
+{
+  struct wl_listener frame;
+};
 
-class Output : public Listeners::OutputListeners
+class Output : public OutputListeners
 {
 public:
   Output(Server *server, struct wlr_output *wlr_output);

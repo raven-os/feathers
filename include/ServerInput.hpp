@@ -6,14 +6,17 @@
 
 class Server;
 
-class ServerInput : public Listeners::ServerInputListeners
+struct ServerInputListeners
+{
+  struct wl_listener new_input;
+};
+
+class ServerInput : public ServerInputListeners
 {
 public:
   ServerInput(Server *server);
   ~ServerInput() = default;
 
-  // void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
-  // void keyboard_handle_key(struct wl_listener *listener, void *data);
   void server_new_input(struct wl_listener *listener, void *data);
 
 private:

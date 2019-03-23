@@ -21,8 +21,6 @@ public:
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
 
-  // struct wlr_xdg_shell *xdg_shell;
-  // struct wl_listener new_xdg_surface;
   XdgShell *xdgShell;
   struct wl_list views;
 

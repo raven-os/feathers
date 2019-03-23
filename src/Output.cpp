@@ -6,7 +6,7 @@ Output::Output(Server *server, struct wlr_output *wlr_output) : server(server), 
 
 }
 
-void Output::output_frame(struct wl_listener *listener, void *data)
+void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_renderer *renderer = server->renderer;
 

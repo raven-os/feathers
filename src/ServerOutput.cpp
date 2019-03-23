@@ -8,7 +8,7 @@ ServerOutput::ServerOutput(Server *server) : server(server) {
   wl_signal_add(&server->backend->events.new_output, &new_output);
 }
 
-void ServerOutput::server_new_output(struct wl_listener *listener, void *data)
+void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
 
@@ -20,7 +20,6 @@ void ServerOutput::server_new_output(struct wl_listener *listener, void *data)
 
   Output *output = new Output(server, wlr_output);
   output->setFrameListener();
-  //wl_signal_add(&wlr_output->events.frame, &output->frame);
   wl_list_insert(&outputs, &output->link);
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
