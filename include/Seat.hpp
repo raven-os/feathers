@@ -12,7 +12,7 @@ public:
   ~Seat() = default;
 
   void seat_request_cursor(struct wl_listener *listener, void *data);
-  struct wlr_seat *getSeat() const;
+  struct wlr_seat *getSeat() const noexcept;
 
 private:
   Server *server;
