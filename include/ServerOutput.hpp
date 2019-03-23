@@ -24,7 +24,7 @@ public:
   void server_new_output(struct wl_listener *listener, void *data);
   static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data);
 
-  struct wlr_output_layout *getLayout() const;
+  struct wlr_output_layout *getLayout() const noexcept;
 
 private:
   Server *server;
