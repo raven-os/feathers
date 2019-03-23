@@ -1,16 +1,37 @@
 #include "View.hpp"
 #include "Server.hpp"
 
+View::View(Server *server, struct wlr_xdg_surface *xdg_surface) :
+  server(server), xdg_surface(xdg_surface)
+{
+
+}
+
+void View::setListeners() {
+  struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
+
+  SET_LISTENER(View, ViewListeners, map, server->xdgShell->xdg_surface_map);
+  wl_signal_add(&xdg_surface->events.map, &map);
+  SET_LISTENER(View, ViewListeners, unmap, server->xdgShell->xdg_surface_unmap);
+  wl_signal_add(&xdg_surface->events.unmap, &unmap);
+  SET_LISTENER(View, ViewListeners, destroy, server->xdgShell->xdg_surface_destroy);
+  wl_signal_add(&xdg_surface->events.destroy, &destroy);
+  SET_LISTENER(View, ViewListeners, request_move, server->xdgShell->xdg_toplevel_request_move);
+  wl_signal_add(&toplevel->events.request_move, &request_move);
+  SET_LISTENER(View, ViewListeners, request_resize, server->xdgShell->xdg_toplevel_request_resize);
+  wl_signal_add(&toplevel->events.request_resize, &request_resize);
+}
+
 namespace ServerView
 {
   void focus_view(View *view, struct wlr_surface *surface)
   {
-    if (view == NULL)
+    if (!view)
       {
 	return;
       }
     Server *server = view->server;
-    struct wlr_seat *seat = server->seat;
+    struct wlr_seat *seat = server->seat->getSeat();
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
     if (prev_surface == surface)
       {
@@ -42,7 +63,7 @@ namespace ServerView
     struct wlr_surface *_surface = NULL;
     _surface = wlr_xdg_surface_surface_at(view->xdg_surface, view_sx, view_sy, &_sx, &_sy);
 
-    if (_surface != NULL)
+    if (_surface )
       {
 	*sx = _sx;
 	*sy = _sy;
@@ -70,24 +91,24 @@ namespace ServerView
   void begin_interactive(View *view, CursorMode mode, uint32_t edges)
   {
     Server *server = view->server;
-    struct wlr_surface *focused_surface = server->seat->pointer_state.focused_surface;
+    struct wlr_surface *focused_surface = server->seat->getSeat()->pointer_state.focused_surface;
     if (view->xdg_surface->surface != focused_surface)
       {
 	return;
       }
     server->grabbed_view = view;
-    server->cursor_mode = mode;
+    server->cursor->cursor_mode = mode;
     struct wlr_box geo_box;
     wlr_xdg_surface_get_geometry(view->xdg_surface, &geo_box);
     if (mode == CursorMode::CURSOR_MOVE)
       {
-	server->grab_x = server->cursor->x - view->x;
-	server->grab_y = server->cursor->y - view->y;
+	server->grab_x = server->cursor->cursor->x - view->x;
+	server->grab_y = server->cursor->cursor->y - view->y;
       }
     else
       {
-	server->grab_x = server->cursor->x + geo_box.x;
-	server->grab_y = server->cursor->y + geo_box.y;
+	server->grab_x = server->cursor->cursor->x + geo_box.x;
+	server->grab_y = server->cursor->cursor->y + geo_box.y;
       }
     server->grab_width = geo_box.width;
     server->grab_height = geo_box.height;
