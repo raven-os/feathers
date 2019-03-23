@@ -21,7 +21,7 @@ void XdgShell::xdg_surface_unmap(struct wl_listener *listener, void *data)
 void XdgShell::xdg_surface_destroy(struct wl_listener *listener, void *data)
 {
   wl_list_remove(&view->link);
-  //Maybe delete the view here ?
+  // TODO: Maybe delete the view here ?
 };
 
 void XdgShell::xdg_toplevel_request_move(struct wl_listener *listener, void *data)
