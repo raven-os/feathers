@@ -60,7 +60,7 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
   wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-struct wlr_output_layout *ServerOutput::getLayout() const
+struct wlr_output_layout *ServerOutput::getLayout() const noexcept
 {
   return output_layout;
 }
