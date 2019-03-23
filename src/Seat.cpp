@@ -18,7 +18,7 @@ wlr_cursor_set_surface(server->cursor->cursor, event->surface, event->hotspot_x,
     }
 }
 
-struct wlr_seat *Seat::getSeat() const
+struct wlr_seat *Seat::getSeat() const noexcept
 {
   return seat;
 }
