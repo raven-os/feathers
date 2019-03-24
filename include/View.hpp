@@ -17,7 +17,7 @@ struct ViewListeners
 struct View : public ViewListeners
 {
 public:
-  View(Server *server, struct wlr_xdg_surface *xdg_surface);
+  View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface);
   ~View() = default;
 
   struct wl_list link;
@@ -25,7 +25,7 @@ public:
   void setListeners();
 
   Server *server;
-  struct wlr_xdg_surface *xdg_surface;
+  struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   int x, y;
 };

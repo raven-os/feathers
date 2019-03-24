@@ -65,7 +65,8 @@ extern "C" {
 #include <wlr/types/wlr_wl_shell.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
-#include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/types/wlr_xdg_shell_v6.h>
+
 
 #include <wlr/util/log.h>
 #include <wlr/util/region.h>

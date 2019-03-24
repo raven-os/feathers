@@ -1,14 +1,14 @@
 #include "View.hpp"
 #include "Server.hpp"
 
-View::View(Server *server, struct wlr_xdg_surface *xdg_surface) :
+View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   server(server), xdg_surface(xdg_surface)
 {
 
 }
 
 void View::setListeners() {
-  struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
+  struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
   SET_LISTENER(View, ViewListeners, map, server->xdgShell->xdg_surface_map);
   wl_signal_add(&xdg_surface->events.map, &map);
@@ -39,14 +39,14 @@ namespace ServerView
       }
     if (prev_surface)
       {
-	struct wlr_xdg_surface *previous =
-	  wlr_xdg_surface_from_wlr_surface(seat->keyboard_state.focused_surface);
-	wlr_xdg_toplevel_set_activated(previous, false);
+	struct wlr_xdg_surface_v6 *previous =
+	  wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
+	wlr_xdg_toplevel_v6_set_activated(previous, false);
       }
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
     wl_list_remove(&view->link);
     wl_list_insert(&server->views, &view->link);
-    wlr_xdg_toplevel_set_activated(view->xdg_surface, true);
+    wlr_xdg_toplevel_v6_set_activated(view->xdg_surface, true);
     wlr_seat_keyboard_notify_enter(seat, view->xdg_surface->surface, keyboard->keycodes,
 				   keyboard->num_keycodes, &keyboard->modifiers);
   }
@@ -61,7 +61,7 @@ namespace ServerView
 
     double _sx, _sy;
     struct wlr_surface *_surface = NULL;
-    _surface = wlr_xdg_surface_surface_at(view->xdg_surface, view_sx, view_sy, &_sx, &_sy);
+    _surface = wlr_xdg_surface_v6_surface_at(view->xdg_surface, view_sx, view_sy, &_sx, &_sy);
 
     if (_surface )
       {
@@ -99,7 +99,7 @@ namespace ServerView
     server->grabbed_view = view;
     server->cursor->cursor_mode = mode;
     struct wlr_box geo_box;
-    wlr_xdg_surface_get_geometry(view->xdg_surface, &geo_box);
+    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &geo_box);
     if (mode == CursorMode::CURSOR_MOVE)
       {
 	server->grab_x = server->cursor->cursor->x - view->x;
