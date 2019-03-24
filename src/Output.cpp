@@ -35,7 +35,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
     rdata.view = view;
     rdata.renderer = renderer;
     rdata.when = &now;
-    wlr_xdg_surface_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
+    wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
   }
 
   wlr_output_render_software_cursors(wlr_output, NULL);

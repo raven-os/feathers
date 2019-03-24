@@ -2,7 +2,7 @@
 #include "Server.hpp"
 
 XdgShell::XdgShell(Server *server, struct wl_display *display) : server(server) {
-  xdg_shell = wlr_xdg_shell_create(display);
+  xdg_shell = wlr_xdg_shell_v6_create(display);
   SET_LISTENER(XdgShell, XdgShellListeners, new_xdg_surface, server_new_xdg_surface);
   wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 }
@@ -31,15 +31,15 @@ void XdgShell::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *lis
 
 void XdgShell::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_xdg_toplevel_resize_event *event = static_cast<struct wlr_xdg_toplevel_resize_event *>(data);
+  struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   ServerView::begin_interactive(view, CursorMode::CURSOR_RESIZE, event->edges);
 };
 
 void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
+  struct wlr_xdg_surface_v6 *xdg_surface = static_cast<struct wlr_xdg_surface_v6 *>(data);
 
-  if (xdg_surface->role != WLR_XDG_SURFACE_ROLE_TOPLEVEL)
+  if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
     {
       return;
     }

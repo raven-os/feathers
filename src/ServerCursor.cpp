@@ -63,7 +63,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
     }
   view->x = x;
   view->y = y;
-  wlr_xdg_toplevel_set_size(view->xdg_surface, width, height);
+  wlr_xdg_toplevel_v6_set_size(view->xdg_surface, width, height);
 }
 
 void ServerCursor::process_cursor_motion(uint32_t time)

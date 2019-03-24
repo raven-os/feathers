@@ -27,5 +27,5 @@ public:
 private:
   Server *server;
   View *view;
-  struct wlr_xdg_shell *xdg_shell;
+  struct wlr_xdg_shell_v6 *xdg_shell;
 };
