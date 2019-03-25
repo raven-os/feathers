@@ -22,7 +22,7 @@ Server::Server()
   output = new ServerOutput(this);
 
   wl_list_init(&views);
-  xdgShell = new XdgShell(this, display);
+  xdgShell = new XdgShell(this);
 
   cursor = new ServerCursor(this);
   input = new ServerInput(this);
