@@ -54,7 +54,7 @@ void Server::run()
   setenv("WAYLAND_DISPLAY", socket, true);
   if (fork() == 0)
     {
-      execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", nullptr);
+      execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
     }
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
 	  socket);
