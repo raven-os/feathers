@@ -14,7 +14,7 @@ struct XdgShellListeners
 class XdgShell : public XdgShellListeners
 {
 public:
-  XdgShell(Server *server, struct wl_display *display);
+  XdgShell(Server *server);
   ~XdgShell() = default;
 
   void xdg_surface_map(struct wl_listener *listener, void *data);
@@ -26,6 +26,5 @@ public:
 
 private:
   Server *server;
-  View *view;
   struct wlr_xdg_shell_v6 *xdg_shell;
 };
