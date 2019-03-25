@@ -2,7 +2,8 @@
 #include "Server.hpp"
 
 ServerCursor::ServerCursor(Server *server)
-  : server(server)
+  : server(server),
+    cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
 {
   cursor = wlr_cursor_create();
   wlr_cursor_attach_output_layout(cursor, server->output->getLayout());
@@ -68,38 +69,39 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 
 void ServerCursor::process_cursor_motion(uint32_t time)
 {
-  if (cursor_mode == CursorMode::CURSOR_MOVE)
+  switch (cursor_mode)
     {
+    case CursorMode::CURSOR_MOVE:
       process_cursor_move(time);
-      return;
-    }
-  else if (cursor_mode == CursorMode::CURSOR_RESIZE)
-    {
+      break;
+    case CursorMode::CURSOR_RESIZE:
       process_cursor_resize(time);
-      return;
-    }
-
-  double sx, sy;
-  struct wlr_seat *seat = server->seat->getSeat();
-  struct wlr_surface *surface = NULL;
-  View *view = ServerView::desktop_view_at(server, cursor->x,
-					   cursor->y, &surface, &sx, &sy);
-  if (!view)
-    {
-      wlr_xcursor_manager_set_cursor_image(cursor_mgr, "left_ptr", cursor);
-    }
-  if (surface)
-    {
-      bool focus_changed = seat->pointer_state.focused_surface != surface;
-      wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
-      if (!focus_changed)
-	{
-	  wlr_seat_pointer_notify_motion(seat, time, sx, sy);
-	}
-    }
-  else
-    {
-      wlr_seat_pointer_clear_focus(seat);
+      break;
+    default:
+      {
+	double sx, sy;
+	struct wlr_seat *seat = server->seat->getSeat();
+	struct wlr_surface *surface = NULL;
+	View *view = ServerView::desktop_view_at(server, cursor->x,
+						 cursor->y, &surface, &sx, &sy);
+	if (!view)
+	  {
+	    wlr_xcursor_manager_set_cursor_image(cursor_mgr, "left_ptr", cursor);
+	  }
+	if (surface)
+	  {
+	    bool focus_changed = seat->pointer_state.focused_surface != surface;
+	    wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
+	    if (!focus_changed)
+	      {
+		wlr_seat_pointer_notify_motion(seat, time, sx, sy);
+	      }
+	  }
+	else
+	  {
+	    wlr_seat_pointer_clear_focus(seat);
+	  }
+      }
     }
 }
 

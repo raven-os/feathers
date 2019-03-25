@@ -2,7 +2,11 @@
 #include "Server.hpp"
 
 View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
-  server(server), xdg_surface(xdg_surface)
+  server(server),
+  xdg_surface(xdg_surface),
+  mapped(false),
+  x(0),
+  y(0)
 {
 
 }
