@@ -18,6 +18,7 @@ struct ServerCursorListeners
   struct wl_listener cursor_motion_absolute;
   struct wl_listener cursor_button;
   struct wl_listener cursor_axis;
+  struct wl_listener cursor_frame;
 };
 
 class ServerCursor : public ServerCursorListeners
@@ -29,7 +30,9 @@ public:
   void server_cursor_motion(struct wl_listener *listener, void *data);
   void server_cursor_motion_absolute(struct wl_listener *listener, void *data);
   void server_cursor_button(struct wl_listener *listener, void *data);
+  void server_cursor_frame(struct wl_listener *, void *);
   void server_cursor_axis(struct wl_listener *listener, void *data);
+
 
   struct wlr_cursor *cursor;
   struct wlr_xcursor_manager *cursor_mgr;

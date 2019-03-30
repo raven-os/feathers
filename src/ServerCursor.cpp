@@ -1,6 +1,9 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
 
+#include <cassert>
+#include <stdio.h>
+
 ServerCursor::ServerCursor(Server *server)
   : server(server),
     cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
@@ -18,7 +21,8 @@ ServerCursor::ServerCursor(Server *server)
   wl_signal_add(&cursor->events.button, &cursor_button);
   SET_LISTENER(ServerCursor, ServerCursorListeners, cursor_axis, server_cursor_axis);
   wl_signal_add(&cursor->events.axis, &cursor_axis);
-
+  SET_LISTENER(ServerCursor, ServerCursorListeners, cursor_frame, server_cursor_frame);
+  wl_signal_add(&cursor->events.frame, &cursor_frame);
 }
 
 void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
@@ -123,19 +127,31 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
 {
   struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
   struct wlr_seat *seat = server->seat->getSeat();
-  double sx, sy;
-  struct wlr_surface *surface;
 
   wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
-  View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
-  if (event->state == WLR_BUTTON_RELEASED)
+
+  switch (event->state)
     {
+    case WLR_BUTTON_RELEASED:
       cursor_mode = CursorMode::CURSOR_PASSTHROUGH;
+      break;
+    case WLR_BUTTON_PRESSED:
+      {
+	double sx, sy;
+	struct wlr_surface *surface;
+	View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
+
+	ServerView::focus_view(view, surface);
+      }
+      break;
+    default:
+      assert(!"Unknown WLR_BUTTON value");
     }
-  else
-    {
-      ServerView::focus_view(view, surface);
-    }
+}
+
+void ServerCursor::server_cursor_frame(struct wl_listener *, void *)
+{
+  wlr_seat_pointer_notify_frame(server->seat->getSeat());
 }
 
 void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
