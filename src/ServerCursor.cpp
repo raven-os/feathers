@@ -1,6 +1,9 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
 
+#include <cassert>
+#include <stdio.h>
+
 ServerCursor::ServerCursor(Server *server)
   : server(server),
     cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
@@ -18,7 +21,8 @@ ServerCursor::ServerCursor(Server *server)
   wl_signal_add(&cursor->events.button, &cursor_button);
   SET_LISTENER(ServerCursor, ServerCursorListeners, cursor_axis, server_cursor_axis);
   wl_signal_add(&cursor->events.axis, &cursor_axis);
-
+  SET_LISTENER(ServerCursor, ServerCursorListeners, cursor_frame, server_cursor_frame);
+  wl_signal_add(&cursor->events.frame, &cursor_frame);
 }
 
 void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
@@ -105,43 +109,55 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     }
 }
 
-  void ServerCursor::server_cursor_motion([[maybe_unused]]struct wl_listener *listener, void *data)
-  {
-    struct wlr_event_pointer_motion *event = static_cast<struct wlr_event_pointer_motion *>(data);
-    wlr_cursor_move(cursor, event->device, event->delta_x, event->delta_y);
-    process_cursor_motion(event->time_msec);
-  }
+void ServerCursor::server_cursor_motion([[maybe_unused]]struct wl_listener *listener, void *data)
+{
+  struct wlr_event_pointer_motion *event = static_cast<struct wlr_event_pointer_motion *>(data);
+  wlr_cursor_move(cursor, event->device, event->delta_x, event->delta_y);
+  process_cursor_motion(event->time_msec);
+}
 
-  void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]struct wl_listener *listener, void *data)
-  {
-    struct wlr_event_pointer_motion_absolute *event = static_cast<struct wlr_event_pointer_motion_absolute *>(data);
-    wlr_cursor_warp_absolute(cursor, event->device, event->x, event->y);
-    process_cursor_motion(event->time_msec);
-  }
+void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]struct wl_listener *listener, void *data)
+{
+  struct wlr_event_pointer_motion_absolute *event = static_cast<struct wlr_event_pointer_motion_absolute *>(data);
+  wlr_cursor_warp_absolute(cursor, event->device, event->x, event->y);
+  process_cursor_motion(event->time_msec);
+}
 
-  void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *listener, void *data)
-  {
-    struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
-    struct wlr_seat *seat = server->seat->getSeat();
-    double sx, sy;
-    struct wlr_surface *surface;
+void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *listener, void *data)
+{
+  struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
+  struct wlr_seat *seat = server->seat->getSeat();
 
-    wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
-    View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
-    if (event->state == WLR_BUTTON_RELEASED)
+  wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
+
+  switch (event->state)
+    {
+    case WLR_BUTTON_RELEASED:
+      cursor_mode = CursorMode::CURSOR_PASSTHROUGH;
+      break;
+    case WLR_BUTTON_PRESSED:
       {
-	cursor_mode = CursorMode::CURSOR_PASSTHROUGH;
-      }
-    else
-      {
+	double sx, sy;
+	struct wlr_surface *surface;
+	View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
+
 	ServerView::focus_view(view, surface);
       }
-  }
+      break;
+    default:
+      assert(!"Unknown WLR_BUTTON value");
+    }
+}
 
-  void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
-  {
-    struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
-    wlr_seat_pointer_notify_axis(server->seat->getSeat(),
-				 event->time_msec, event->orientation, event->delta,
-				 event->delta_discrete, event->source);
-  }
+void ServerCursor::server_cursor_frame(struct wl_listener *, void *)
+{
+  wlr_seat_pointer_notify_frame(server->seat->getSeat());
+}
+
+void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
+{
+  struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
+  wlr_seat_pointer_notify_axis(server->seat->getSeat(),
+			       event->time_msec, event->orientation, event->delta,
+			       event->delta_discrete, event->source);
+}
