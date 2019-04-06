@@ -5,7 +5,7 @@ project(feathers CXX)
 
 # main sources and headers
 set(HEADER_DIRECTORY "include")
-set(SOURCE_DIRECTORY "src")
+set(SOURCE_DIRECTORY "source")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
