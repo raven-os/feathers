@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "XdgShell.hpp"
 #include "Server.hpp"
 
@@ -46,10 +48,10 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
 
   if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
     {
+      assert(!"not handled yet");
       return;
     }
   View *view = new View(server, xdg_surface);
 
-  view->setListeners();
   wl_list_insert(&server->views, &view->link);
 };

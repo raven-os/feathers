@@ -22,8 +22,6 @@ public:
 
   struct wl_list link;
 
-  void setListeners();
-
   Server *server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
