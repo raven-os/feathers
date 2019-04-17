@@ -2,6 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "ServerCursor.hpp"
+# include "wm/WindowNodeIndex.hpp"
 
 class Server;
 
@@ -26,6 +27,8 @@ public:
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   int x, y;
+  // while this is null the window is floating
+  wm::WindowNodeIndex windowNode{wm::nullNode};
 };
 
 namespace ServerView

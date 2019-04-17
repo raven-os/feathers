@@ -7,6 +7,7 @@
 #include "Seat.hpp"
 
 Server::Server()
+  : windowTree(wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}})
 {
   wlr_log_init(WLR_DEBUG, NULL);
 
