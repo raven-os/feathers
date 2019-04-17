@@ -10,7 +10,7 @@ namespace wm
 	       }, data);
   }
 
-  void WindowData::move(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> position)
+  void WindowData::move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
   {
     std::visit([&](auto &data)
 	       {
@@ -18,7 +18,7 @@ namespace wm
 	       }, data);
   }
 
-  std::array<uint16_t, 2u> WindowData::getPosition() const noexcept
+  std::array<int16_t, 2u> WindowData::getPosition() const noexcept
   {
     return std::visit([](auto &data) noexcept
 		      {
@@ -31,14 +31,14 @@ namespace wm
     wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
   }
 
-  void ClientData::move(WindowNodeIndex, WindowTree &, std::array<uint16_t, 2u> position)
+  void ClientData::move(WindowNodeIndex, WindowTree &, std::array<int16_t, 2u> position)
   {
     // todo: move xdg surface
     view->x = position[0];
     view->y = position[1];
   }
 
-  std::array<uint16_t, 2u> ClientData::getPosition() const noexcept
+  std::array<int16_t, 2u> ClientData::getPosition() const noexcept
   {
     return {view->x, view->y};
   }

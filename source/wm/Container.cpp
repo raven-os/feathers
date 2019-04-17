@@ -32,21 +32,22 @@ namespace wm
       return (windowTree.getData(sibling)).getPosition()[direction] - childData.getPosition()[direction];
   }
 
-  uint16_t Container::updateChildWidths(WindowNodeIndex index, WindowTree &windowTree)
+  void Container::updateChildWidths(WindowNodeIndex index, WindowTree &windowTree)
   {
     for (auto childIndex : windowTree.getChildren(index))
       {
 	auto &childData(windowTree.getData(childIndex));
 	auto newSize(rect.size);
-	
+
 	newSize[direction] = getChildWidth(index, windowTree, childIndex);
 	childData.resize(childIndex, windowTree, newSize);
       }
   }
 
-  void Container::move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> position)
+  void Container::move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
   {
     auto children(windowTree.getChildren(index));
+
     for (auto childIndex : children)
       {
 	auto &childData(windowTree.getData(childIndex));
@@ -61,7 +62,7 @@ namespace wm
       }
   }
 
-  void Container::move(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> position)
+  void Container::move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
   {
     move_impl(index, windowTree, position);
     rect.position = position;
@@ -99,8 +100,8 @@ namespace wm
       for ([[maybe_unused]]auto _ : children)
 	++count;
       {
-	std::array<uint16_t, 2u> position{rect.position};
-	std::array<uint16_t, 2u> size{rect.size};
+        auto position{rect.position};
+	auto size{rect.size};
 
 	position[direction] += rect.size[direction] / (count + 1);
 	size[direction] = (size[direction] * count) / (count + 1);
@@ -139,14 +140,14 @@ namespace wm
     
     
     {
-      std::array<uint16_t, 2u> size{rect.size};
+      auto size{rect.size};
 
       rect.size[direction] = size[direction] - removedWidth;
       resize(index, windowTree, size);
     }
   }
 
-  std::array<uint16_t, 2u> Container::getPosition() const noexcept
+  std::array<int16_t, 2u> Container::getPosition() const noexcept
   {
     return rect.position;
   }
