@@ -8,10 +8,6 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   x(0),
   y(0)
 {
-
-}
-
-void View::setListeners() {
   struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
   SET_LISTENER(View, ViewListeners, map, server->xdgShell->xdg_surface_map);

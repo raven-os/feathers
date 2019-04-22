@@ -8,6 +8,7 @@
 # include "ServerInput.hpp"
 # include "ServerOutput.hpp"
 # include "Seat.hpp"
+# include "wm/WindowTree.hpp"
 
 class Server
 {
@@ -16,6 +17,8 @@ public:
   ~Server();
 
   void run();
+
+  wm::WindowTree windowTree;
 
   struct wl_display *display;
   struct wlr_backend *backend;
