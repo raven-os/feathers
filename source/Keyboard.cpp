@@ -6,6 +6,14 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 
 }
 
+Keyboard::~Keyboard() {
+  if (keymap) {
+		xkb_keymap_unref(keymap);
+	}
+  wl_list_remove(&key.link);
+	wl_list_remove(&modifiers.link);
+}
+
 bool Keyboard::handle_keybinding(xkb_keysym_t sym)
 {
   switch (sym)
@@ -77,4 +85,8 @@ void Keyboard::setKeyListener()
 {
   SET_LISTENER(Keyboard, KeyboardListeners, key, keyboard_handle_key);
   wl_signal_add(&device->keyboard->events.key, &key);
+}
+
+void Keyboard::setKeyMap(struct xkb_keymap *keymap) {
+  this->keymap = keymap;
 }

@@ -15,12 +15,14 @@ class Keyboard : public KeyboardListeners
 {
 public:
   Keyboard(Server *server, struct wlr_input_device *device);
-  ~Keyboard() = default;
+  ~Keyboard();
 
   void setModifiersListener();
   void setKeyListener();
+  void setKeyMap(struct xkb_keymap *keymap);
 
   struct wl_list link;
+  struct xkb_keymap *keymap;
 
 private:
   Server *server;
