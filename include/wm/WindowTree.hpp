@@ -10,7 +10,6 @@ namespace wm
 {
   class WindowTree
   {
-
   private:
     struct WindowNode
     {
@@ -32,22 +31,14 @@ namespace wm
     {
       return const_cast<WindowTree &>(*this).getNode(nodeIndex);
     }
+
   public:
     WindowTree() = delete;
     WindowTree(WindowTree &&) = delete;
     WindowTree(WindowTree const &) = delete;
 
-    WindowTree(WindowData &&screen)
-      : freeList(nullNode)
-    {
-      nodes.emplace_back(WindowNode{nullNode, nullNode, nullNode, std::move(screen)});
-    }
-
-    WindowTree(WindowData const &screen)
-      : freeList(nullNode)
-    {
-      nodes.emplace_back(WindowNode{nullNode, nullNode, nullNode, screen});
-    }
+    WindowTree(WindowData &&screen);
+    WindowTree(WindowData const &screen);
 
     uint16_t getWindowCountUpperBound() const noexcept
     {
@@ -133,61 +124,12 @@ namespace wm
       return const_cast<WindowTree &>(*this).getData(nodeIndex);
     }
 
-    WindowNodeIndex allocateIndex()
-    {
-      if (freeList == nullNode)
-	{
-	  WindowNodeIndex result(static_cast<uint16_t>(nodes.size()));
+    WindowNodeIndex allocateIndex();
 
-	  nodes.emplace_back();
-	  return result;
-	}
-      else
-	{
-	  WindowNodeIndex result(freeList);
+    void removeIndex(WindowNodeIndex index) noexcept;
 
-	  freeList = getSibling(freeList);
-	  return result;
-	}
-    }
-
-    void removeIndex(WindowNodeIndex index) noexcept
-    {
-      WindowNodeIndex child(getFirstChild(getParent(index)));
-
-      if (child == index)
-	getNode(getParent(index)).firstChild = getSibling(index);
-      else
-	{
-	  while (getSibling(child) != index)
-	    child = getSibling(child);
-	  getNode(child).nextSibling = getSibling(index);
-	}
-      getNode(index).nextSibling = freeList;
-      freeList = index;
-    }
-
-    WindowNodeIndex addChild(WindowNodeIndex parent)
-    {
-      WindowNodeIndex result(allocateIndex());
-
-      getNode(result).parent = parent;
-      getNode(result).nextSibling = getFirstChild(parent);
-      getNode(result).firstChild = nullNode;
-      getNode(parent).firstChild = result;
-      return result;
-    }
-
-    WindowNodeIndex addChildAfter(WindowNodeIndex parent, WindowNodeIndex index)
-    {
-      WindowNodeIndex result(allocateIndex());
-
-      getNode(result).parent = parent;
-      getNode(result).nextSibling = getNode(index).nextSibling;
-      getNode(result).firstChild = nullNode;
-      getNode(index).nextSibling = result;
-      return result;
-    }
+    WindowNodeIndex addChild(WindowNodeIndex parent);
+    WindowNodeIndex addChildAfter(WindowNodeIndex parent, WindowNodeIndex index);
 
   };
 }
