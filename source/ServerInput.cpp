@@ -38,14 +38,15 @@ void ServerInput::server_new_keyboard(struct wlr_input_device *device)
   struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
   struct xkb_keymap *keymap = xkb_map_new_from_names(context, &rules, XKB_KEYMAP_COMPILE_NO_FLAGS);
 
+  xkb_keymap_unref(keyboard->keymap);
+  keyboard->setKeyMap(keymap);
   wlr_keyboard_set_keymap(device->keyboard, keymap);
-  xkb_keymap_unref(keymap);
   xkb_context_unref(context);
   wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
 
   keyboard->setModifiersListener();
   keyboard->setKeyListener();
-  
+
   wlr_seat_set_keyboard(server->seat->getSeat(), device);
   wl_list_insert(&keyboards, &keyboard->link);
 }
