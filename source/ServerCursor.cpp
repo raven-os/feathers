@@ -34,6 +34,9 @@ void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 {
   View *view = server->grabbed_view;
+  struct wlr_box box[1];
+  wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
   double dx = cursor->x - server->grab_x;
   double dy = cursor->y - server->grab_y;
   double x = view->x;
@@ -42,8 +45,8 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
   int height = server->grab_height;
   if (server->resize_edges & WLR_EDGE_TOP)
     {
-      y = server->grab_y + dy;
-      height -= dy;
+      y = server->grab_y + dy - box->y;
+      height -= dy + box->y;
       if (height < 1)
 	{
 	  y += height;
@@ -51,12 +54,12 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
     }
   else if (server->resize_edges & WLR_EDGE_BOTTOM)
     {
-      height += dy;
+      height += dy + box->y;
     }
   if (server->resize_edges & WLR_EDGE_LEFT)
     {
-      x = server->grab_x + dx;
-      width -= dx;
+      x = server->grab_x + dx - box->x;
+      width -= dx + box->x;
       if (width < 1)
 	{
 	  x += width;
@@ -64,7 +67,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
     }
   else if (server->resize_edges & WLR_EDGE_RIGHT)
     {
-      width += dx;
+      width += dx + box->x;
     }
   view->x = x;
   view->y = y;
