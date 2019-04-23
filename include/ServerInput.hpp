@@ -21,7 +21,7 @@ public:
 
 private:
   Server *server;
-  Keyboard *keyboard;
+  Keyboard *keyboard = nullptr;
 
   struct wl_list keyboards;
 

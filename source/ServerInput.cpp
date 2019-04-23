@@ -32,18 +32,10 @@ void ServerInput::server_new_input(struct wl_listener *listener, void *data)
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
 {
-  keyboard = new Keyboard(server, device);
+  if (!keyboard)
+    keyboard = new Keyboard(server, device);
 
-  struct xkb_rule_names rules = { 0 };
-  struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-  struct xkb_keymap *keymap = xkb_map_new_from_names(context, &rules, XKB_KEYMAP_COMPILE_NO_FLAGS);
-
-  xkb_keymap_unref(keyboard->keymap);
-  keyboard->setKeyMap(keymap);
-  wlr_keyboard_set_keymap(device->keyboard, keymap);
-  xkb_context_unref(context);
-  wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
-
+  keyboard->configure();
   keyboard->setModifiersListener();
   keyboard->setKeyListener();
 
