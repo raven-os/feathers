@@ -28,18 +28,26 @@ namespace wm
 
   void ClientData::resize(WindowNodeIndex, WindowTree &, std::array<uint16_t, 2u> size)
   {
+    struct wlr_box box[1];
+    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
     wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
   }
 
   void ClientData::move(WindowNodeIndex, WindowTree &, std::array<int16_t, 2u> position)
   {
-    // todo: move xdg surface
-    view->x = position[0];
-    view->y = position[1];
+    struct wlr_box box[1];
+    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
+    view->x = position[0] - box->x;
+    view->y = position[1] - box->y;
   }
 
   std::array<int16_t, 2u> ClientData::getPosition() const noexcept
   {
-    return {view->x, view->y};
+    struct wlr_box box[1];
+    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
+    return {view->x + box->x, view->y + box->y};
   }
 }
