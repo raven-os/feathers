@@ -2,6 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "Listeners.hpp"
+# include "FthShortcutState.hpp"
 
 class Server;
 
@@ -19,14 +20,22 @@ public:
 
   void setModifiersListener();
   void setKeyListener();
-  void setKeyMap(struct xkb_keymap *keymap);
+  void configure();
 
   struct wl_list link;
   struct xkb_keymap *keymap;
 
+  //TODO repeat info (wlr_keyboard_set_repeat_info)
+  /*
+    struct wl_event_source *key_repeat_src;
+    //TODO struct for binding
+  */
+
+
 private:
   Server *server;
   struct wlr_input_device *device;
+  FthShortcutState keycodes_states;
 
 private:
   bool handle_keybinding(xkb_keysym_t sym);
