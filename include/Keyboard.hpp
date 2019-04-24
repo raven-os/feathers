@@ -5,7 +5,6 @@
 # include "FthShortcutState.hpp"
 
 #include <map>
-#include <functional>
 
 class Server;
 
@@ -39,10 +38,10 @@ private:
   Server *server;
   struct wlr_input_device *device;
   FthShortcutState keycodes_states;
-  std::map<std::string, std::function<void()>> shortcuts;
+  std::map<std::string, binding> shortcuts;
 
 private:
-  bool handle_keybinding(/*xkb_keysym_t sym*/);
+  bool handle_keybinding();
   void getBinding();
   void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
   void keyboard_handle_key(struct wl_listener *listener, void *data);
