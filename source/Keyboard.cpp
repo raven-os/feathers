@@ -3,15 +3,16 @@
 
 #include <iostream>
 
-// std::map<string, uint32_t> modifiers = {
-//   {"Alt", WLR_MODIFIER_ALT},
-//   {"Ctrl", WLR_MODIFIER_CTRL}
-// };
+std::map<std::string, uint32_t> modifiersLst = {
+  {"Alt", WLR_MODIFIER_ALT},
+  {"Ctrl", WLR_MODIFIER_CTRL}
+};
 
 Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
 {
-  shortcuts["A+B"] = [server](){ wl_display_terminate(server->display);};
-  shortcuts["C+D"] = [](){std::cout << "open terminal" << std::endl;};
+  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){std::cout << "Open Terminal" << std::endl;}};
+  shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
+  shortcuts["Ctrl+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
 }
 
 Keyboard::~Keyboard() {
@@ -26,7 +27,7 @@ void Keyboard::getBinding() {
 
 }
 
-bool Keyboard::handle_keybinding(/*xkb_keysym_t sym*/)
+bool Keyboard::handle_keybinding()
 {
   for (auto const & shortcut : shortcuts) {
     char *tmp;
@@ -35,16 +36,25 @@ bool Keyboard::handle_keybinding(/*xkb_keysym_t sym*/)
   	key[shortcut.first.size()] = 0;
 
     uint32_t sum = 0;
+    uint32_t mod = 0;
     tmp = strtok(key, "+");
     while (tmp != NULL) {
-      sum += xkb_keysym_from_name(tmp, XKB_KEYSYM_CASE_INSENSITIVE);
+      if (modifiersLst.find(tmp) != modifiersLst.end()) {
+        mod += modifiersLst[tmp];
+      }
+      else
+        sum += xkb_keysym_from_name(tmp, XKB_KEYSYM_CASE_INSENSITIVE);
       tmp = strtok(NULL, "+");
     }
-    if (sum == keycodes_states.sum) {
-      shortcut.second();
+    std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
+    if ((keycodes_states.last_raw_modifiers == mod) && sum == keycodes_states.sum) {
+      std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
+      shortcut.second.action();
       return true;
     }
+    delete key;
   }
+  std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl << std::endl;
   return false;
 }
 
@@ -69,12 +79,11 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
   uint32_t modifiers = wlr_keyboard_get_modifiers(device->keyboard);
   keycodes_states.update_state(event, static_cast<uint32_t>(keycode), modifiers, device->keyboard->xkb_state);
   //std::cout << keycode << " " <<  "'A' sym:" <<xkb_keysym_from_name("a", XKB_KEYSYM_CASE_INSENSITIVE) << " " << xkb_state_key_get_utf32(device->keyboard->xkb_state, keycode) << std::endl;
-  if (/*(modifiers & WLR_MODIFIER_ALT) && */event->state == WLR_KEY_PRESSED)
+  if (event->state == WLR_KEY_PRESSED)
   {
     for (int i = 0; i < nsyms; i++)
     {
-      //ascci code
-      //std::cout << "sym: " << syms[i] << std::endl;
+      // std::cout << "sym: " << syms[i] << std::endl;
       handled = handle_keybinding();
     }
   }
