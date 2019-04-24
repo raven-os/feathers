@@ -18,7 +18,9 @@ struct FthShortcutState {
   uint32_t last_keycode = 0;
 	uint32_t current_key = 0;
 
-  void update_state(struct wlr_event_keyboard_key *event, uint32_t new_key,	uint32_t raw_modifiers) {
+  uint32_t sum = 0;
+
+  void update_state(struct wlr_event_keyboard_key *event, uint32_t new_key,	uint32_t raw_modifiers, xkb_state *state) {
     bool last_was_modifier = raw_modifiers != last_raw_modifiers;
 	  last_raw_modifiers = raw_modifiers;
 
@@ -35,7 +37,7 @@ struct FthShortcutState {
     } else {
        remove_key(event->keycode);
     }
-    display_vector();
+    compute_shortcut(state);
   }
 
 
@@ -48,7 +50,6 @@ private:
                 [key_id](const std::pair<uint32_t, uint32_t> &key) {
                   return key.first == key_id;
                 })));
-      std::cout << i << " " << npressed << std::endl;
       if (i < npressed)
          pressed_key[i] = {key_id, keycode};
       else {
@@ -96,9 +97,11 @@ private:
     current_key = 0;
   }
 
-  void display_vector() {
+  void compute_shortcut(xkb_state *state) {
+    sum = 0;
     for (size_t i = 0; i < npressed; ++i) {
-      std::cout << "KEYID: " << pressed_key[i].first << " KEYCODE: " << pressed_key[i].second << std::endl;
+  //    std::cout << "KEYID: " << pressed_key[i].first << " KEYCODE: " << pressed_key[i].second << std::endl;
+      sum += xkb_state_key_get_utf32(state, pressed_key[i].first);
     }
     std::cout << std::endl;
   }

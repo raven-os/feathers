@@ -3,9 +3,15 @@
 
 #include <iostream>
 
+// std::map<string, uint32_t> modifiers = {
+//   {"Alt", WLR_MODIFIER_ALT},
+//   {"Ctrl", WLR_MODIFIER_CTRL}
+// };
+
 Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
 {
-
+  shortcuts["A+B"] = [server](){ wl_display_terminate(server->display);};
+  shortcuts["C+D"] = [](){std::cout << "open terminal" << std::endl;};
 }
 
 Keyboard::~Keyboard() {
@@ -16,30 +22,30 @@ Keyboard::~Keyboard() {
 	wl_list_remove(&modifiers.link);
 }
 
-bool Keyboard::handle_keybinding(xkb_keysym_t sym)
+void Keyboard::getBinding() {
+
+}
+
+bool Keyboard::handle_keybinding(/*xkb_keysym_t sym*/)
 {
-  switch (sym)
-    {
-    case XKB_KEY_Escape:
-      wl_display_terminate(server->display);
-      break;
-    case XKB_KEY_F1:
-      {
-  	if (wl_list_length(&server->views) < 2)
-  	  {
-  	    break;
-  	  }
-  	View *current_view = wl_container_of(server->views.next, current_view, link);
-  	View *next_view = wl_container_of(current_view->link.next, next_view, link);
-  	ServerView::focus_view(next_view, next_view->xdg_surface->surface);
-  	wl_list_remove(&current_view->link);
-  	wl_list_insert(server->views.prev, &current_view->link);
-  	break;
-      }
-    default:
-      return false;
+  for (auto const & shortcut : shortcuts) {
+    char *tmp;
+    char *key = new char[shortcut.first.size() + 1];
+    shortcut.first.copy(key, shortcut.first.size() + 1);
+  	key[shortcut.first.size()] = 0;
+
+    uint32_t sum = 0;
+    tmp = strtok(key, "+");
+    while (tmp != NULL) {
+      sum += xkb_keysym_from_name(tmp, XKB_KEYSYM_CASE_INSENSITIVE);
+      tmp = strtok(NULL, "+");
     }
-  return true;
+    if (sum == keycodes_states.sum) {
+      shortcut.second();
+      return true;
+    }
+  }
+  return false;
 }
 
 void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -61,13 +67,15 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
 
   bool handled = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(device->keyboard);
-  keycodes_states.update_state(event, (uint32_t)keycode, modifiers);
-  if ((modifiers & WLR_MODIFIER_ALT) && event->state == WLR_KEY_PRESSED)
+  keycodes_states.update_state(event, static_cast<uint32_t>(keycode), modifiers, device->keyboard->xkb_state);
+  //std::cout << keycode << " " <<  "'A' sym:" <<xkb_keysym_from_name("a", XKB_KEYSYM_CASE_INSENSITIVE) << " " << xkb_state_key_get_utf32(device->keyboard->xkb_state, keycode) << std::endl;
+  if (/*(modifiers & WLR_MODIFIER_ALT) && */event->state == WLR_KEY_PRESSED)
   {
     for (int i = 0; i < nsyms; i++)
     {
-      std::cout << "SYM: " << syms[i] << std::endl;
-      handled = handle_keybinding(syms[i]);
+      //ascci code
+      //std::cout << "sym: " << syms[i] << std::endl;
+      handled = handle_keybinding();
     }
   }
 
@@ -100,6 +108,7 @@ void Keyboard::configure() {
 
     //xkb_keymap_unref(keymap);
     this->keymap = key_map;
+    std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
     wlr_keyboard_set_keymap(device->keyboard, this->keymap);
 
     //TODO implem repeat info
