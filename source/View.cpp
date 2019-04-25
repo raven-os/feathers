@@ -56,9 +56,7 @@ void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *liste
 };
 
 void View::close() {
-  if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL) {
-    wlr_xdg_surface_v6_send_close(xdg_surface);
-  }
+  wlr_xdg_surface_v6_send_close(xdg_surface);
 }
 
 namespace ServerView
