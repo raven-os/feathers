@@ -3,7 +3,6 @@
 
 ServerOutput::ServerOutput(Server *server) : server(server) {
   output_layout = wlr_output_layout_create();
-  wl_list_init(&outputs);
   SET_LISTENER(ServerOutput, ServerOutputListeners, new_output, server_new_output);
   wl_signal_add(&server->backend->events.new_output, &new_output);
 }
@@ -18,9 +17,9 @@ void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listene
       wlr_output_set_mode(wlr_output, mode);
     }
 
-  Output *output = new Output(server, wlr_output);
+  std::unique_ptr<Output> output(new Output(server, wlr_output));
   output->setFrameListener();
-  wl_list_insert(&outputs, &output->link);
+  outputs.emplace_back(std::move(output));
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
   wlr_output_create_global(wlr_output);
