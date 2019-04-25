@@ -12,6 +12,7 @@ std::map<std::string, uint32_t> modifiersLst = {
 
 Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
 {
+  shortcuts["a+b"] = {"Nothing", [](){std::cout << "NOTHING" << std::endl;}};
   shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){
     if (fork() == 0)
     {
@@ -43,29 +44,35 @@ Keyboard::~Keyboard() {
 bool Keyboard::handle_keybinding()
 {
   for (auto const & shortcut : shortcuts) {
-    char *tmp;
-    char *key = new char[shortcut.first.size() + 1];
-    shortcut.first.copy(key, shortcut.first.size() + 1);
-  	key[shortcut.first.size()] = 0;
-
+    std::string key = shortcut.first;
+    std::vector<std::string> splitStr;
+    size_t i = 0;
+    size_t j = key.find("+");
     uint32_t sum = 0;
     uint32_t mod = 0;
-    tmp = strtok(key, "+");
-    while (tmp != NULL) {
-      if (modifiersLst.find(tmp) != modifiersLst.end()) {
-        mod += modifiersLst[tmp];
-      }
-      else
-        sum += xkb_keysym_from_name(tmp, XKB_KEYSYM_CASE_INSENSITIVE);
-      tmp = strtok(NULL, "+");
+
+    while (j != std::string::npos) {
+      key[j] = 0;
+      splitStr.push_back(key.data() + i);
+      i = j + 1;
+      j = key.find("+", j + 1);
     }
+    splitStr.push_back(key.data() + i);
+
+    for (std::string tmp : splitStr) {
+      std::cout << "TMP: " << tmp << std::endl;
+      if (modifiersLst.find(tmp) != modifiersLst.end())
+        mod |= modifiersLst[tmp];
+      else
+        sum += xkb_keysym_from_name(tmp.c_str(), XKB_KEYSYM_CASE_INSENSITIVE);
+    }
+
     std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
     if ((keycodes_states.last_raw_modifiers == mod) && sum == keycodes_states.sum) {
       std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
       shortcut.second.action();
       return true;
     }
-    delete key;
   }
   std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl << std::endl;
   return false;

@@ -14,10 +14,10 @@ struct binding {
   std::function<void()> action;
 };
 
-struct FthShortcutState {
+struct ShortcutState {
   //keyId , Keycode
   std::vector<std::pair<uint32_t, uint32_t>> pressed_key;
-  size_t npressed = 0;
+  int npressed = 0;
   uint32_t last_raw_modifiers = 0;
   uint32_t last_keycode = 0;
 	uint32_t current_key = 0;
@@ -26,18 +26,18 @@ struct FthShortcutState {
 
   void update_state(struct wlr_event_keyboard_key *event, uint32_t new_key,	uint32_t raw_modifiers, xkb_state *state) {
     bool last_was_modifier = raw_modifiers != last_raw_modifiers;
-	  last_raw_modifiers = raw_modifiers;
+    last_raw_modifiers = raw_modifiers;
 
     if (last_was_modifier && last_keycode) {
-  		// Last pressed key before this one was a modifier
-  		remove_key(last_keycode);
-  	}
+      // Last pressed key before this one was a modifier
+      remove_key(last_keycode);
+    }
 
     if (event->state == WLR_KEY_PRESSED) {
       add_key(event->keycode, new_key);
       last_keycode = event->keycode;
     } else {
-       remove_key(event->keycode);
+      remove_key(event->keycode);
     }
     compute_shortcut(state);
   }
@@ -48,15 +48,15 @@ private:
     auto begin = pressed_key.begin();
 
     if (npressed < FTH_LIMIT_KEY_PRESSED) {
-      size_t i = static_cast<int>(std::distance(begin, std::find_if(begin, pressed_key.end(),
-                [key_id](const std::pair<uint32_t, uint32_t> &key) {
-                  return key.first == key_id;
-                })));
+      auto i = std::distance(begin, std::find_if(begin, pressed_key.end(),
+								    [key_id](const std::pair<uint32_t, uint32_t> &key) {
+								      return key.first == key_id;
+								    }));
       if (i < npressed)
-         pressed_key[i] = {key_id, keycode};
+	pressed_key[i] = {key_id, keycode};
       else {
-         pressed_key.insert(begin + i, std::make_pair(key_id, keycode));
-    	 ++npressed;
+	pressed_key.insert(begin + i, std::make_pair(key_id, keycode));
+	++npressed;
       }
       current_key = key_id;
     }
@@ -64,10 +64,10 @@ private:
 
   void remove_key(uint32_t keycode) {
     auto begin = pressed_key.begin();
-    size_t i = static_cast<size_t>(std::distance(begin, std::find_if(begin, pressed_key.end(),
-              [keycode](const std::pair<uint32_t, uint32_t> &key) {
-                return key.second == keycode;
-              })));
+    auto i = std::distance(begin, std::find_if(begin, pressed_key.end(),
+								     [keycode](const std::pair<uint32_t, uint32_t> &key) {
+								       return key.second == keycode;
+								     }));
     while (npressed > i) {
       --npressed;
       pressed_key.erase(begin + npressed);
@@ -77,7 +77,7 @@ private:
 
   void compute_shortcut(xkb_state *state) {
     sum = 0;
-    for (size_t i = 0; i < npressed; ++i) {
+    for (int i = 0; i < npressed; ++i) {
       sum += xkb_state_key_get_one_sym(state, pressed_key[i].first);
     }
   }
