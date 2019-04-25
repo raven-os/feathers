@@ -28,6 +28,8 @@ public:
   void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_resize(struct wl_listener *listener, void *data);
 
+  void close();
+
   Server *server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;

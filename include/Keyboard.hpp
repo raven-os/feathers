@@ -42,7 +42,6 @@ private:
 
 private:
   bool handle_keybinding();
-  void getBinding();
   void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
   void keyboard_handle_key(struct wl_listener *listener, void *data);
 };

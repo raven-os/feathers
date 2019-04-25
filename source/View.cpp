@@ -55,6 +55,12 @@ void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *liste
   ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
 };
 
+void View::close() {
+  if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL) {
+    wlr_xdg_surface_v6_send_close(xdg_surface);
+  }
+}
+
 namespace ServerView
 {
   void focus_view(View *view, struct wlr_surface *surface)
