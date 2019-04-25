@@ -19,6 +19,8 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
     }
   }};
 
+  shortcuts["a+F4"] = {"destroy", [](){ std::cout << "close window" << std::endl;/*view->close()*/;}};
+
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
   shortcuts["Ctrl+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
 }
@@ -29,10 +31,6 @@ Keyboard::~Keyboard() {
 	}
   wl_list_remove(&key.link);
 	wl_list_remove(&modifiers.link);
-}
-
-void Keyboard::getBinding() {
-
 }
 
 bool Keyboard::handle_keybinding()
@@ -86,12 +84,14 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
   bool handled = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(device->keyboard);
   keycodes_states.update_state(event, static_cast<uint32_t>(keycode), modifiers, device->keyboard->xkb_state);
+  char name[30] = {0};
   //std::cout << keycode << " " <<  "'A' sym:" <<xkb_keysym_from_name("a", XKB_KEYSYM_CASE_INSENSITIVE) << " " << xkb_state_key_get_utf32(device->keyboard->xkb_state, keycode) << std::endl;
   if (event->state == WLR_KEY_PRESSED)
   {
     for (int i = 0; i < nsyms; i++)
     {
-      // std::cout << "sym: " << syms[i] << std::endl;
+      xkb_keysym_get_name(syms[i], name, 30);
+      std::cout << name << ": " << syms[i] << std::endl;
       handled = handle_keybinding();
     }
   }
