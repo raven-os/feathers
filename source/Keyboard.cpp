@@ -60,7 +60,6 @@ bool Keyboard::handle_keybinding()
     splitStr.push_back(key.data() + i);
 
     for (std::string tmp : splitStr) {
-      std::cout << "TMP: " << tmp << std::endl;
       if (modifiersLst.find(tmp) != modifiersLst.end())
         mod |= modifiersLst[tmp];
       else
@@ -97,7 +96,7 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
 
   bool handled = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(device->keyboard);
-  keycodes_states.update_state(event, static_cast<uint32_t>(keycode), modifiers, device->keyboard->xkb_state);
+  keycodes_states.update_state(event, keycode, modifiers, device->keyboard->xkb_state);
   char name[30] = {0};
   //std::cout << keycode << " " <<  "'A' sym:" <<xkb_keysym_from_name("a", XKB_KEYSYM_CASE_INSENSITIVE) << " " << xkb_state_key_get_utf32(device->keyboard->xkb_state, keycode) << std::endl;
   if (event->state == WLR_KEY_PRESSED)
@@ -119,13 +118,11 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
 }
 
 void Keyboard::configure() {
-    struct xkb_rule_names rules = { 0 };
+    struct xkb_rule_names rules = { NULL, NULL, "fr", NULL, NULL };
     struct xkb_context *context;
     struct xkb_keymap *key_map;
 
     //TODO KEYBOARD config
-
-    rules.layout = "fr";
 
     if (!(context = xkb_context_new(XKB_CONTEXT_NO_FLAGS))) {
       std::cerr << "Cannot create the xkb context" << std::endl;

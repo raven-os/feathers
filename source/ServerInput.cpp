@@ -7,7 +7,7 @@ ServerInput::ServerInput(Server *server) : server(server) {
   wl_signal_add(&server->backend->events.new_input, &new_input);
 }
 
-void ServerInput::server_new_input(struct wl_listener *listener, void *data)
+void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_input_device *device = static_cast<struct wlr_input_device *>(data);
   switch (device->type)
@@ -32,8 +32,7 @@ void ServerInput::server_new_input(struct wl_listener *listener, void *data)
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
 {
-  if (!keyboard)
-    keyboard = new Keyboard(server, device);
+  keyboard = new Keyboard(server, device);
 
   keyboard->configure();
   keyboard->setModifiersListener();
