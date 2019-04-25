@@ -2,7 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "Listeners.hpp"
-# include "FthShortcutState.hpp"
+# include "ShortcutState.hpp"
 
 #include <map>
 
@@ -31,13 +31,13 @@ public:
   /*
     struct wl_event_source *key_repeat_src;
     //TODO struct for binding
-  */
+    */
 
 
 private:
   Server *server;
   struct wlr_input_device *device;
-  FthShortcutState keycodes_states;
+  ShortcutState keycodes_states;
   std::map<std::string, binding> shortcuts;
 
 private:
