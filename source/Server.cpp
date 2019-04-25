@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "Server.hpp"
 #include "XdgShell.hpp"
 #include "ServerCursor.hpp"
@@ -53,10 +52,6 @@ void Server::run()
     }
 
   setenv("WAYLAND_DISPLAY", socket, true);
-  if (fork() == 0)
-    {
-      execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
-    }
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
 	  socket);
   wl_display_run(display);
