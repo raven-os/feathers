@@ -1,7 +1,9 @@
+#include <unistd.h>
+#include <iostream>
+
 #include "Keyboard.hpp"
 #include "Server.hpp"
 
-#include <iostream>
 
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},
@@ -10,7 +12,13 @@ std::map<std::string, uint32_t> modifiersLst = {
 
 Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
 {
-  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){std::cout << "Open Terminal" << std::endl;}};
+  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){
+    if (fork() == 0)
+    {
+      execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
+    }
+  }};
+
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
   shortcuts["Ctrl+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
 }

@@ -10,17 +10,50 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
 {
   struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
-  SET_LISTENER(View, ViewListeners, map, server->xdgShell->xdg_surface_map);
+  SET_LISTENER(View, ViewListeners, map, xdg_surface_map);
   wl_signal_add(&xdg_surface->events.map, &map);
-  SET_LISTENER(View, ViewListeners, unmap, server->xdgShell->xdg_surface_unmap);
+  SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap);
   wl_signal_add(&xdg_surface->events.unmap, &unmap);
   SET_LISTENER(View, ViewListeners, destroy, server->xdgShell->xdg_surface_destroy);
   wl_signal_add(&xdg_surface->events.destroy, &destroy);
-  SET_LISTENER(View, ViewListeners, request_move, server->xdgShell->xdg_toplevel_request_move);
+  SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move);
   wl_signal_add(&toplevel->events.request_move, &request_move);
-  SET_LISTENER(View, ViewListeners, request_resize, server->xdgShell->xdg_toplevel_request_resize);
+  SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize);
   wl_signal_add(&toplevel->events.request_resize, &request_resize);
 }
+
+void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  mapped = true;
+
+  ServerView::focus_view(this, xdg_surface->surface);
+
+  auto rootNode(server->windowTree.getRootIndex());
+  auto &rootNodeData(server->windowTree.getData(rootNode));
+
+  windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, server->windowTree, wm::ClientData{this});
+};
+
+void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  mapped = false;
+
+  auto rootNode(server->windowTree.getRootIndex());
+  auto &rootNodeData(server->windowTree.getData(rootNode));
+
+  std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, server->windowTree, windowNode);
+};
+
+void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  ServerView::begin_interactive(this, CursorMode::CURSOR_MOVE, 0);
+};
+
+void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
+  ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
+};
 
 namespace ServerView
 {
