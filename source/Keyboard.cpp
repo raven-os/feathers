@@ -25,7 +25,10 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
       {
 	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
 	    view->xdg_surface->toplevel->server_pending.activated)
-	  view->close();
+	  {
+	    view->close();
+	    break;
+	  }
       }
   }};
 

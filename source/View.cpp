@@ -83,11 +83,15 @@ namespace ServerView
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
     {
-      auto ptr(std::move(server->views[view->index]));
+      auto it(std::find_if(server->views.begin(), server->views.end(),
+			   [view](auto const &ptr)
+			   {
+			     return ptr.get() == view;
+			   }));
+      std::unique_ptr<View> ptr(std::move(*it));
 
-      std::move_backward(server->views.begin(), server->views.begin() + view->index, server->views.begin() + view->index + 1);
-      view->index = 0;
-      server->views[view->index] = std::move(ptr);
+      std::move_backward(server->views.begin(), it, it + 1);
+      server->views.front() = std::move(ptr);
     }
     wlr_xdg_toplevel_v6_set_activated(view->xdg_surface, true);
     wlr_seat_keyboard_notify_enter(seat, view->xdg_surface->surface, keyboard->keycodes,

@@ -21,8 +21,6 @@ public:
   View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface);
   ~View() = default;
 
-  size_t index;
-
   void xdg_surface_map(struct wl_listener *listener, void *data);
   void xdg_surface_unmap(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
