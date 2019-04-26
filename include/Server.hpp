@@ -27,10 +27,10 @@ public:
   XdgShell *xdgShell;
   struct wl_list views;
 
-  ServerCursor *cursor;
-  ServerInput *input;
-  ServerOutput *output;
-  Seat *seat;
+  ServerOutput output;
+  ServerCursor cursor;
+  ServerInput input;
+  Seat seat;
 
   View *grabbed_view;
   double grab_x, grab_y;

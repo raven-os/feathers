@@ -9,7 +9,7 @@ ServerCursor::ServerCursor(Server *server)
     cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
 {
   cursor = wlr_cursor_create();
-  wlr_cursor_attach_output_layout(cursor, server->output->getLayout());
+  wlr_cursor_attach_output_layout(cursor, server->output.getLayout());
 
   cursor_mgr = wlr_xcursor_manager_create(nullptr, 24);
   wlr_xcursor_manager_load(cursor_mgr, 1);
@@ -87,7 +87,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     default:
       {
 	double sx, sy;
-	struct wlr_seat *seat = server->seat->getSeat();
+	struct wlr_seat *seat = server->seat.getSeat();
 	struct wlr_surface *surface = NULL;
 	View *view = ServerView::desktop_view_at(server, cursor->x,
 						 cursor->y, &surface, &sx, &sy);
@@ -129,7 +129,7 @@ void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]struct wl_liste
 void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
-  struct wlr_seat *seat = server->seat->getSeat();
+  struct wlr_seat *seat = server->seat.getSeat();
 
   wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
 
@@ -154,13 +154,13 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
 
 void ServerCursor::server_cursor_frame(struct wl_listener *, void *)
 {
-  wlr_seat_pointer_notify_frame(server->seat->getSeat());
+  wlr_seat_pointer_notify_frame(server->seat.getSeat());
 }
 
 void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
-  wlr_seat_pointer_notify_axis(server->seat->getSeat(),
+  wlr_seat_pointer_notify_axis(server->seat.getSeat(),
 			       event->time_msec, event->orientation, event->delta,
 			       event->delta_discrete, event->source);
 }
