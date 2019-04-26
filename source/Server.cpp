@@ -9,16 +9,21 @@ Server::Server()
   : windowTree(wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}})
   , display(wl_display_create())
   , backend(wlr_backend_autocreate(display, nullptr)) // nullptr can be replaced with a custom rendererx
-  , renderer(wlr_backend_get_renderer(backend))
-  , xdgShell(new XdgShell(this))
+  , renderer([this]()
+	     {
+	       auto *renderer = wlr_backend_get_renderer(backend);
+
+	       wlr_renderer_init_wl_display(renderer, display);
+	       wlr_compositor_create(display, renderer);
+	       
+	       return renderer;
+	     }())
   , output(this)
+  , xdgShell(new XdgShell(this))
   , cursor(this)
   , input(this)
   , seat(this)
 {
-
-  wlr_renderer_init_wl_display(renderer, display);
-  wlr_compositor_create(display, renderer);
   wlr_data_device_manager_create(display);
 }
 

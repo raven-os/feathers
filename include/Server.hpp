@@ -24,10 +24,10 @@ public:
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
 
-  XdgShell *xdgShell;
   std::vector<std::unique_ptr<View>> views;
 
   ServerOutput output;
+  XdgShell *xdgShell;
   ServerCursor cursor;
   ServerInput input;
   Seat seat;
