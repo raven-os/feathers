@@ -33,6 +33,7 @@ public:
     //TODO struct for binding
     */
 
+bool debug = false;
 
 private:
   Server *server;

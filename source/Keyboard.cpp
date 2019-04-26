@@ -30,7 +30,8 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
   }};
 
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
-  shortcuts["Ctrl+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
+  shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
+  shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
 }
 
 Keyboard::~Keyboard() {
@@ -66,14 +67,17 @@ bool Keyboard::handle_keybinding()
         sum += xkb_keysym_from_name(tmp.c_str(), XKB_KEYSYM_CASE_INSENSITIVE);
     }
 
-    std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
+    if (debug)
+      std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
     if ((keycodes_states.last_raw_modifiers == mod) && sum == keycodes_states.sum) {
-      std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
+      if (debug)
+        std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
       shortcut.second.action();
       return true;
     }
   }
-  std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl << std::endl;
+  if (debug)
+    std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl << std::endl;
   return false;
 }
 
@@ -103,8 +107,10 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
   {
     for (int i = 0; i < nsyms; i++)
     {
-      xkb_keysym_get_name(syms[i], name, 30);
-      std::cout << name << ": " << syms[i] << std::endl;
+      if (debug) {
+        xkb_keysym_get_name(syms[i], name, 30);
+        std::cout << name << ": " << syms[i] << std::endl;
+      }
       handled = handle_keybinding();
     }
   }
