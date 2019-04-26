@@ -4,6 +4,9 @@
 # include "Keyboard.hpp"
 # include "Listeners.hpp"
 
+# include <memory>
+# include <vector>
+
 class Server;
 
 struct ServerInputListeners
@@ -21,9 +24,8 @@ public:
 
 private:
   Server *server;
-  Keyboard *keyboard = nullptr;
 
-  struct wl_list keyboards;
+  std::vector<std::unique_ptr<Keyboard>> keyboards;
 
   bool handle_keybinding(xkb_keysym_t sym);
   void server_new_keyboard(struct wlr_input_device *device);
