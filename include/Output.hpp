@@ -16,7 +16,6 @@ public:
   Output(Server *server, struct wlr_output *wlr_output);
   ~Output() = default;
 
-  struct wl_list link;
 
   void setFrameListener();
 
