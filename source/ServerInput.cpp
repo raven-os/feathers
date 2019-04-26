@@ -2,7 +2,6 @@
 #include "Server.hpp"
 
 ServerInput::ServerInput(Server *server) : server(server) {
-  wl_list_init(&keyboards);
   SET_LISTENER(ServerInput, ServerInputListeners, new_input, server_new_input);
   wl_signal_add(&server->backend->events.new_input, &new_input);
 }
@@ -22,7 +21,7 @@ void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener,
       break;
   }
   uint32_t caps = WL_SEAT_CAPABILITY_POINTER;
-  if (!wl_list_empty(&keyboards))
+  if (!keyboards.empty())
   {
     caps |= WL_SEAT_CAPABILITY_KEYBOARD;
   }
@@ -32,14 +31,14 @@ void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener,
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
 {
-  keyboard = new Keyboard(server, device);
+  std::unique_ptr<Keyboard> keyboard(new Keyboard(server, device));
 
   keyboard->configure();
   keyboard->setModifiersListener();
   keyboard->setKeyListener();
 
   wlr_seat_set_keyboard(server->seat.getSeat(), device);
-  wl_list_insert(&keyboards, &keyboard->link);
+  keyboards.emplace_back(std::move(keyboard));
 }
 
 void ServerInput::server_new_pointer(struct wlr_input_device *device)

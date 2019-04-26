@@ -24,7 +24,6 @@ public:
   void setKeyListener();
   void configure();
 
-  struct wl_list link;
   struct xkb_keymap *keymap;
 
   //TODO repeat info (wlr_keyboard_set_repeat_info)
