@@ -24,19 +24,21 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   float color[4] = {0.3, 0.3, 0.3, 1.0};
   wlr_renderer_clear(renderer, color);
 
-  View *view;
-  wl_list_for_each_reverse(view, &server->views, link) {
-    if (!view->mapped)
-      {
-	continue;
-      }
-    render_data rdata;
-    rdata.output = wlr_output;
-    rdata.view = view;
-    rdata.renderer = renderer;
-    rdata.when = &now;
-    wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
-  }
+  for (auto it = server->views.rbegin(); it != server->views.rend(); ++it)
+    {
+      auto &view(*it);
+
+      if (!view->mapped)
+	{
+	  continue;
+	}
+      render_data rdata;
+      rdata.output = wlr_output;
+      rdata.view = view.get();
+      rdata.renderer = renderer;
+      rdata.when = &now;
+      wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
+    }
 
   wlr_output_render_software_cursors(wlr_output, NULL);
   wlr_renderer_end(renderer);

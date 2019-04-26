@@ -25,7 +25,7 @@ public:
   struct wlr_renderer *renderer;
 
   XdgShell *xdgShell;
-  struct wl_list views;
+  std::vector<std::unique_ptr<View>> views;
 
   ServerOutput output;
   ServerCursor cursor;

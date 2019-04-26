@@ -20,11 +20,6 @@ Server::Server()
   wlr_renderer_init_wl_display(renderer, display);
   wlr_compositor_create(display, renderer);
   wlr_data_device_manager_create(display);
-
-
-  wl_list_init(&views);
-  
-
 }
 
 Server::~Server()

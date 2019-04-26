@@ -21,12 +21,12 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
   }};
 
   shortcuts["a+F4"] = {"destroy", [server](){
-    View *view;
-    wl_list_for_each(view, &server->views, link) {
-      if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-          view->xdg_surface->toplevel->server_pending.activated)
-        view->close();
-    };
+    for (auto &view : server->views)
+      {
+	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
+	    view->xdg_surface->toplevel->server_pending.activated)
+	  view->close();
+      }
   }};
 
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
