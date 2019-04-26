@@ -7,26 +7,19 @@
 
 Server::Server()
   : windowTree(wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}})
+  , display(wl_display_create())
+  , backend(wlr_backend_autocreate(display, nullptr)) // nullptr can be replaced with a custom rendererx
+  , renderer(wlr_backend_get_renderer(backend))
+  , xdgShell(new XdgShell(this))
+  , output(this)
+  , cursor(this)
+  , input(this)
+  , seat(this)
 {
-  wlr_log_init(WLR_DEBUG, NULL);
-
-  display = wl_display_create();
-  // nullptr can be replaced with a custom renderer
-  backend = wlr_backend_autocreate(display, nullptr);
-  renderer = wlr_backend_get_renderer(backend);
 
   wlr_renderer_init_wl_display(renderer, display);
   wlr_compositor_create(display, renderer);
   wlr_data_device_manager_create(display);
-
-  output = new ServerOutput(this);
-
-  wl_list_init(&views);
-  xdgShell = new XdgShell(this);
-
-  cursor = new ServerCursor(this);
-  input = new ServerInput(this);
-  seat = new Seat(this);
 }
 
 Server::~Server()

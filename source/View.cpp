@@ -68,7 +68,7 @@ namespace ServerView
 	return;
       }
     Server *server = view->server;
-    struct wlr_seat *seat = server->seat->getSeat();
+    struct wlr_seat *seat = server->seat.getSeat();
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
     if (prev_surface == surface)
       {
@@ -81,8 +81,14 @@ namespace ServerView
 	wlr_xdg_toplevel_v6_set_activated(previous, false);
       }
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
-    wl_list_remove(&view->link);
-    wl_list_insert(&server->views, &view->link);
+
+    {
+      auto ptr(std::move(server->views[view->index]));
+
+      std::move_backward(server->views.begin(), server->views.begin() + view->index, server->views.begin() + view->index + 1);
+      view->index = 0;
+      server->views[view->index] = std::move(ptr);
+    }
     wlr_xdg_toplevel_v6_set_activated(view->xdg_surface, true);
     wlr_seat_keyboard_notify_enter(seat, view->xdg_surface->surface, keyboard->keycodes,
 				   keyboard->num_keycodes, &keyboard->modifiers);
@@ -114,12 +120,11 @@ namespace ServerView
   View *desktop_view_at(Server *server, double lx, double ly,
 			struct wlr_surface **surface, double *sx, double *sy)
   {
-    View *view;
-    wl_list_for_each(view, &server->views, link)
+    for (auto &view : server->views)
       {
-	if (view_at(view, lx, ly, surface, sx, sy))
+	if (view_at(view.get(), lx, ly, surface, sx, sy))
 	  {
-	    return view;
+	    return view.get();
 	  }
       }
     return NULL;
@@ -128,24 +133,24 @@ namespace ServerView
   void begin_interactive(View *view, CursorMode mode, uint32_t edges)
   {
     Server *server = view->server;
-    struct wlr_surface *focused_surface = server->seat->getSeat()->pointer_state.focused_surface;
+    struct wlr_surface *focused_surface = server->seat.getSeat()->pointer_state.focused_surface;
     if (view->xdg_surface->surface != focused_surface)
       {
 	return;
       }
     server->grabbed_view = view;
-    server->cursor->cursor_mode = mode;
+    server->cursor.cursor_mode = mode;
     struct wlr_box geo_box;
     wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &geo_box);
     if (mode == CursorMode::CURSOR_MOVE)
       {
-	server->grab_x = server->cursor->cursor->x - view->x;
-	server->grab_y = server->cursor->cursor->y - view->y;
+	server->grab_x = server->cursor.cursor->x - view->x;
+	server->grab_y = server->cursor.cursor->y - view->y;
       }
     else
       {
-	server->grab_x = server->cursor->cursor->x + geo_box.x;
-	server->grab_y = server->cursor->cursor->y + geo_box.y;
+	server->grab_x = server->cursor.cursor->x + geo_box.x;
+	server->grab_y = server->cursor.cursor->y + geo_box.y;
       }
     server->grab_width = geo_box.width;
     server->grab_height = geo_box.height;

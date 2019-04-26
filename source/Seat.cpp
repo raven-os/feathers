@@ -14,7 +14,7 @@ void Seat::seat_request_cursor([[maybe_unused]]struct wl_listener *listener, voi
   struct wlr_seat_client *focused_client = seat->pointer_state.focused_client;
   if (focused_client == event->seat_client)
     {
-wlr_cursor_set_surface(server->cursor->cursor, event->surface, event->hotspot_x, event->hotspot_y);
+      wlr_cursor_set_surface(server->cursor.cursor, event->surface, event->hotspot_x, event->hotspot_y);
     }
 }
 

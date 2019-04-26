@@ -38,7 +38,7 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
     }
 
   double ox = 0, oy = 0;
-  wlr_output_layout_output_coords(view->server->output->getLayout(), output, &ox, &oy);
+  wlr_output_layout_output_coords(view->server->output.getLayout(), output, &ox, &oy);
   ox += view->x + sx, oy += view->y + sy;
 
   struct wlr_box box = {

@@ -13,8 +13,8 @@ XdgShell::XdgShell(Server *server) : server(server) {
 void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   View *view = wl_container_of(listener, view, destroy);
-  wl_list_remove(&view->link);
-  delete view;
+
+  server->views.erase(server->views.begin() + view->index);
 };
 
 void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -26,7 +26,8 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
       assert(!"not handled yet");
       return;
     }
-  View *view = new View(server, xdg_surface);
+  std::unique_ptr<View> view(new View(server, xdg_surface));
 
-  wl_list_insert(&server->views, &view->link);
+  view->index = server->views.size();
+  server->views.emplace_back(std::move(view));
 };
