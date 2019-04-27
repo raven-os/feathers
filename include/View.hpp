@@ -32,6 +32,8 @@ public:
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   int x, y;
+  bool fullscreen;
+  wlr_box saved;
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};
 };
