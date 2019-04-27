@@ -64,8 +64,23 @@ void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *liste
   ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
 };
 
-void View::close() {
+void View::close()
+{
   wlr_xdg_surface_v6_send_close(xdg_surface);
+}
+
+struct wlr_output *View::getOutput()
+{
+  struct wlr_box viewBox;
+  wlr_xdg_surface_v6_get_geometry(xdg_surface, &viewBox);
+
+  double outputX;
+  double outputY;
+  wlr_output_layout_closest_point(server->output->getLayout(), nullptr,
+				  x + (double)viewBox.width/2,
+				  y + (double)viewBox.height/2,
+				  &outputX, &outputY);
+  return wlr_output_layout_output_at(server->output->getLayout(), outputX, outputY);
 }
 
 namespace ServerView

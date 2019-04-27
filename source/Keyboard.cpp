@@ -40,7 +40,8 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &view->saved);
 	    view->saved.x = view->x;
 	    view->saved.y = view->y;
-	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, 1920, 1080);
+	    struct wlr_box *outputBox = wlr_output_layout_get_box(view->server->output->getLayout(), view->getOutput());
+	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, outputBox->width, outputBox->height);
 	    view->x = 0;
 	    view->y = 0;
 	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, true);
