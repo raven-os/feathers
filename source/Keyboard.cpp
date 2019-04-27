@@ -38,6 +38,8 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	if (!view->fullscreen)
 	  {
 	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &view->saved);
+	    view->saved.x = view->x;
+	    view->saved.y = view->y;
 	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, 1920, 1080);
 	    view->x = 0;
 	    view->y = 0;
@@ -45,10 +47,10 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	  }
 	else
 	  {
+	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
+	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->saved.width, view->saved.height);
 	    view->x = view->saved.x;
 	    view->y = view->saved.y;
-	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->saved.width, view->saved.height);
-	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
 	  }
 	view->fullscreen = !view->fullscreen;
       }
