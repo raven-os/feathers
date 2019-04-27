@@ -10,7 +10,7 @@ std::map<std::string, uint32_t> modifiersLst = {
   {"Ctrl", WLR_MODIFIER_CTRL}
 };
 
-Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device)
+Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device), keymap(nullptr)
 {
   shortcuts["a+b"] = {"Nothing", [](){std::cout << "NOTHING" << std::endl;}};
   shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){
@@ -39,10 +39,10 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 
 Keyboard::~Keyboard() {
   if (keymap) {
-		xkb_keymap_unref(keymap);
-	}
+    xkb_keymap_unref(keymap);
+  }
   wl_list_remove(&key.link);
-	wl_list_remove(&modifiers.link);
+  wl_list_remove(&modifiers.link);
 }
 
 bool Keyboard::handle_keybinding()
@@ -144,13 +144,14 @@ void Keyboard::configure() {
     }
 
     //xkb_keymap_unref(keymap);
+    xkb_keymap_unref(this->keymap);
     this->keymap = key_map;
     std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
     wlr_keyboard_set_keymap(device->keyboard, this->keymap);
 
     //TODO implem repeat info
 
-    xkb_keymap_unref(key_map);
+    
     xkb_context_unref(context);
     wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
 }
