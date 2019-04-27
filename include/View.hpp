@@ -28,6 +28,8 @@ public:
 
   void close();
 
+  struct wlr_output *getOutput();
+
   Server *server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
