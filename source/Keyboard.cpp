@@ -32,8 +32,8 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
       }
   }};
 
-  shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
-  shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->display);}};
+  shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
+  shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
 }
 

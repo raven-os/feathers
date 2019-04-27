@@ -5,7 +5,7 @@
 #include "wm/Container.hpp"
 
 XdgShell::XdgShell(Server *server) : server(server) {
-  xdg_shell = wlr_xdg_shell_v6_create(server->display);
+  xdg_shell = wlr_xdg_shell_v6_create(server->getWlDisplay());
   SET_LISTENER(XdgShell, XdgShellListeners, new_xdg_surface, server_new_xdg_surface);
   wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 }

@@ -22,6 +22,15 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   wl_signal_add(&toplevel->events.request_resize, &request_resize);
 }
 
+View::~View()
+{
+  wl_list_remove(&map.link);
+  wl_list_remove(&unmap.link);
+  wl_list_remove(&destroy.link);
+  wl_list_remove(&request_move.link);
+  wl_list_remove(&request_resize.link);
+}
+
 void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   mapped = true;

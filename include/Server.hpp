@@ -20,7 +20,16 @@ public:
 
   wm::WindowTree windowTree;
 
-  struct wl_display *display;
+  struct DisplayDeleter
+  {
+    void operator()(struct wl_display *display) const noexcept
+    {
+      wl_display_destroy_clients(display);
+      wl_display_destroy(display);
+    }
+  };
+
+  std::unique_ptr<struct wl_display, DisplayDeleter> display;
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
 
@@ -37,4 +46,8 @@ public:
   int grab_width, grab_height;
   uint32_t resize_edges;
 
+  wl_display *getWlDisplay() const noexcept
+  {
+    return display.get();
+  }
 };

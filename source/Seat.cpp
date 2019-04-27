@@ -3,7 +3,7 @@
 
 Seat::Seat(Server *server) : server(server)
 {
-  seat = wlr_seat_create(server->display, "seat0");
+  seat = wlr_seat_create(server->getWlDisplay(), "seat0");
   SET_LISTENER(Seat, SeatListeners, request_cursor, seat_request_cursor);
   wl_signal_add(&seat->events.request_set_cursor, &request_cursor);
 }
