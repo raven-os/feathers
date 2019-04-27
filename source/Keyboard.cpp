@@ -31,6 +31,38 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	  }
       }
   }};
+  shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){
+    if (wl_list_length(&server->views) >= 1)
+      {
+        View *view = wl_container_of(server->views.next, view, link);
+	if (!view->fullscreen)
+	  {
+	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &view->saved);
+	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, 1920, 1080);
+	    view->x = 0;
+	    view->y = 0;
+	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, true);
+	  }
+	else
+	  {
+	    view->x = view->saved.x;
+	    view->y = view->saved.y;
+	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->saved.width, view->saved.height);
+	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
+	  }
+	view->fullscreen = !view->fullscreen;
+      }
+  }};
+  shortcuts["Alt+Tab"] = {"Switch window", [server](){
+    if (wl_list_length(&server->views) >= 2)
+      {
+	View *currentView = wl_container_of(server->views.next, currentView, link);
+	View *nextView = wl_container_of(currentView->link.next, nextView, link);
+	ServerView::focus_view(nextView, nextView->xdg_surface->surface);
+	wl_list_remove(&currentView->link);
+	wl_list_insert(server->views.prev, &currentView->link);
+      }
+    }};
 
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
   shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
