@@ -25,12 +25,6 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
     }
   }};
 
-  shortcuts["a+F4"] = {"destroy", [server](){
-    	std::unique_ptr<View> &view = server->views.front();
-      if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-    	    view->xdg_surface->toplevel->server_pending.activated)
-    	     view->close();
-  }};
   shortcuts["a+F2"] = {"Toggle fullscreen", [server](){
     if (server->views.size() >= 1)
       {
