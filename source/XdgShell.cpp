@@ -19,6 +19,11 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
 				   {
 				     return ptr.get() == view;
 				   }));
+  if (!server->views.empty())
+    {
+      std::unique_ptr<View> &currentView = server->views[0];
+      ServerView::focus_view(currentView.get(), currentView->xdg_surface->surface);
+    }
 };
 
 void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
