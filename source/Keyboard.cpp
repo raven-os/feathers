@@ -13,6 +13,10 @@ std::map<std::string, uint32_t> modifiersLst = {
 
 Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device), keymap(nullptr)
 {
+
+  // a + Something are some temporary shortcut for the sub compositor, otherwise our own compositor will override the Shortcuts
+  // i.e: Alt+F4
+
   shortcuts["a+b"] = {"Nothing", [](){std::cout << "NOTHING" << std::endl;}};
   shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){
     if (fork() == 0)
@@ -21,18 +25,13 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
     }
   }};
 
-  shortcuts["Alt+F4"] = {"destroy", [server](){
-    for (auto &view : server->views)
-      {
-	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-	    view->xdg_surface->toplevel->server_pending.activated)
-	  {
-	    view->close();
-	    break;
-	  }
-      }
+  shortcuts["a+F4"] = {"destroy", [server](){
+    	std::unique_ptr<View> &view = server->views.front();
+      if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
+    	    view->xdg_surface->toplevel->server_pending.activated)
+    	     view->close();
   }};
-  shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){
+  shortcuts["a+F2"] = {"Toggle fullscreen", [server](){
     if (server->views.size() >= 1)
       {
 	std::unique_ptr<View> &view = server->views.front();
@@ -64,7 +63,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	output->setFullscreen(!output->getFullscreen());
       }
   }};
-  shortcuts["Alt+Tab"] = {"Switch window", [server](){
+  shortcuts["a+Tab"] = {"Switch window", [server](){
     if (server->views.size() >= 2)
       {
 	std::unique_ptr<View> &view = server->views[1];
@@ -190,7 +189,8 @@ void Keyboard::configure() {
     //xkb_keymap_unref(keymap);
     xkb_keymap_unref(this->keymap);
     this->keymap = key_map;
-    std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
+    if (debug)
+      std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
     wlr_keyboard_set_keymap(device->keyboard, this->keymap);
 
     //TODO implem repeat info
