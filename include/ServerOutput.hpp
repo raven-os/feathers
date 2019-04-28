@@ -33,6 +33,7 @@ public:
   static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data);
 
   struct wlr_output_layout *getLayout() const noexcept;
+  std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
 private:
   Server *server;
