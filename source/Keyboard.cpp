@@ -21,7 +21,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
     }
   }};
 
-  shortcuts["a+F4"] = {"destroy", [server](){
+  shortcuts["Alt+F4"] = {"destroy", [server](){
     for (auto &view : server->views)
       {
 	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
@@ -64,16 +64,17 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	output->setFullscreen(!output->getFullscreen());
       }
   }};
-  // shortcuts["Alt+Tab"] = {"Switch window", [server](){
-  //   if (server->views.size() >= 2)
-  //     {
-  // 	View *currentView = wl_container_of(server->views.next, currentView, link);
-  // 	View *nextView = wl_container_of(currentView->link.next, nextView, link);
-  // 	ServerView::focus_view(nextView, nextView->xdg_surface->surface);
-  // 	wl_list_remove(&currentView->link);
-  // 	wl_list_insert(server->views.prev, &currentView->link);
-  //     }
-  // }};
+  shortcuts["Alt+Tab"] = {"Switch window", [server](){
+    if (server->views.size() >= 2)
+      {
+	std::unique_ptr<View> &view = server->views[1];
+  	ServerView::focus_view(view.get(), view->xdg_surface->surface);
+	// focus view put the newly focused view in front
+	// so we put it back to its position and then rotate
+	std::iter_swap(server->views.begin(), server->views.begin() + 1);
+	std::rotate(server->views.begin(), server->views.begin() + 1, server->views.end());
+      }
+  }};
 
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
   shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
@@ -194,7 +195,7 @@ void Keyboard::configure() {
 
     //TODO implem repeat info
 
-    
+
     xkb_context_unref(context);
     wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
 }
