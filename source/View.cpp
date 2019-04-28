@@ -76,11 +76,11 @@ struct wlr_output *View::getOutput()
 
   double outputX;
   double outputY;
-  wlr_output_layout_closest_point(server->output->getLayout(), nullptr,
+  wlr_output_layout_closest_point(server->output.getLayout(), nullptr,
 				  x + (double)viewBox.width/2,
 				  y + (double)viewBox.height/2,
 				  &outputX, &outputY);
-  return wlr_output_layout_output_at(server->output->getLayout(), outputX, outputY);
+  return wlr_output_layout_output_at(server->output.getLayout(), outputX, outputY);
 }
 
 namespace ServerView

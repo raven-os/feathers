@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <iostream>
+#include <algorithm>
 
 #include "Keyboard.hpp"
 #include "Server.hpp"
@@ -32,15 +33,22 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
       }
   }};
   shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){
-    if (wl_list_length(&server->views) >= 1)
+    if (server->views.size() >= 1)
       {
-        View *view = wl_container_of(server->views.next, view, link);
-	if (!view->fullscreen)
+	std::unique_ptr<View> &view = server->views.front();
+	auto const &output =
+	  std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
+		       [&view](auto &out) {
+			 return out->getWlrOutput() == view->getOutput();
+		       })
+	  ->get();
+
+	if (!output->getFullscreen())
 	  {
-	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &view->saved);
-	    view->saved.x = view->x;
-	    view->saved.y = view->y;
-	    struct wlr_box *outputBox = wlr_output_layout_get_box(view->server->output->getLayout(), view->getOutput());
+	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &output->saved);
+	    output->saved.x = view->x;
+	    output->saved.y = view->y;
+	    struct wlr_box *outputBox = wlr_output_layout_get_box(view->server->output.getLayout(), view->getOutput());
 	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, outputBox->width, outputBox->height);
 	    view->x = 0;
 	    view->y = 0;
@@ -49,23 +57,23 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(ser
 	else
 	  {
 	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
-	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->saved.width, view->saved.height);
-	    view->x = view->saved.x;
-	    view->y = view->saved.y;
+	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, output->saved.width, output->saved.height);
+	    view->x = output->saved.x;
+	    view->y = output->saved.y;
 	  }
-	view->fullscreen = !view->fullscreen;
+	output->setFullscreen(!output->getFullscreen());
       }
   }};
-  shortcuts["Alt+Tab"] = {"Switch window", [server](){
-    if (wl_list_length(&server->views) >= 2)
-      {
-	View *currentView = wl_container_of(server->views.next, currentView, link);
-	View *nextView = wl_container_of(currentView->link.next, nextView, link);
-	ServerView::focus_view(nextView, nextView->xdg_surface->surface);
-	wl_list_remove(&currentView->link);
-	wl_list_insert(server->views.prev, &currentView->link);
-      }
-    }};
+  // shortcuts["Alt+Tab"] = {"Switch window", [server](){
+  //   if (server->views.size() >= 2)
+  //     {
+  // 	View *currentView = wl_container_of(server->views.next, currentView, link);
+  // 	View *nextView = wl_container_of(currentView->link.next, nextView, link);
+  // 	ServerView::focus_view(nextView, nextView->xdg_surface->surface);
+  // 	wl_list_remove(&currentView->link);
+  // 	wl_list_insert(server->views.prev, &currentView->link);
+  //     }
+  // }};
 
   shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
   shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};

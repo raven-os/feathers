@@ -18,10 +18,16 @@ public:
 
 
   void setFrameListener();
+  void setFullscreen(bool fullscreen);
+  bool getFullscreen() const;
+  struct wlr_output *getWlrOutput() const;
+
+  wlr_box saved;
 
 private:
   Server *server;
   struct wlr_output *wlr_output;
+  bool fullscreen;
 
 private:
   void output_frame(struct wl_listener *listener, void *data);

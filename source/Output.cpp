@@ -1,7 +1,10 @@
 #include "Output.hpp"
 #include "Server.hpp"
 
-Output::Output(Server *server, struct wlr_output *wlr_output) : server(server), wlr_output(wlr_output)
+Output::Output(Server *server, struct wlr_output *wlr_output) :
+  server(server),
+  wlr_output(wlr_output),
+  fullscreen(false)
 {
 
 }
@@ -49,4 +52,19 @@ void Output::setFrameListener()
 {
     SET_LISTENER(Output, OutputListeners, frame, output_frame);
     wl_signal_add(&wlr_output->events.frame, &frame);
+}
+
+void Output::setFullscreen(bool fullscreen)
+{
+  this->fullscreen = fullscreen;
+}
+
+bool Output::getFullscreen() const
+{
+  return fullscreen;
+}
+
+struct wlr_output *Output::getWlrOutput() const
+{
+  return wlr_output;
 }

@@ -62,3 +62,8 @@ struct wlr_output_layout *ServerOutput::getLayout() const noexcept
 {
   return output_layout;
 }
+
+std::vector<std::unique_ptr<Output>> const& ServerOutput::getOutputs() const
+{
+  return outputs;
+}
