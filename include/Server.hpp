@@ -32,6 +32,7 @@ public:
   std::unique_ptr<struct wl_display, DisplayDeleter> display;
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
+  struct wl_event_loop *wl_event_loop;
 
   std::vector<std::unique_ptr<View>> views;
 
