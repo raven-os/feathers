@@ -24,6 +24,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
   shortcuts["Alt+Tab"] = {"Switch window", [server](){ Commands::switch_window(server); }};
   shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
 
+  shortcuts["a+b"] = {"TEST", [](){ std::cout << "TEST SHORTCUT" << std::endl; }};
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
 }
@@ -64,19 +65,12 @@ bool Keyboard::handle_keybinding()
 
     if (debug)
       std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
-    if ((keycodes_states.last_raw_modifiers == mod) && sum == keycodes_states.sum) {
+
+    bool isBinding = keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum;
+
+    if (isBinding) {
       if (debug)
         std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
-
-      //Set up or clear keyboard repeat for a pressed binding. Since the
-	    // binding may remove the keyboard, the timer needs to be updated first
-      if (device->keyboard->repeat_info.delay > 0) {
-      	repeatBinding = splitStr;
-      	wl_event_source_timer_update(key_repeat_source, device->keyboard->repeat_info.delay);
-      } else if (repeatBinding.size() > 0) {
-      	disarm_key_repeat();
-      }
-
       shortcut.second.action();
       return true;
     }
@@ -189,18 +183,5 @@ void Keyboard::setKeyListener()
 
 int Keyboard::keyboard_handle_repeat(void *data)
 {
-  Keyboard *k = static_cast<Keyboard *>(data);
-  if (k->repeatBinding.size() > 0) {
-    if (k->device->keyboard->repeat_info.rate > 0 &&  wl_event_source_timer_update(k->key_repeat_source, 1000 / k->device->keyboard->repeat_info.rate) < 0) {
-				std::cerr << "failed to update key repeat timer" << std::endl;
-		}
-
-    //TODO execute last shortcut;
-  }
   return 0;
-}
-
-void Keyboard::disarm_key_repeat() {
-  repeatBinding.clear();
-  wl_event_source_timer_update(key_repeat_source, 0);
 }

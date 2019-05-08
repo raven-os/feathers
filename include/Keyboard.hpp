@@ -33,7 +33,7 @@ private:
   struct wlr_input_device *device;
   struct wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;
-  std::vector<std::string> repeatBinding;
+  std::string repeatBinding = "";
   std::map<std::string, binding> shortcuts;
 
 private:
@@ -41,5 +41,4 @@ private:
   void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
   void keyboard_handle_key(struct wl_listener *listener, void *data);
   static int keyboard_handle_repeat(void *data);
-  void disarm_key_repeat();
 };
