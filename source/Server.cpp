@@ -15,9 +15,10 @@ Server::Server()
 
 	       wlr_renderer_init_wl_display(renderer, getWlDisplay());
 	       wlr_compositor_create(getWlDisplay(), renderer);
-	       
+
 	       return renderer;
 	     }())
+  , wl_event_loop(wl_display_get_event_loop(getWlDisplay()))
   , output(this)
   , xdgShell(new XdgShell(this))
   , cursor(this)

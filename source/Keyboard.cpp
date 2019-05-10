@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "Keyboard.hpp"
+#include "Commands.hpp"
 #include "Server.hpp"
 
 
@@ -11,66 +12,20 @@ std::map<std::string, uint32_t> modifiersLst = {
   {"Ctrl", WLR_MODIFIER_CTRL}
 };
 
-Keyboard::Keyboard(Server *server, struct wlr_input_device *device) : server(server), device(device), keymap(nullptr)
+Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
+  : keymap(nullptr)
+  , server(server)
+  , device(device)
 {
+  key_repeat_source = wl_event_loop_add_timer(server->wl_event_loop, keyboard_handle_repeat, this);
 
-  // a + Something are some temporary shortcut for the sub compositor, otherwise our own compositor will override the Shortcuts
-  // i.e: Alt+F4
+  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){ Commands::open_terminal(); }};
+  shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){ Commands::toggle_fullscreen(server); }};
+  shortcuts["Alt+Tab"] = {"Switch window", [server](){ Commands::switch_window(server); }};
+  shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
 
-  shortcuts["a+b"] = {"Nothing", [](){std::cout << "NOTHING" << std::endl;}};
-  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){
-    if (fork() == 0)
-    {
-      execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
-    }
-  }};
-
-  shortcuts["a+F2"] = {"Toggle fullscreen", [server](){
-    if (server->views.size() >= 1)
-      {
-	std::unique_ptr<View> &view = server->views.front();
-	auto const &output =
-	  std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
-		       [&view](auto &out) {
-			 return out->getWlrOutput() == view->getOutput();
-		       })
-	  ->get();
-
-	if (!output->getFullscreen())
-	  {
-	    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &output->saved);
-	    output->saved.x = view->x;
-	    output->saved.y = view->y;
-	    struct wlr_box *outputBox = wlr_output_layout_get_box(view->server->output.getLayout(), view->getOutput());
-	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, outputBox->width, outputBox->height);
-	    view->x = 0;
-	    view->y = 0;
-	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, true);
-	  }
-	else
-	  {
-	    wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
-	    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, output->saved.width, output->saved.height);
-	    view->x = output->saved.x;
-	    view->y = output->saved.y;
-	  }
-	output->setFullscreen(!output->getFullscreen());
-      }
-  }};
-  shortcuts["a+Tab"] = {"Switch window", [server](){
-    if (server->views.size() >= 2)
-      {
-	std::unique_ptr<View> &view = server->views[1];
-  	ServerView::focus_view(view.get(), view->xdg_surface->surface);
-	// focus view put the newly focused view in front
-	// so we put it back to its position and then rotate
-	std::iter_swap(server->views.begin(), server->views.begin() + 1);
-	std::rotate(server->views.begin(), server->views.begin() + 1, server->views.end());
-      }
-  }};
-
-  shortcuts["Alt+Escape"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
-  shortcuts["Ctrl+D"] = {"Leave", [server](){ wl_display_terminate(server->getWlDisplay());}};
+  shortcuts["a+b"] = {"TEST", [](){ std::cout << "TEST SHORTCUT" << std::endl; }};
+  //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
 }
 
@@ -80,6 +35,7 @@ Keyboard::~Keyboard() {
   }
   wl_list_remove(&key.link);
   wl_list_remove(&modifiers.link);
+  wl_event_source_remove(key_repeat_source);
 }
 
 bool Keyboard::handle_keybinding()
@@ -109,7 +65,10 @@ bool Keyboard::handle_keybinding()
 
     if (debug)
       std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
-    if ((keycodes_states.last_raw_modifiers == mod) && sum == keycodes_states.sum) {
+
+    bool isBinding = keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum;
+
+    if (isBinding) {
       if (debug)
         std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
       shortcut.second.action();
@@ -151,6 +110,7 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
         xkb_keysym_get_name(syms[i], name, 30);
         std::cout << name << ": " << syms[i] << std::endl;
       }
+
       handled = handle_keybinding();
     }
   }
@@ -168,7 +128,22 @@ void Keyboard::configure() {
     struct xkb_context *context;
     struct xkb_keymap *key_map;
 
-    //TODO KEYBOARD config
+
+  	if (!rules.layout) {
+  		rules.layout = getenv("XKB_DEFAULT_LAYOUT");
+  	}
+  	if (!rules.model) {
+  		rules.model = getenv("XKB_DEFAULT_MODEL");
+  	}
+  	if (!rules.options) {
+  		rules.options = getenv("XKB_DEFAULT_OPTIONS");
+  	}
+  	if (!rules.rules) {
+  		rules.rules = getenv("XKB_DEFAULT_RULES");
+  	}
+  	if (!rules.variant) {
+  		rules.variant = getenv("XKB_DEFAULT_VARIANT");
+  	}
 
     if (!(context = xkb_context_new(XKB_CONTEXT_NO_FLAGS))) {
       std::cerr << "Cannot create the xkb context" << std::endl;
@@ -180,18 +155,18 @@ void Keyboard::configure() {
       return ;
     }
 
-    //xkb_keymap_unref(keymap);
     xkb_keymap_unref(this->keymap);
     this->keymap = key_map;
     if (debug)
       std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
     wlr_keyboard_set_keymap(device->keyboard, this->keymap);
 
-    //TODO implem repeat info
-
+    //TODO get info from config
+    int repeat_rate = 25;
+    int repeat_delay = 600;
 
     xkb_context_unref(context);
-    wlr_keyboard_set_repeat_info(device->keyboard, 25, 600);
+    wlr_keyboard_set_repeat_info(device->keyboard, repeat_rate, repeat_delay);
 }
 
 void Keyboard::setModifiersListener()
@@ -204,4 +179,9 @@ void Keyboard::setKeyListener()
 {
   SET_LISTENER(Keyboard, KeyboardListeners, key, keyboard_handle_key);
   wl_signal_add(&device->keyboard->events.key, &key);
+}
+
+int Keyboard::keyboard_handle_repeat(void *data)
+{
+  return 0;
 }
