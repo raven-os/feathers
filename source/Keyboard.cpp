@@ -23,6 +23,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
   shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){ Commands::toggle_fullscreen(server); }};
   shortcuts["Alt+Tab"] = {"Switch window", [server](){ Commands::switch_window(server); }};
   shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
+  shortcuts["a+z"] = {"Toggle float", [server](){ Commands::toggle_float_window(server); }};
 
   shortcuts["a+b"] = {"TEST", [](){ std::cout << "TEST SHORTCUT" << std::endl; }};
   //Allowing keyboard debug
