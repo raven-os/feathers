@@ -57,6 +57,22 @@ namespace Commands
       }
   }
 
+  void toggle_float_window(Server *server) {
+    if (server->views.size() <= 0)
+      return ;
+    std::unique_ptr<View> &view = server->views.front();
+
+    auto rootNode(server->windowTree.getRootIndex());
+    auto &rootNodeData(server->windowTree.getData(rootNode));
+
+    if (view->windowNode != wm::nullNode) {
+      std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, server->windowTree, view->windowNode);
+      view->windowNode = wm::nullNode;
+    }
+    else
+      view->windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, server->windowTree, wm::ClientData{view.get()});
+  }
+
   void close_compositor(Server *server) {
     wl_display_terminate(server->getWlDisplay());
   }
