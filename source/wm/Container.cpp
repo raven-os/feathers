@@ -2,19 +2,19 @@
 #include "wm/WindowTree.hpp"
 
 #include <iostream>
-                                                                                 
+
 /*
-** ::: ::: :::       :::     :::     :::::::::  ::::    ::: ::::::::::: ::::    :::  ::::::::  ::: ::: 
-** :+: :+: :+:       :+:   :+: :+:   :+:    :+: :+:+:   :+:     :+:     :+:+:   :+: :+:    :+: :+: :+: 
-** +:+ +:+ +:+       +:+  +:+   +:+  +:+    +:+ :+:+:+  +:+     +:+     :+:+:+  +:+ +:+        +:+ +:+ 
-** +#+ +#+ +#+  +:+  +#+ +#++:++#++: +#++:++#:  +#+ +:+ +#+     +#+     +#+ +:+ +#+ :#:        +#+ +#+ 
-** +#+ +#+ +#+ +#+#+ +#+ +#+     +#+ +#+    +#+ +#+  +#+#+#     +#+     +#+  +#+#+# +#+   +#+# +#+ +#+ 
-**          #+#+# #+#+#  #+#     #+# #+#    #+# #+#   #+#+#     #+#     #+#   #+#+# #+#    #+#         
-** ### ###   ###   ###   ###     ### ###    ### ###    #### ########### ###    ####  ########  ### ### 
+** ::: ::: :::       :::     :::     :::::::::  ::::    ::: ::::::::::: ::::    :::  ::::::::  ::: :::
+** :+: :+: :+:       :+:   :+: :+:   :+:    :+: :+:+:   :+:     :+:     :+:+:   :+: :+:    :+: :+: :+:
+** +:+ +:+ +:+       +:+  +:+   +:+  +:+    +:+ :+:+:+  +:+     +:+     :+:+:+  +:+ +:+        +:+ +:+
+** +#+ +#+ +#+  +:+  +#+ +#++:++#++: +#++:++#:  +#+ +:+ +#+     +#+     +#+ +:+ +#+ :#:        +#+ +#+
+** +#+ +#+ +#+ +#+#+ +#+ +#+     +#+ +#+    +#+ +#+  +#+#+#     +#+     +#+  +#+#+# +#+   +#+# +#+ +#+
+**          #+#+# #+#+#  #+#     #+# #+#    #+# #+#   #+#+#     #+#     #+#   #+#+# #+#    #+#
+** ### ###   ###   ###   ###     ### ###    ### ###    #### ########### ###    ####  ########  ### ###
 **
 ** gcc's -Wconversion is disabled beyond this point, please pay careful attention to any type-conversions
 ** This was done because uint16_t's operator += triggers it
-*/ 
+*/
 
 // please don't include anything below this point
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -67,7 +67,7 @@ namespace wm
     move_impl(index, windowTree, position);
     rect.position = position;
   }
-  
+
   void Container::resize_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size)
   {
     auto children(windowTree.getChildren(index));
@@ -137,8 +137,8 @@ namespace wm
 	position[direction] -= removedWidth;
 	childData.move(childIndex2, windowTree, position);
       }
-    
-    
+
+
     {
       auto size{rect.size};
 

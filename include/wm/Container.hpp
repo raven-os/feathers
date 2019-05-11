@@ -42,7 +42,7 @@ namespace wm
     static constexpr bool const horizontalTiling{false};
     static constexpr bool const verticalTiling{!horizontalTiling};
     bool direction{horizontalTiling};
-    
+
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
 

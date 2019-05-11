@@ -33,9 +33,13 @@ View::~View()
 
 void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  mapped = true;
+  struct wlr_box box[1];
 
+  mapped = true;
   ServerView::focus_view(this, xdg_surface->surface);
+  wlr_xdg_surface_v6_get_geometry(xdg_surface, box);
+
+  previous_size = {box->width, box->height};
 
   auto const *wlr_output(getOutput());
   auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
@@ -55,6 +59,9 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 {
   mapped = false;
 
+  if (windowNode == wm::nullNode)
+    return ;
+
   auto const *wlr_output(getOutput());
   auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
 			      [&wlr_output](auto &out) noexcept {
@@ -62,21 +69,22 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 			      })
     ->get();
 
-
   auto &windowTree(output.getWindowTree());
   auto rootNode(windowTree.getRootIndex());
   auto &rootNodeData(windowTree.getData(rootNode));
-
   std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, windowTree, windowNode);
 };
 
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  ServerView::begin_interactive(this, CursorMode::CURSOR_MOVE, 0);
+  if (windowNode == wm::nullNode)
+    ServerView::begin_interactive(this, CursorMode::CURSOR_MOVE, 0);
 };
 
 void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
+  if (windowNode != wm::nullNode)
+    return ;
   struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
 };

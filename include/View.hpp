@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 # include "Wlroots.hpp"
 # include "ServerCursor.hpp"
 # include "wm/WindowNodeIndex.hpp"
@@ -34,6 +36,8 @@ public:
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   int x, y;
+
+  std::array<int16_t, 2u> previous_size;
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};
 };
