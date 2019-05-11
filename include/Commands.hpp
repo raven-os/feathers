@@ -62,15 +62,29 @@ namespace Commands
       return ;
     std::unique_ptr<View> &view = server->views.front();
 
-    auto rootNode(server->windowTree.getRootIndex());
-    auto &rootNodeData(server->windowTree.getData(rootNode));
+    auto const *wlr_output(view->getOutput());
+    auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
+              [&wlr_output](auto &out) noexcept {
+          return out->getWlrOutput() == wlr_output;
+              })
+      ->get();
+
+    auto &windowTree(output.getWindowTree());
+    auto rootNode(windowTree.getRootIndex());
+    auto &rootNodeData(windowTree.getData(rootNode));
 
     if (view->windowNode != wm::nullNode) {
-      std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, server->windowTree, view->windowNode);
+      struct wlr_box box[1];
+
+      std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, windowTree, view->windowNode);
+      view->x = 10;
+      view->y = 10;
+      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->previous_size[0], view->previous_size[1]);
       view->windowNode = wm::nullNode;
     }
     else
-      view->windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, server->windowTree, wm::ClientData{view.get()});
+      view->windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{view.get()});
   }
 
   void close_compositor(Server *server) {
