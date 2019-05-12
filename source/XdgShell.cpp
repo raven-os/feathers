@@ -32,7 +32,7 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
 
   if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
     {
-      assert(!"not handled yet");
+      //assert(!"not handled yet");
       return;
     }
   server->views.emplace_back(new View(server, xdg_surface));
