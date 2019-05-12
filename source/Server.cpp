@@ -6,8 +6,7 @@
 #include "Seat.hpp"
 
 Server::Server()
-  : windowTree(wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}})
-  , display(wl_display_create())
+  : display(wl_display_create())
   , backend(wlr_backend_autocreate(getWlDisplay(), nullptr)) // nullptr can be replaced with a custom rendererx
   , renderer([this]()
 	     {

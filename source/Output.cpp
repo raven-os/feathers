@@ -4,7 +4,12 @@
 Output::Output(Server *server, struct wlr_output *wlr_output) :
   server(server),
   wlr_output(wlr_output),
-  fullscreen(false)
+  fullscreen(false),
+  windowTree([&]()
+	     {
+	       // todo: get output size
+	       return wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}};
+	     }())
 {
 
 }

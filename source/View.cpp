@@ -37,20 +37,37 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   ServerView::focus_view(this, xdg_surface->surface);
 
-  auto rootNode(server->windowTree.getRootIndex());
-  auto &rootNodeData(server->windowTree.getData(rootNode));
+  auto const *wlr_output(getOutput());
+  auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
+				[&wlr_output](auto &out) noexcept {
+				  return out->getWlrOutput() == wlr_output;
+			       })->get();
 
-  windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, server->windowTree, wm::ClientData{this});
+
+  auto &windowTree(output.getWindowTree());
+  auto rootNode(windowTree.getRootIndex());
+  auto &rootNodeData(windowTree.getData(rootNode));
+
+  windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{this});
 };
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   mapped = false;
 
-  auto rootNode(server->windowTree.getRootIndex());
-  auto &rootNodeData(server->windowTree.getData(rootNode));
+  auto const *wlr_output(getOutput());
+  auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
+			      [&wlr_output](auto &out) noexcept {
+				return out->getWlrOutput() == wlr_output;
+			      })
+    ->get();
 
-  std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, server->windowTree, windowNode);
+
+  auto &windowTree(output.getWindowTree());
+  auto rootNode(windowTree.getRootIndex());
+  auto &rootNodeData(windowTree.getData(rootNode));
+
+  std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, windowTree, windowNode);
 };
 
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
