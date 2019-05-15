@@ -41,13 +41,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   previous_size = {box->width, box->height};
 
-  auto const *wlr_output(getOutput());
-  auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
-				[&wlr_output](auto &out) noexcept {
-				  return out->getWlrOutput() == wlr_output;
-			       })->get();
-
-
+  auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
   auto rootNode(windowTree.getRootIndex());
   auto &rootNodeData(windowTree.getData(rootNode));
@@ -62,13 +56,7 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   if (windowNode == wm::nullNode)
     return ;
 
-  auto const *wlr_output(getOutput());
-  auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
-			      [&wlr_output](auto &out) noexcept {
-				return out->getWlrOutput() == wlr_output;
-			      })
-    ->get();
-
+  auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
   auto rootNode(windowTree.getRootIndex());
   auto &rootNodeData(windowTree.getData(rootNode));

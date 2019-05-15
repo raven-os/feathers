@@ -67,3 +67,16 @@ std::vector<std::unique_ptr<Output>> const& ServerOutput::getOutputs() const
 {
   return outputs;
 }
+
+Output &ServerOutput::getOutput(wlr_output *wlr_output) noexcept
+{
+  return *std::find_if(getOutputs().begin(), getOutputs().end(),
+		       [&wlr_output](auto &out) noexcept {
+			 return out->getWlrOutput() == wlr_output;
+		       })->get();
+}
+
+Output const &ServerOutput::getOutput(wlr_output *wlr_output) const noexcept
+{
+  return const_cast<ServerOutput *>(this)->getOutput(wlr_output);
+}
