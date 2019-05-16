@@ -71,8 +71,6 @@ void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listene
 
 void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  if (windowNode != wm::nullNode)
-    return ;
   struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
 };

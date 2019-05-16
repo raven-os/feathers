@@ -34,44 +34,91 @@ void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 {
   View *view = server->grabbed_view;
-  struct wlr_box box[1];
-  wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+  
+  if (view->windowNode == wm::nullNode)
+    {
+      struct wlr_box box[1];
+      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
 
-  double dx = cursor->x - server->grab_x;
-  double dy = cursor->y - server->grab_y;
-  double x = view->x;
-  double y = view->y;
-  int width = server->grab_width;
-  int height = server->grab_height;
-  if (server->resize_edges & WLR_EDGE_TOP)
-    {
-      y = server->grab_y + dy - box->y;
-      height -= dy + box->y;
-      if (height < 1)
+      double dx = cursor->x - server->grab_x + box->x;
+      double dy = cursor->y - server->grab_y + box->y;
+      int width = server->grab_width;
+      int height = server->grab_height;
+
+      if (server->resize_edges & WLR_EDGE_TOP)
 	{
-	  y += height;
+	  double y = cursor->y;
+
+	  height -= dy;
+	  if (height < 1) // TODO: prevent moving the window downwards properly
+	    {
+	      y += height;
+	    }
+	  view->y = y - box->y;
+	}
+      else if (server->resize_edges & WLR_EDGE_BOTTOM)
+	{
+	  height += dy;
+	}
+      if (server->resize_edges & WLR_EDGE_LEFT)
+	{
+	  double x = cursor->x;
+
+	  width -= dx;
+	  if (width < 1) // TODO: prevent moving the window to the right properly
+	    {
+	      x += width;
+	    }
+	  view->x = x - box->x;
+	}
+      else if (server->resize_edges & WLR_EDGE_RIGHT)
+	{
+	  width += dx;
+	}
+      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, width, height);
+    }
+  else
+    {
+      Output &output(server->output.getOutput(view->getOutput()));
+      wm::WindowTree &windowTree(output.getWindowTree());
+
+      for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTilling, wm::Container::verticalTilling})
+	{
+	  // TODO: clamp cursor position to not cause negative sizes and moving windows
+	  int16_t cursor_pos(direction == wm::Container::horizontalTilling ? cursor->x : cursor->y);
+
+	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
+	    {
+	      auto parentNode(windowTree.getParent(node));
+	      auto &parentData(std::get<wm::Container>(windowTree.getData(parentNode).data));
+
+	      if (parentData.direction == direction)
+		{
+		  if ((server->resize_edges & (direction == wm::Container::horizontalTilling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
+		      && windowTree.getFirstChild(parentNode) != node)
+		    {
+		      auto &data(windowTree.getData(node));
+		      auto newPos(data.getPosition());
+
+		      newPos[direction] = cursor_pos;
+		      data.move(node, windowTree, newPos);
+		    }
+		  else if ((server->resize_edges & (direction == wm::Container::horizontalTilling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
+		  	   && windowTree.getSibling(node) != wm::nullNode)
+		    {
+		      auto nextNode(windowTree.getSibling(node));
+		      auto &nextData(windowTree.getData(nextNode));
+		      auto newPos(nextData.getPosition());
+		      
+		      newPos[direction] = cursor_pos;
+		      nextData.move(nextNode, windowTree, newPos);
+		    }
+		  parentData.updateChildWidths(parentNode, windowTree);
+		  break;
+		}
+	    }
 	}
     }
-  else if (server->resize_edges & WLR_EDGE_BOTTOM)
-    {
-      height += dy + box->y;
-    }
-  if (server->resize_edges & WLR_EDGE_LEFT)
-    {
-      x = server->grab_x + dx - box->x;
-      width -= dx + box->x;
-      if (width < 1)
-	{
-	  x += width;
-	}
-    }
-  else if (server->resize_edges & WLR_EDGE_RIGHT)
-    {
-      width += dx + box->x;
-    }
-  view->x = x;
-  view->y = y;
-  wlr_xdg_toplevel_v6_set_size(view->xdg_surface, width, height);
 }
 
 void ServerCursor::process_cursor_motion(uint32_t time)

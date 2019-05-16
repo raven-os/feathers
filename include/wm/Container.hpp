@@ -13,12 +13,6 @@ namespace wm
   class WindowData;
   class ClientData;
 
-  enum class PlacementStyle
-    {
-     tilling,
-     floaty
-    };
-
   struct Rect
   {
     std::array<int16_t, 2u> position;
@@ -30,7 +24,6 @@ namespace wm
   {
   private:
     uint16_t getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex);
-    void updateChildWidths(WindowNodeIndex index, WindowTree &windowTree);
 
     /// Doesn't actually update size of windowData, only the contents of the container
     void resize_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
@@ -39,9 +32,11 @@ namespace wm
   public:
     Rect rect;
 
-    static constexpr bool const horizontalTiling{false};
-    static constexpr bool const verticalTiling{!horizontalTiling};
-    bool direction{horizontalTiling};
+    static constexpr bool const horizontalTilling{false};
+    static constexpr bool const verticalTilling{!horizontalTilling};
+    bool direction{horizontalTilling};
+
+    void updateChildWidths(WindowNodeIndex index, WindowTree &windowTree);
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);

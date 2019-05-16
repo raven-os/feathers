@@ -151,5 +151,10 @@ namespace wm
   {
     return rect.position;
   }
+  
+  std::array<uint16_t, 2u> Container::getSize() const noexcept
+  {
+    return rect.size;
+  }
 
 }
