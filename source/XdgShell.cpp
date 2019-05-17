@@ -30,10 +30,6 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
 {
   struct wlr_xdg_surface_v6 *xdg_surface = static_cast<struct wlr_xdg_surface_v6 *>(data);
 
-  if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
-    {
-      //assert(!"not handled yet");
-      return;
-    }
-  server->views.emplace_back(new View(server, xdg_surface));
+  if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
+    server->views.emplace_back(new View(server, xdg_surface));
 };
