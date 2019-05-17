@@ -16,18 +16,13 @@ namespace Commands
     if (server->views.size() >= 1)
       {
   std::unique_ptr<View> &view = server->views.front();
-  auto const &output =
-    std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
-           [&view](auto &out) {
-       return out->getWlrOutput() == view->getOutput();
-           })
-    ->get();
+  auto &output = server->output.getOutput(view->getOutput());
 
-  if (!output->getFullscreen())
+  if (!output.getFullscreen())
     {
-      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &output->saved);
-      output->saved.x = view->x;
-      output->saved.y = view->y;
+      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &output.saved);
+      output.saved.x = view->x;
+      output.saved.y = view->y;
       struct wlr_box *outputBox = wlr_output_layout_get_box(view->server->output.getLayout(), view->getOutput());
       wlr_xdg_toplevel_v6_set_size(view->xdg_surface, outputBox->width, outputBox->height);
       view->x = 0;
@@ -37,11 +32,11 @@ namespace Commands
   else
     {
       wlr_xdg_toplevel_v6_set_fullscreen(view->xdg_surface, false);
-      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, output->saved.width, output->saved.height);
-      view->x = output->saved.x;
-      view->y = output->saved.y;
+      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, output.saved.width, output.saved.height);
+      view->x = output.saved.x;
+      view->y = output.saved.y;
     }
-  output->setFullscreen(!output->getFullscreen());
+  output.setFullscreen(!output.getFullscreen());
       }
   }
 
@@ -62,12 +57,7 @@ namespace Commands
       return ;
     std::unique_ptr<View> &view = server->views.front();
 
-    auto const *wlr_output(view->getOutput());
-    auto &output = *std::find_if(server->output.getOutputs().begin(), server->output.getOutputs().end(),
-              [&wlr_output](auto &out) noexcept {
-          return out->getWlrOutput() == wlr_output;
-              })
-      ->get();
+    auto &output = server->output.getOutput(view->getOutput());
 
     auto &windowTree(output.getWindowTree());
     auto rootNode(windowTree.getRootIndex());
