@@ -26,11 +26,16 @@ namespace wm
 		      }, data);
   }
 
+  std::array<uint16_t, 2u> WindowData::getSize() const noexcept
+  {
+    return std::visit([](auto &data) noexcept
+		      {
+			return data.getSize();
+		      }, data);
+  }
+
   void ClientData::resize(WindowNodeIndex, WindowTree &, std::array<uint16_t, 2u> size)
   {
-    struct wlr_box box[1];
-    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
-
     wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
   }
 
@@ -49,5 +54,13 @@ namespace wm
     wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
 
     return {view->x + box->x, view->y + box->y};
+  }
+
+  std::array<uint16_t, 2u> ClientData::getSize() const noexcept
+  {
+    struct wlr_box box[1];
+    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+    
+    return {box->width, box->height};
   }
 }
