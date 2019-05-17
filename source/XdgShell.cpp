@@ -14,6 +14,10 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
 {
   View *view = wl_container_of(listener, view, destroy);
 
+  if (server->views.front().get() == view)
+    {
+      server->seat.getSeat()->keyboard_state.focused_surface = nullptr;
+    }
   server->views.erase(std::find_if(server->views.begin(), server->views.end(),
 				   [view](auto const &ptr)
 				   {
