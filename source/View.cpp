@@ -20,7 +20,7 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   wl_signal_add(&toplevel->events.request_move, &request_move);
   SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize);
   wl_signal_add(&toplevel->events.request_resize, &request_resize);
-  SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen)
+  SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen);
   SET_LISTENER(View, ViewListeners, new_popup, xdg_handle_new_popup);
   wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
 }
@@ -42,7 +42,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
   struct wlr_box box[1];
 
   mapped = true;
-  ServerView::focus_view(this, xdg_surface->surface);
+  focus_view();
   wlr_xdg_surface_v6_get_geometry(xdg_surface, box);
 
   previous_size = {box->width, box->height};
@@ -72,48 +72,48 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   if (windowNode == wm::nullNode)
-    ServerView::begin_interactive(this, CursorMode::CURSOR_MOVE, 0);
-};
-
-void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
-{
-  struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
-  ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
+    begin_interactive(CursorMode::CURSOR_MOVE, 0);
 };
 
 void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   if (server->views.size() >= 1)
     {
-  auto &output = server->output.getOutput(getOutput());
+      auto &output = server->output.getOutput(getOutput());
 
-  if (!output.getFullscreen())
-    {
-      wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
-      output.saved.x = x;
-      output.saved.y = y;
-      struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
-      wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
-      x = 0;
-      y = 0;
-      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+      if (!output.getFullscreen())
+	{
+	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
+	  output.saved.x = x;
+	  output.saved.y = y;
+	  struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
+	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
+	  x = 0;
+	  y = 0;
+	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+	}
+      else
+	{
+	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
+	  wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
+	  x = output.saved.x;
+	  y = output.saved.y;
+	}
+      output.setFullscreen(!output.getFullscreen());
     }
-  else
-    {
-      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
-      wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
-      x = output.saved.x;
-      y = output.saved.y;
-    }
-  output.setFullscreen(!output.getFullscreen());
-      }
 }
 
 void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_xdg_popup_v6  *xdg_popup = static_cast<struct wlr_xdg_popup_v6 *>(data);
+  struct wlr_xdg_popup_v6 *xdg_popup = static_cast<struct wlr_xdg_popup_v6 *>(data);
   popup = std::make_unique<Popup>(Popup(server, this, xdg_popup->base));
 }
+
+void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
+  begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);
+};
 
 void View::close()
 {
@@ -134,44 +134,67 @@ struct wlr_output *View::getOutput()
   return wlr_output_layout_output_at(server->output.getLayout(), outputX, outputY);
 }
 
+void View::focus_view()
+{
+  struct wlr_surface *surface = xdg_surface->surface;
+  struct wlr_seat *seat = server->seat.getSeat();
+  struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
+  if (prev_surface == surface)
+    {
+      return;
+    }
+  if (prev_surface)
+    {
+      struct wlr_xdg_surface_v6 *previous =
+	wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
+      wlr_xdg_toplevel_v6_set_activated(previous, false);
+    }
+  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+
+  {
+    auto it(std::find_if(server->views.begin(), server->views.end(),
+			 [this](auto const &ptr)
+			 {
+			   return ptr.get() == this;
+			 }));
+    std::unique_ptr<View> ptr(std::move(*it));
+
+    std::move_backward(server->views.begin(), it, it + 1);
+    server->views.front() = std::move(ptr);
+  }
+  wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
+  wlr_seat_keyboard_notify_enter(seat, xdg_surface->surface, keyboard->keycodes,
+				 keyboard->num_keycodes, &keyboard->modifiers);
+}
+
+void View::begin_interactive(CursorMode mode, uint32_t edges)
+{
+  struct wlr_surface *focused_surface = server->seat.getSeat()->pointer_state.focused_surface;
+  if (xdg_surface->surface != focused_surface)
+    {
+      return;
+    }
+  server->grabbed_view = this;
+  server->cursor.cursor_mode = mode;
+  struct wlr_box geo_box;
+  wlr_xdg_surface_v6_get_geometry(xdg_surface, &geo_box);
+  if (mode == CursorMode::CURSOR_MOVE)
+    {
+      server->grab_x = server->cursor.cursor->x - x;
+      server->grab_y = server->cursor.cursor->y - y;
+    }
+  else
+    {
+      server->grab_x = server->cursor.cursor->x + geo_box.x;
+      server->grab_y = server->cursor.cursor->y + geo_box.y;
+    }
+  server->grab_width = geo_box.width;
+  server->grab_height = geo_box.height;
+  server->resize_edges = edges;
+}
+
 namespace ServerView
 {
-  void focus_view(View *view, struct wlr_surface *surface)
-  {
-    if (!view)
-      {
-	return;
-      }
-    Server *server = view->server;
-    struct wlr_seat *seat = server->seat.getSeat();
-    struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
-    if (prev_surface == surface)
-      {
-	return;
-      }
-    if (prev_surface)
-      {
-	struct wlr_xdg_surface_v6 *previous =
-	  wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
-	wlr_xdg_toplevel_v6_set_activated(previous, false);
-      }
-    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
-
-    {
-      auto it(std::find_if(server->views.begin(), server->views.end(),
-			   [view](auto const &ptr)
-			   {
-			     return ptr.get() == view;
-			   }));
-      std::unique_ptr<View> ptr(std::move(*it));
-
-      std::move_backward(server->views.begin(), it, it + 1);
-      server->views.front() = std::move(ptr);
-    }
-    wlr_xdg_toplevel_v6_set_activated(view->xdg_surface, true);
-    wlr_seat_keyboard_notify_enter(seat, view->xdg_surface->surface, keyboard->keycodes,
-				   keyboard->num_keycodes, &keyboard->modifiers);
-  }
 
   bool view_at(View *view, double lx, double ly, struct wlr_surface **surface,
 	       double *sx, double *sy)
@@ -207,32 +230,5 @@ namespace ServerView
 	  }
       }
     return NULL;
-  }
-
-  void begin_interactive(View *view, CursorMode mode, uint32_t edges)
-  {
-    Server *server = view->server;
-    struct wlr_surface *focused_surface = server->seat.getSeat()->pointer_state.focused_surface;
-    if (view->xdg_surface->surface != focused_surface)
-      {
-	return;
-      }
-    server->grabbed_view = view;
-    server->cursor.cursor_mode = mode;
-    struct wlr_box geo_box;
-    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, &geo_box);
-    if (mode == CursorMode::CURSOR_MOVE)
-      {
-	server->grab_x = server->cursor.cursor->x - view->x;
-	server->grab_y = server->cursor.cursor->y - view->y;
-      }
-    else
-      {
-	server->grab_x = server->cursor.cursor->x + geo_box.x;
-	server->grab_y = server->cursor.cursor->y + geo_box.y;
-      }
-    server->grab_width = geo_box.width;
-    server->grab_height = geo_box.height;
-    server->resize_edges = edges;
   }
 }

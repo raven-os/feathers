@@ -34,7 +34,7 @@ void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 {
   View *view = server->grabbed_view;
-  
+
   if (view->windowNode == wm::nullNode)
     {
       struct wlr_box box[1];
@@ -109,7 +109,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 		      auto nextNode(windowTree.getSibling(node));
 		      auto &nextData(windowTree.getData(nextNode));
 		      auto newPos(nextData.getPosition());
-		      
+
 		      newPos[direction] = cursor_pos;
 		      nextData.move(nextNode, windowTree, newPos);
 		    }
@@ -191,7 +191,7 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
 	struct wlr_surface *surface;
 	View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
 
-	ServerView::focus_view(view, surface);
+	view->focus_view();
       }
       break;
     default:
