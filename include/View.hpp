@@ -19,6 +19,7 @@ struct ViewListeners
   struct wl_listener destroy;
   struct wl_listener request_move;
   struct wl_listener request_resize;
+  struct wl_listener request_fullscreen;
 };
 
 class View : public ViewListeners
@@ -31,6 +32,7 @@ public:
   void xdg_surface_unmap(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_resize(struct wl_listener *listener, void *data);
+  void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data);
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
   void close();
@@ -42,7 +44,7 @@ public:
   bool mapped;
   int x, y;
   std::unique_ptr<Popup> popup;
-  
+
   std::array<int16_t, 2u> previous_size;
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};

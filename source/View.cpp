@@ -20,6 +20,7 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   wl_signal_add(&toplevel->events.request_move, &request_move);
   SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize);
   wl_signal_add(&toplevel->events.request_resize, &request_resize);
+  SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen)
   SET_LISTENER(View, ViewListeners, new_popup, xdg_handle_new_popup);
   wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
 }
@@ -79,6 +80,34 @@ void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *liste
   struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   ServerView::begin_interactive(this, CursorMode::CURSOR_RESIZE, event->edges);
 };
+
+void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+{
+  if (server->views.size() >= 1)
+    {
+  auto &output = server->output.getOutput(getOutput());
+
+  if (!output.getFullscreen())
+    {
+      wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
+      output.saved.x = x;
+      output.saved.y = y;
+      struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
+      wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
+      x = 0;
+      y = 0;
+      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+    }
+  else
+    {
+      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
+      wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
+      x = output.saved.x;
+      y = output.saved.y;
+    }
+  output.setFullscreen(!output.getFullscreen());
+      }
+}
 
 void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
