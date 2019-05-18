@@ -136,8 +136,6 @@ struct wlr_output *View::getOutput()
 
 void View::focus_view()
 {
-  if (this == nullptr)
-    return ;
   struct wlr_surface *surface = xdg_surface->surface;
   struct wlr_seat *seat = server->seat.getSeat();
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;

@@ -189,9 +189,9 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
       {
 	double sx, sy;
 	struct wlr_surface *surface;
-	View *view = View::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
 
-	view->focus_view();
+	if (View *view = View::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy))
+	  view->focus_view();
       }
       break;
     default:

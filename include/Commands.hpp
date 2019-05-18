@@ -22,6 +22,7 @@ namespace Commands
     if (server->views.size() >= 2)
       {
 	std::unique_ptr<View> &view = server->views[1];
+
 	view->focus_view();
 	// focus view put the newly focused view in front
 	// so we put it back to its position and then rotate
