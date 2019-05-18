@@ -49,10 +49,21 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
-  auto rootNode(windowTree.getRootIndex());
-  auto &rootNodeData(windowTree.getData(rootNode));
+  if (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode) // node: we are at least ourselves in the tree
+    {
+      auto rootNode(windowTree.getRootIndex());
+      auto &rootNodeData(windowTree.getData(rootNode));
 
-  windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{this});
+      windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{this});
+    }
+  else
+    {
+      auto prevNode(server->views[1]->windowNode);
+      auto parentNode(windowTree.getParent(prevNode));
+      auto &parentNodeData(windowTree.getData(parentNode));
+
+      windowNode = std::get<wm::Container>(parentNodeData.data).addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
+    }
 };
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
