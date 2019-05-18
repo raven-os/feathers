@@ -29,6 +29,8 @@ namespace wm
     void resize_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     /// Doesn't actually update position of windowData, only the contents of the container
     void move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
+    /// Doesn't actually update position of windowData, only the contents of the container after start
+    void move_after_impl(WindowTree &windowTree, WindowNodeIndex start, std::array<int16_t, 2u> position);
   public:
     Rect rect;
 
@@ -42,6 +44,7 @@ namespace wm
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
 
     WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, ClientData &&newChildWindowData);
+    WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex prev, ClientData &&newChildWindowData);
     void removeChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex);
 
     std::array<int16_t, 2u> getPosition() const noexcept;

@@ -46,9 +46,12 @@ namespace wm
 
   void Container::move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
   {
-    auto children(windowTree.getChildren(index));
+    return move_after_impl(windowTree, windowTree.getFirstChild(index), position);
+  }
 
-    for (auto childIndex : children)
+  void Container::move_after_impl(WindowTree &windowTree, WindowNodeIndex start, std::array<int16_t, 2u> position)
+  {
+    for (auto childIndex(start); childIndex != wm::nullNode; childIndex = windowTree.getSibling(childIndex))
       {
 	auto &childData(windowTree.getData(childIndex));
 	auto newPosition(childData.getPosition());
@@ -114,9 +117,49 @@ namespace wm
       auto newChild(windowTree.addChild(index));
       auto &childData(windowTree.getData(newChild));
 
-      childData.data = newChildWindowData;
+      childData.data = std::move(newChildWindowData);
       childData.move(newChild, windowTree, rect.position);
 
+      updateChildWidths(index, windowTree);
+      return newChild;
+    }
+  }
+
+  WindowNodeIndex Container::addChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex prev, ClientData &&newChildWindowData)
+  {
+    uint16_t count(0u);
+    uint16_t offset(0u);
+
+    {
+      auto childIndex(windowTree.getFirstChild(index));
+      for (; childIndex != prev; childIndex = windowTree.getSibling(childIndex))
+	++offset;
+      count = offset;
+      offset += 1;
+      for (; childIndex != wm::nullNode; childIndex = windowTree.getSibling(childIndex))
+	++count;
+    }
+    {
+      auto position{rect.position};
+      auto size{rect.size};
+
+      position[direction] += rect.size[direction] / (count + 1);
+      size[direction] = (size[direction] * count) / (count + 1);
+
+      resize_impl(index, windowTree, size);
+      move_after_impl(windowTree, windowTree.getSibling(prev), position);
+    }
+    {
+      auto newChild(windowTree.addChildAfter(index, prev));
+      auto &childData(windowTree.getData(newChild));
+
+      childData.data = std::move(newChildWindowData);
+      {
+	auto position{rect.position};
+
+	position[direction] += (offset * rect.size[direction]) / (count + 1);
+	childData.move(newChild, windowTree, position);
+      }
       updateChildWidths(index, windowTree);
       return newChild;
     }
