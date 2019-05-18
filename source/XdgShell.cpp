@@ -14,6 +14,10 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
 {
   View *view = wl_container_of(listener, view, destroy);
 
+  if (server->views.front().get() == view)
+    {
+      server->seat.getSeat()->keyboard_state.focused_surface = nullptr;
+    }
   server->views.erase(std::find_if(server->views.begin(), server->views.end(),
 				   [view](auto const &ptr)
 				   {
@@ -30,10 +34,6 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
 {
   struct wlr_xdg_surface_v6 *xdg_surface = static_cast<struct wlr_xdg_surface_v6 *>(data);
 
-  if (xdg_surface->role != WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
-    {
-      assert(!"not handled yet");
-      return;
-    }
-  server->views.emplace_back(new View(server, xdg_surface));
+  if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
+    server->views.emplace_back(new View(server, xdg_surface));
 };

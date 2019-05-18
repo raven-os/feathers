@@ -1,23 +1,28 @@
 #pragma once
 
 #include <array>
+#include <vector>
+#include <memory>
 
 # include "Wlroots.hpp"
 # include "ServerCursor.hpp"
+# include "Popup.hpp"
 # include "wm/WindowNodeIndex.hpp"
 
 class Server;
 
 struct ViewListeners
 {
+  struct wl_listener new_popup;
   struct wl_listener map;
   struct wl_listener unmap;
   struct wl_listener destroy;
   struct wl_listener request_move;
   struct wl_listener request_resize;
+  struct wl_listener request_fullscreen;
 };
 
-struct View : public ViewListeners
+class View : public ViewListeners
 {
 public:
   View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface);
@@ -27,6 +32,8 @@ public:
   void xdg_surface_unmap(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
   void xdg_toplevel_request_resize(struct wl_listener *listener, void *data);
+  void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data);
+  void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
   void close();
 
@@ -36,6 +43,7 @@ public:
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   int x, y;
+  std::unique_ptr<Popup> popup;
 
   std::array<int16_t, 2u> previous_size;
   // while this is null the window is floating
