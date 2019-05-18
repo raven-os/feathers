@@ -13,9 +13,7 @@ namespace wm
   {
     View *view;
 
-    /// Doesn't actually update size of windowData, only the surface itself
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
-    /// Doesn't actually update position of windowData, only the surface itself
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
     std::array<int16_t, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;
