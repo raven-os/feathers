@@ -13,15 +13,16 @@ namespace Commands
   }
 
   void toggle_fullscreen(Server *server) {
-  std::unique_ptr<View> &view = server->views.front();
-  view->xdg_toplevel_request_fullscreen(nullptr, nullptr);
+    std::unique_ptr<View> &view = server->views.front();
+
+    view->xdg_toplevel_request_fullscreen(nullptr, nullptr);
   }
 
   void switch_window(Server *server) {
     if (server->views.size() >= 2)
       {
 	std::unique_ptr<View> &view = server->views[1];
-  	ServerView::focus_view(view.get(), view->xdg_surface->surface);
+	view->focus_view();
 	// focus view put the newly focused view in front
 	// so we put it back to its position and then rotate
 	std::iter_swap(server->views.begin(), server->views.begin() + 1);
@@ -35,7 +36,6 @@ namespace Commands
     std::unique_ptr<View> &view = server->views.front();
 
     auto &output = server->output.getOutput(view->getOutput());
-
     auto &windowTree(output.getWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));

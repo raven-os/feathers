@@ -26,7 +26,7 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
   if (!server->views.empty())
     {
       std::unique_ptr<View> &currentView = server->views.front();
-      ServerView::focus_view(currentView.get(), currentView->xdg_surface->surface);
+      currentView->focus_view();
     }
 };
 
