@@ -136,7 +136,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
 	double sx, sy;
 	struct wlr_seat *seat = server->seat.getSeat();
 	struct wlr_surface *surface = NULL;
-	View *view = ServerView::desktop_view_at(server, cursor->x,
+	View *view = View::desktop_view_at(server, cursor->x,
 						 cursor->y, &surface, &sx, &sy);
 	if (!view)
 	  {
@@ -189,7 +189,7 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
       {
 	double sx, sy;
 	struct wlr_surface *surface;
-	View *view = ServerView::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
+	View *view = View::desktop_view_at(server, cursor->x, cursor->y, &surface, &sx, &sy);
 
 	view->focus_view();
       }

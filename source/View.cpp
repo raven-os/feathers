@@ -136,6 +136,8 @@ struct wlr_output *View::getOutput()
 
 void View::focus_view()
 {
+  if (this == nullptr)
+    return ;
   struct wlr_surface *surface = xdg_surface->surface;
   struct wlr_seat *seat = server->seat.getSeat();
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
@@ -193,42 +195,37 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
   server->resize_edges = edges;
 }
 
-namespace ServerView
+bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
 {
+  double view_sx = lx - x;
+  double view_sy = ly - y;
 
-  bool view_at(View *view, double lx, double ly, struct wlr_surface **surface,
-	       double *sx, double *sy)
-  {
-    double view_sx = lx - view->x;
-    double view_sy = ly - view->y;
+  struct wlr_surface_state *state = &xdg_surface->surface->current;
 
-    struct wlr_surface_state *state = &view->xdg_surface->surface->current;
+  double _sx, _sy;
+  struct wlr_surface *_surface = nullptr;
+  _surface = wlr_xdg_surface_v6_surface_at(xdg_surface, view_sx, view_sy, &_sx, &_sy);
 
-    double _sx, _sy;
-    struct wlr_surface *_surface = NULL;
-    _surface = wlr_xdg_surface_v6_surface_at(view->xdg_surface, view_sx, view_sy, &_sx, &_sy);
+  if (_surface )
+    {
+      *sx = _sx;
+      *sy = _sy;
+      *surface = _surface;
+      return true;
+    }
 
-    if (_surface )
-      {
-	*sx = _sx;
-	*sy = _sy;
-	*surface = _surface;
-	return true;
-      }
+  return false;
+}
 
-    return false;
-  }
-
-  View *desktop_view_at(Server *server, double lx, double ly,
-			struct wlr_surface **surface, double *sx, double *sy)
-  {
-    for (auto &view : server->views)
-      {
-	if (view_at(view.get(), lx, ly, surface, sx, sy))
-	  {
-	    return view.get();
-	  }
-      }
-    return NULL;
-  }
+View *View::desktop_view_at(Server *server, double lx, double ly,
+			    struct wlr_surface **surface, double *sx, double *sy)
+{
+  for (auto &view : server->views)
+    {
+      if (view->at(lx, ly, surface, sx, sy))
+	{
+	  return view.get();
+	}
+    }
+  return nullptr;
 }
