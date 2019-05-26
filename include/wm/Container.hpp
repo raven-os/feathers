@@ -46,6 +46,7 @@ namespace wm
     WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, ClientData &&newChildWindowData);
     WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex prev, ClientData &&newChildWindowData);
     void removeChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex);
+    void changeDirection(WindowNodeIndex index, WindowTree &windowTree);
 
     std::array<int16_t, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;

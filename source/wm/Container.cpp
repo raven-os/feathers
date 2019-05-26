@@ -190,6 +190,21 @@ namespace wm
     }
   }
 
+  void Container::changeDirection(WindowNodeIndex index, WindowTree &windowTree)
+  {
+    for (auto child : windowTree.getChildren(index))
+      {
+	auto childData(windowTree.getData(child));
+	auto position(childData.getPosition());
+
+	position[!direction] = (position[direction] * rect.size[!direction]) / rect.size[direction];
+	position[direction] = rect.position[direction];
+	childData.move(child, windowTree, position);
+      }
+    direction ^= 1;
+    updateChildWidths(index, windowTree);
+  }
+
   std::array<int16_t, 2u> Container::getPosition() const noexcept
   {
     return rect.position;

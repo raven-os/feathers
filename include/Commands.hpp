@@ -55,6 +55,18 @@ namespace Commands
       view->windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{view.get()});
   }
 
+  void switch_container_direction(Server *server) {
+    if (server->views.size() <= 0)
+      return ;
+    std::unique_ptr<View> &view = server->views.front();
+    auto &output = server->output.getOutput(view->getOutput());
+    auto &windowTree(output.getWindowTree());
+    auto parent = windowTree.getParent(view->windowNode);
+    auto &parentData(std::get<wm::Container>(windowTree.getData(parent).data));
+
+    parentData.changeDirection(parent, windowTree);
+  }
+
   void close_compositor(Server *server) {
     wl_display_terminate(server->getWlDisplay());
   }
