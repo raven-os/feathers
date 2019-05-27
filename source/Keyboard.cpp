@@ -126,7 +126,7 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
 }
 
 void Keyboard::configure() {
-    struct xkb_rule_names rules = { NULL, NULL, "fr", NULL, NULL };
+    struct xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
     struct xkb_context *context;
     struct xkb_keymap *key_map;
 
