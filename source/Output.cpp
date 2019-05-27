@@ -1,5 +1,7 @@
 #include "Output.hpp"
 #include "Server.hpp"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 Output::Output(Server *server, struct wlr_output *wlr_output) :
   server(server),
@@ -12,6 +14,17 @@ Output::Output(Server *server, struct wlr_output *wlr_output) :
 	     }())
 {
 
+  int width, height, channels;
+  // TODO load user wallpaper
+  unsigned char *image = stbi_load("wallpaper.jpg",
+				   &width,
+				   &height,
+				   &channels,
+				   STBI_rgb_alpha);
+  wallpaperTexture =
+    wlr_texture_from_pixels(server->renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
+			    width, height, image);
+  stbi_image_free(image);
 }
 
 void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -29,8 +42,11 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_output_effective_resolution(wlr_output, &width, &height);
   wlr_renderer_begin(renderer, width, height);
 
-  float color[4] = {0.3, 0.3, 0.3, 1.0};
+  float color[4] = {0.5, 0.5, 0.5, 1.0};
   wlr_renderer_clear(renderer, color);
+
+  // render wallpaper
+  wlr_render_texture(renderer, wallpaperTexture, wlr_output->transform_matrix, 0, 0, 1.0f);
 
   for (auto it = server->views.rbegin(); it != server->views.rend(); ++it)
     {
