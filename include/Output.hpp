@@ -40,6 +40,7 @@ private:
   struct wlr_output *wlr_output;
   bool fullscreen;
   wm::WindowTree windowTree;
+  struct wlr_texture *wallpaperTexture;
 
 private:
   void output_frame(struct wl_listener *listener, void *data);
