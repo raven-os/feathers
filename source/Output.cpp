@@ -1,7 +1,18 @@
 #include "Output.hpp"
 #include "Server.hpp"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
+#pragma GCC diagnostic pop
 
 Output::Output(Server *server, struct wlr_output *wlr_output) :
   server(server),
@@ -13,18 +24,40 @@ Output::Output(Server *server, struct wlr_output *wlr_output) :
 	       return wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}};
 	     }())
 {
+  refreshImage();
+}
 
-  int width, height, channels;
-  // TODO load user wallpaper
-  unsigned char *image = stbi_load("wallpaper.jpg",
-				   &width,
-				   &height,
-				   &channels,
-				   STBI_rgb_alpha);
-  wallpaperTexture =
-    wlr_texture_from_pixels(server->renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
-			    width, height, image);
-  stbi_image_free(image);
+void Output::refreshImage()
+{
+  char const *setting("background_image");
+
+  server->configuration.poll();
+  if (server->configuration.consumeChanged(setting))
+    {
+      int width, height, channels;
+      char const *imagePath = server->configuration.get(setting);
+      // TODO load user wallpaper
+      std::cout << imagePath << std::endl;
+      
+      unsigned char *image = stbi_load(imagePath,
+				       &width,
+				       &height,
+				       &channels,
+				       STBI_rgb_alpha);
+      if (!image)
+	{
+	  image = stbi_load("wallpaper.jpg",
+			    &width,
+			    &height,
+			    &channels,
+			    STBI_rgb_alpha);
+	}
+      
+      wallpaperTexture =
+	wlr_texture_from_pixels(server->renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
+				width, height, image);
+      stbi_image_free(image);
+    }
 }
 
 void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -67,6 +100,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_output_render_software_cursors(wlr_output, NULL);
   wlr_renderer_end(renderer);
   wlr_output_swap_buffers(wlr_output, NULL, NULL);
+  refreshImage();
 }
 
 void Output::setFrameListener()

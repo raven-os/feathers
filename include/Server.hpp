@@ -8,6 +8,7 @@
 # include "ServerInput.hpp"
 # include "ServerOutput.hpp"
 # include "Seat.hpp"
+# include "conf/Configuration.hpp"
 
 class Server
 {
@@ -16,6 +17,8 @@ public:
   ~Server();
 
   void run();
+
+  conf::Configuration configuration;
 
   struct DisplayDeleter
   {
