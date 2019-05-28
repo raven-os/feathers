@@ -44,4 +44,5 @@ private:
 
 private:
   void output_frame(struct wl_listener *listener, void *data);
+  void refreshImage();
 };
