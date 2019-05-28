@@ -15,7 +15,7 @@ class Output : public OutputListeners
 {
 public:
 
-  Output(Server *server, struct wlr_output *wlr_output);
+  Output(Server *server, struct wlr_output *wlr_output, struct wlr_output_layout *wlr_output_layout);
   ~Output() = default;
 
   void setFrameListener();

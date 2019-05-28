@@ -17,11 +17,12 @@ void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listene
       wlr_output_set_mode(wlr_output, mode);
     }
 
-  std::unique_ptr<Output> output(new Output(server, wlr_output));
+  wlr_output_layout_add_auto(output_layout, wlr_output);
+
+  std::unique_ptr<Output> output(new Output(server, wlr_output, output_layout));
   output->setFrameListener();
   outputs.emplace_back(std::move(output));
 
-  wlr_output_layout_add_auto(output_layout, wlr_output);
   wlr_output_create_global(wlr_output);
 }
 
