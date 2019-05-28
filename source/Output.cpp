@@ -14,14 +14,15 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(Server *server, struct wlr_output *wlr_output) :
+Output::Output(Server *server, struct wlr_output *wlr_output, struct wlr_output_layout *wlr_output_layout) :
   server(server),
   wlr_output(wlr_output),
   fullscreen(false),
   windowTree([&]()
 	     {
-	       // todo: get output size
-	       return wm::WindowData{wm::Container{{{{0, 0}}, {{1920, 1080}}}}};
+	       auto box = wlr_output_layout_get_box(wlr_output_layout, wlr_output);
+
+	       return wm::WindowData{wm::Container{{{{box->x, box->y}}, {{box->width, box->height}}}}};
 	     }())
 {
   refreshImage();
