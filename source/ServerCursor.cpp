@@ -90,7 +90,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
 	    {
 	      auto parentNode(windowTree.getParent(node));
-	      auto &parentData(std::get<wm::Container>(windowTree.getData(parentNode).data));
+	      auto &parentData(windowTree.getData(parentNode).getContainer());
 
 	      if (parentData.direction == direction)
 		{

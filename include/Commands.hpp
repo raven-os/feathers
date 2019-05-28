@@ -44,7 +44,7 @@ namespace Commands
     if (view->windowNode != wm::nullNode) {
       struct wlr_box box[1];
 
-      std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, windowTree, view->windowNode);
+      rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
       view->x = 10;
       view->y = 10;
       wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
@@ -52,7 +52,7 @@ namespace Commands
       view->windowNode = wm::nullNode;
     }
     else
-      view->windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{view.get()});
+      view->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{view.get()});
   }
 
   void switch_container_direction(Server *server) {
@@ -62,7 +62,7 @@ namespace Commands
     auto &output = server->output.getOutput(view->getOutput());
     auto &windowTree(output.getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
-    auto &parentData(std::get<wm::Container>(windowTree.getData(parent).data));
+    auto &parentData(windowTree.getData(parent).getContainer());
 
     parentData.changeDirection(parent, windowTree);
   }
