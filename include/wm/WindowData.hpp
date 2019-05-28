@@ -29,6 +29,9 @@ namespace wm
 
     std::array<int16_t, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;
-    
+
+    // Only call this if you're 100% sure it contains a container
+    Container &getContainer() noexcept;
+    Container const &getContainer() const noexcept;
   };
 };

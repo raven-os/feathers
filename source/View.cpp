@@ -55,7 +55,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
       auto rootNode(windowTree.getRootIndex());
       auto &rootNodeData(windowTree.getData(rootNode));
 	  
-      windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{this});
+      windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{this});
     }
   else
     {
@@ -67,7 +67,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    auto parentNode(windowTree.getParent(prevNode));
 	    auto &parentNodeData(windowTree.getData(parentNode));
 	    
-	    windowNode = std::get<wm::Container>(parentNodeData.data).addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
+	    windowNode = parentNodeData.getContainer().addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
 	  }
 	  break;
 	case OpenType::below:
@@ -80,7 +80,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 	    prevData.data.emplace<wm::Container>(wm::Rect{position, size});
 
-	    auto &container(std::get<wm::Container>(prevData.data));
+	    auto &container(prevData.getContainer());
 
 	    container.direction = (server->openType == OpenType::below) ? wm::Container::verticalTilling : wm::Container::horizontalTilling;
 	    server->views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server->views[1].get()});
@@ -103,7 +103,8 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   auto &windowTree(output.getWindowTree());
   auto rootNode(windowTree.getRootIndex());
   auto &rootNodeData(windowTree.getData(rootNode));
-  std::get<wm::Container>(rootNodeData.data).removeChild(rootNode, windowTree, windowNode);
+
+  rootNodeData.getContainer().removeChild(rootNode, windowTree, windowNode);
 };
 
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)

@@ -63,4 +63,14 @@ namespace wm
     
     return {box->width, box->height};
   }
+
+  Container &WindowData::getContainer() noexcept
+  {
+    return std::get<Container>(data);
+  }
+
+  Container const &WindowData::getContainer() const noexcept
+  {
+    return std::get<Container>(data);
+  }
 }
