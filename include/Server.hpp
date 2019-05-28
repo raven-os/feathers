@@ -10,6 +10,13 @@
 # include "Seat.hpp"
 # include "conf/Configuration.hpp"
 
+enum class OpenType : uint8_t
+  {
+   dontCare = 0,
+   below,
+   right
+  };
+
 class Server
 {
 public:
@@ -46,6 +53,7 @@ public:
   double grab_x, grab_y;
   int grab_width, grab_height;
   uint32_t resize_edges;
+  OpenType openType;
 
   wl_display *getWlDisplay() const noexcept
   {
