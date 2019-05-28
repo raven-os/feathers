@@ -46,23 +46,49 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
   wlr_xdg_surface_v6_get_geometry(xdg_surface, box);
 
   previous_size = {box->width, box->height};
-
+  
   auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
+
   if (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode) // node: we are at least ourselves in the tree
     {
       auto rootNode(windowTree.getRootIndex());
       auto &rootNodeData(windowTree.getData(rootNode));
-
+	  
       windowNode = std::get<wm::Container>(rootNodeData.data).addChild(rootNode, windowTree, wm::ClientData{this});
     }
   else
     {
-      auto prevNode(server->views[1]->windowNode);
-      auto parentNode(windowTree.getParent(prevNode));
-      auto &parentNodeData(windowTree.getData(parentNode));
+      switch (server->openType)
+	{
+	case OpenType::dontCare:
+	  {
+	    auto prevNode(server->views[1]->windowNode);
+	    auto parentNode(windowTree.getParent(prevNode));
+	    auto &parentNodeData(windowTree.getData(parentNode));
+	    
+	    windowNode = std::get<wm::Container>(parentNodeData.data).addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
+	  }
+	  break;
+	case OpenType::below:
+	case OpenType::right:
+	  {
+	    auto prevNode(server->views[1]->windowNode);
+	    auto &prevData(windowTree.getData(prevNode));
+	    auto position(prevData.getPosition());
+	    auto size(prevData.getSize());
 
-      windowNode = std::get<wm::Container>(parentNodeData.data).addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
+	    prevData.data.emplace<wm::Container>(wm::Rect{position, size});
+
+	    auto &container(std::get<wm::Container>(prevData.data));
+
+	    container.direction = (server->openType == OpenType::below) ? wm::Container::verticalTilling : wm::Container::horizontalTilling;
+	    server->views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server->views[1].get()});
+	    windowNode = container.addChild(prevNode, windowTree, server->views[1]->windowNode, wm::ClientData{this});
+	    server->openType = OpenType::dontCare;
+	  }
+	  break;
+	}
     }
 };
 

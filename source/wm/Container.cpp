@@ -21,6 +21,12 @@
 
 namespace wm
 {
+  Container::Container(Rect const &rect, bool direction) noexcept
+    : rect(rect)
+    , direction(direction)
+  {
+  }
+
   uint16_t Container::getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
   {
     auto &childData(windowTree.getData(childIndex));
@@ -58,8 +64,7 @@ namespace wm
 
 	for (size_t i(0u); i != childData.getPosition().size(); ++i)
 	  {
-	    uint16_t offset(uint16_t(position[i] - rect.position[i]));
-	    newPosition[i] += offset;
+	    newPosition[i] += position[i] - rect.position[i];
 	  }
 	childData.move(childIndex, windowTree, newPosition);
       }
@@ -194,10 +199,11 @@ namespace wm
   {
     for (auto child : windowTree.getChildren(index))
       {
-	auto childData(windowTree.getData(child));
+	auto &childData(windowTree.getData(child));
 	auto position(childData.getPosition());
 
-	position[!direction] = (position[direction] * rect.size[!direction]) / rect.size[direction];
+	position[!direction] = ((position[direction] - rect.position[direction]) * rect.size[!direction]) / rect.size[direction]
+	  + rect.position[!direction];
 	position[direction] = rect.position[direction];
 	childData.move(child, windowTree, position);
       }

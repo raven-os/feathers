@@ -32,11 +32,15 @@ namespace wm
     /// Doesn't actually update position of windowData, only the contents of the container after start
     void move_after_impl(WindowTree &windowTree, WindowNodeIndex start, std::array<int16_t, 2u> position);
   public:
+    Container(Rect const &rect, bool direction = horizontalTilling) noexcept;
+    Container(Container const &) = delete;
+    Container(Container &&) = default;
+
     Rect rect;
 
     static constexpr bool const horizontalTilling{false};
     static constexpr bool const verticalTilling{!horizontalTilling};
-    bool direction{horizontalTilling};
+    bool direction;
 
     void updateChildWidths(WindowNodeIndex index, WindowTree &windowTree);
 

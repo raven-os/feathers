@@ -22,7 +22,7 @@ namespace wm
   struct WindowData
   {
     // Rect rect;
-    std::variant<Container, ClientData> data;
+    std::variant<ClientData, Container> data;
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);

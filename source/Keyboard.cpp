@@ -25,8 +25,9 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
   shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
   shortcuts["Alt+Space"] = {"Toggle float", [server](){ Commands::toggle_float_window(server); }};
   shortcuts["Alt+E"] = {"Switch position", [server](){ Commands::switch_container_direction(server); }};
+  shortcuts["Alt+H"] = {"Open below", [server](){ server->openType = OpenType::below; }};
+  shortcuts["Alt+V"] = {"Open right", [server](){ server->openType = OpenType::right; }};
 
-  shortcuts["a+b"] = {"TEST", [](){ std::cout << "TEST SHORTCUT" << std::endl; }};
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
 }

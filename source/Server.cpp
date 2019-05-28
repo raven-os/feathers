@@ -23,6 +23,7 @@ Server::Server()
   , cursor(this)
   , input(this)
   , seat(this)
+  , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
 }

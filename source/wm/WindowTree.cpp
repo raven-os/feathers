@@ -8,12 +8,6 @@ namespace wm
     nodes.emplace_back(WindowNode{nullNode, nullNode, nullNode, std::move(screen)});
   }
 
-  WindowTree::WindowTree(WindowData const &screen)
-    : freeList(nullNode)
-  {
-    nodes.emplace_back(WindowNode{nullNode, nullNode, nullNode, screen});
-  }
-
   WindowNodeIndex WindowTree::allocateIndex()
   {
     if (freeList == nullNode)

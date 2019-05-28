@@ -38,7 +38,6 @@ namespace wm
     WindowTree(WindowTree const &) = delete;
 
     WindowTree(WindowData &&screen);
-    WindowTree(WindowData const &screen);
 
     uint16_t getWindowCountUpperBound() const noexcept
     {
