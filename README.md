@@ -22,12 +22,12 @@ XKB_DEFAULT_LAYOUT=fr ./build/<build_type>/feathers
 ## Shortcuts
 
 These are the current shortcuts:
-- Ctrl+Alt+T:	Open terminal
-- Alt+F2:	Toggle fullscreen
+- Alt+Return: Open terminal
+- Alt+F2: Toggle fullscreen
 - Alt+E: Change parent container tilling direction
 - Alt+Space: Toggle floating mode
-- Alt+Tab:	Switch window (will be removed when movement key shortcuts are added)
-- Alt+Escape:	Quit feathers 
+- Alt+Tab: Switch window (will be removed when movement key shortcuts are added)
+- Alt+Escape: Quit feathers 
 
 ## Albinos integration
 
