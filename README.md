@@ -25,6 +25,8 @@ These are the current shortcuts:
 - Alt+Return: Open terminal
 - Alt+F2: Toggle fullscreen
 - Alt+E: Change parent container tilling direction
+- Alt+H: Enable to open a window below
+- Alt+V: Enable to open a window on the right
 - Alt+Space: Toggle floating mode
 - Alt+Tab: Switch window (will be removed when movement key shortcuts are added)
 - Alt+Escape: Quit feathers 
