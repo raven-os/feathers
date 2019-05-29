@@ -53,7 +53,11 @@ namespace conf
 	std::unique_ptr<Albinos::Config, DestroyConfig> tmp;
 	{
 	  Albinos::Config *tmp2 = nullptr;
-	  Albinos::createConfig("feathers", &tmp2);
+	  if (Albinos::createConfig("feathers", &tmp2) != Albinos::SUCCESS)
+	    {
+	      std::cerr << "WARNING: failed to create config" << std::endl;
+	      return ;
+	    }
 	  tmp.reset(tmp2);
 	}
 
