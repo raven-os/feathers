@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 namespace conf
 {
@@ -55,7 +56,7 @@ namespace conf
 	  Albinos::createConfig("feathers", &tmp2);
 	  tmp.reset(tmp2);
 	}
-	
+
 	Albinos::Key key;
 
 	Albinos::getConfigKey(tmp.get(), &key);
@@ -80,14 +81,14 @@ namespace conf
       return subscriptions.at(name).value.c_str();
     } catch (std::out_of_range const &) {
       auto &subscription(subscriptions[name]);
-      
+
       Albinos::subscribeToSetting(config.get(), name, this,
 				  [](Albinos::Subscription const *rawSubscription, Albinos::ModifType type)
 				  {
 				    auto *this_(static_cast<decltype(this)>(Albinos::getSupscriptionUserData(rawSubscription)));
 				    auto name(Albinos::getSupscriptionSettingName(rawSubscription));
 				    auto &subscription(this_->subscriptions.at(name));
-								 
+
 				    subscription.hasChanged = true;
 				    switch (type)
 				      {

@@ -59,6 +59,9 @@ namespace Commands
     if (server->views.size() <= 0)
       return ;
     std::unique_ptr<View> &view = server->views.front();
+
+    if (view->windowNode == wm::nullNode)
+      return ;
     auto &output = server->output.getOutput(view->getOutput());
     auto &windowTree(output.getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
