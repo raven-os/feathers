@@ -27,7 +27,7 @@ namespace wm
   {
   }
 
-  uint16_t Container::getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
+  FixedPoint<-4, uint32_t> Container::getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
   {
     auto &childData(windowTree.getData(childIndex));
     auto sibling(windowTree.getSibling(childIndex));
@@ -43,19 +43,20 @@ namespace wm
     for (auto childIndex : windowTree.getChildren(index))
       {
 	auto &childData(windowTree.getData(childIndex));
-	auto newSize(rect.size);
+	std::array<uint16_t, 2u> newSize;
 
-	newSize[direction] = getChildWidth(index, windowTree, childIndex);
+	newSize[direction] = FixedPoint<0, uint32_t>(getChildWidth(index, windowTree, childIndex)).value;
+	newSize[!direction] = FixedPoint<0, uint32_t>(rect.size[!direction]).value;
 	childData.resize(childIndex, windowTree, newSize);
       }
   }
 
-  void Container::move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
+  void Container::move_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position)
   {
     return move_after_impl(windowTree, windowTree.getFirstChild(index), position);
   }
 
-  void Container::move_after_impl(WindowTree &windowTree, WindowNodeIndex start, std::array<int16_t, 2u> position)
+  void Container::move_after_impl(WindowTree &windowTree, WindowNodeIndex start, std::array<FixedPoint<-4, int32_t>, 2u> position)
   {
     for (auto childIndex(start); childIndex != wm::nullNode; childIndex = windowTree.getSibling(childIndex))
       {
@@ -70,13 +71,13 @@ namespace wm
       }
   }
 
-  void Container::move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position)
+  void Container::move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position)
   {
     move_impl(index, windowTree, position);
     rect.position = position;
   }
 
-  void Container::resize_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size)
+  void Container::resize_impl(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, uint32_t>, 2u> size)
   {
     auto children(windowTree.getChildren(index));
     for (auto childIndex : children)
@@ -93,6 +94,15 @@ namespace wm
   }
 
   void Container::resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size)
+  {
+    std::array<FixedPoint<-4, uint32_t>, 2u> newSize;
+
+    for (int i = 0; i < 2; ++i)
+      newSize[i] = makeFixedPoint(size[i]);
+    resize(index, windowTree, newSize);
+  }
+
+  void Container::resize(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, uint32_t>, 2u> size)
   {
     resize_impl(index, windowTree, size);
     rect.size = size;
@@ -111,8 +121,8 @@ namespace wm
         auto position{rect.position};
 	auto size{rect.size};
 
-	position[direction] += rect.size[direction] / (count + 1);
-	size[direction] = (size[direction] * count) / (count + 1);
+	position[direction] += rect.size[direction] / FixedPoint<0u>(count + 1);
+	size[direction] = (size[direction] * FixedPoint<0u>(count)) / FixedPoint<0u>(count + 1);
 
 	resize_impl(index, windowTree, size);
 	move_impl(index, windowTree, position);
@@ -148,8 +158,8 @@ namespace wm
       auto position{rect.position};
       auto size{rect.size};
 
-      position[direction] += rect.size[direction] / (count + 1);
-      size[direction] = (size[direction] * count) / (count + 1);
+      position[direction] += rect.size[direction] / FixedPoint<0u>(count + 1);
+      size[direction] = (size[direction] * FixedPoint<0u>(count)) / FixedPoint<0u>(count + 1);
 
       resize_impl(index, windowTree, size);
       move_after_impl(windowTree, windowTree.getSibling(prev), position);
@@ -162,7 +172,7 @@ namespace wm
       {
 	auto position{rect.position};
 
-	position[direction] += (offset * rect.size[direction]) / (count + 1);
+	position[direction] += (FixedPoint<0u>(offset) * rect.size[direction]) / FixedPoint<0u>(count + 1);
 	childData.move(newChild, windowTree, position);
       }
       updateChildWidths(index, windowTree);
@@ -217,14 +227,18 @@ namespace wm
     updateChildWidths(index, windowTree);
   }
 
-  std::array<int16_t, 2u> Container::getPosition() const noexcept
+  std::array<FixedPoint<-4, int32_t>, 2u> Container::getPosition() const noexcept
   {
     return rect.position;
   }
   
   std::array<uint16_t, 2u> Container::getSize() const noexcept
   {
-    return rect.size;
+    std::array<uint16_t, 2u> size;
+
+    for (int i = 0; i < size.size(); ++i)
+      size[i] = FixedPoint<0, uint32_t>(rect.size[i]).value;
+    return size;
   }
 
 }

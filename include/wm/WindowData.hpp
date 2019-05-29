@@ -14,8 +14,8 @@ namespace wm
     View *view;
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
-    void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
-    std::array<int16_t, 2u> getPosition() const noexcept;
+    void move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position);
+    std::array<FixedPoint<-4, int32_t>, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;
   };
 
@@ -25,9 +25,9 @@ namespace wm
     std::variant<ClientData, Container> data;
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
-    void move(WindowNodeIndex index, WindowTree &windowTree, std::array<int16_t, 2u> position);
+    void move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position);
 
-    std::array<int16_t, 2u> getPosition() const noexcept;
+    std::array<FixedPoint<-4, int32_t>, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;
 
     // Only call this if you're 100% sure it contains a container

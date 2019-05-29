@@ -27,8 +27,8 @@ ServerCursor::ServerCursor(Server *server)
 
 void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 {
-  server->grabbed_view->x = cursor->x - server->grab_x;
-  server->grabbed_view->y = cursor->y - server->grab_y;
+  server->grabbed_view->x = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->x - server->grab_x)));
+  server->grabbed_view->y = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->y - server->grab_y)));
 }
 
 void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
@@ -54,7 +54,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	    {
 	      y += height;
 	    }
-	  view->y = y - box->y;
+	  view->y = FixedPoint<-4, int>(int(double(1 << 4) * (y - box->y)));
 	}
       else if (server->resize_edges & WLR_EDGE_BOTTOM)
 	{
@@ -69,7 +69,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	    {
 	      x += width;
 	    }
-	  view->x = x - box->x;
+	  view->x = FixedPoint<-4, int>(int(double(1 << 4) * (x - box->x)));
 	}
       else if (server->resize_edges & WLR_EDGE_RIGHT)
 	{
@@ -85,7 +85,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
       for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTilling, wm::Container::verticalTilling})
 	{
 	  // TODO: clamp cursor position to not cause negative sizes and moving windows
-	  int16_t cursor_pos(direction == wm::Container::horizontalTilling ? cursor->x : cursor->y);
+	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * (direction == wm::Container::horizontalTilling ? cursor->x : cursor->y));
 
 	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
 	    {
