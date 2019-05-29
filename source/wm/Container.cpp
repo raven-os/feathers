@@ -193,6 +193,12 @@ namespace wm
       rect.size[direction] = size[direction] - removedWidth;
       resize(index, windowTree, size);
     }
+    if (windowTree.getFirstChild(index) == wm::nullNode && windowTree.getRootIndex() != index)
+      {
+	auto parentNode(windowTree.getParent(index));
+
+	windowTree.getData(parentNode).getContainer().removeChild(parentNode, windowTree, index);
+      }
   }
 
   void Container::changeDirection(WindowNodeIndex index, WindowTree &windowTree)
