@@ -46,15 +46,16 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
   wlr_xdg_surface_v6_get_geometry(xdg_surface, box);
 
   previous_size = {box->width, box->height};
-  
+
   auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
 
-  if (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode) // node: we are at least ourselves in the tree
+  if (server->openType != OpenType::floating &&
+      (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
     {
       auto rootNode(windowTree.getRootIndex());
       auto &rootNodeData(windowTree.getData(rootNode));
-	  
+
       windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{this});
     }
   else
@@ -66,7 +67,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    auto prevNode(server->views[1]->windowNode);
 	    auto parentNode(windowTree.getParent(prevNode));
 	    auto &parentNodeData(windowTree.getData(parentNode));
-	    
+
 	    windowNode = parentNodeData.getContainer().addChild(parentNode, windowTree, prevNode, wm::ClientData{this});
 	  }
 	  break;
@@ -88,9 +89,12 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    server->openType = OpenType::dontCare;
 	  }
 	  break;
+	case OpenType::floating:
+	  windowNode = wm::nullNode;
+	  break;
 	}
     }
-};
+}
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
@@ -114,7 +118,7 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 	}
     }
   if (windowNode == wm::nullNode)
-    return ;
+    return;
 
   auto &windowTree(output.getWindowTree());
   auto parentNode(windowTree.getParent(windowNode));

@@ -14,7 +14,8 @@ enum class OpenType : uint8_t
   {
    dontCare = 0,
    below,
-   right
+   right,
+   floating
   };
 
 class Server

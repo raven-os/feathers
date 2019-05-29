@@ -23,8 +23,10 @@ Server::Server()
   , cursor(this)
   , input(this)
   , seat(this)
-  , openType(OpenType::dontCare)
 {
+  char const *tilling = configuration.get("tilling");
+  // tilling is either 'on' or 'off'
+  openType = (strcmp(tilling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
   wlr_data_device_manager_create(getWlDisplay());
 }
 
