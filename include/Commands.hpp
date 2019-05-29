@@ -13,6 +13,8 @@ namespace Commands
   }
 
   void toggle_fullscreen(Server *server) {
+    if (server->views.size() <= 0)
+      return ;
     std::unique_ptr<View> &view = server->views.front();
 
     view->xdg_toplevel_request_fullscreen(nullptr, nullptr);
