@@ -14,6 +14,10 @@ make
 ## Run instructions
 
 Feathers can be run in TTY or inside another window manager. Simply run the executable.
+If you're a frenchman like us, you may need to change the env to have the right keyboard:
+```
+XKB_DEFAULT_LAYOUT=fr ./build/<build_type>/feathers
+```
 
 ## Shortcuts
 
