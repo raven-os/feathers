@@ -102,6 +102,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 
 		      newPos[direction] = cursor_pos;
 		      data.move(node, windowTree, newPos);
+		      parentData.updateChildWidths(parentNode, windowTree);
 		    }
 		  else if ((server->resize_edges & (direction == wm::Container::horizontalTilling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
 		  	   && windowTree.getSibling(node) != wm::nullNode)
@@ -112,8 +113,12 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 
 		      newPos[direction] = cursor_pos;
 		      nextData.move(nextNode, windowTree, newPos);
+		      parentData.updateChildWidths(parentNode, windowTree);
 		    }
-		  parentData.updateChildWidths(parentNode, windowTree);
+		  else
+		    {
+		      continue;
+		    }
 		  break;
 		}
 	    }
