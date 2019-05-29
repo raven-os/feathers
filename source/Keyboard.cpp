@@ -19,7 +19,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
 {
   key_repeat_source = wl_event_loop_add_timer(server->wl_event_loop, keyboard_handle_repeat, this);
 
-  shortcuts["Ctrl+Alt+t"] = {"Terminal", [](){ Commands::open_terminal(); }};
+  shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
   shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){ Commands::toggle_fullscreen(server); }};
   shortcuts["Alt+Tab"] = {"Switch window", [server](){ Commands::switch_window(server); }};
   shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
