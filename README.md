@@ -34,4 +34,4 @@ These are the current shortcuts:
 To work, the albinos service must be started **before** the compositor. This may be improved in the future.
 Feathers will create to files "configKey.txt" and "readonlyConfigKey.txt" which contain the keys to both configurations.
 
-You can edit settings using the albinos editor. See the albinos project for more details (well, if they gave them, that is).
+You can edit settings using the albinos editor. See the [albinos](https://github.com/raven-os/albinos) project for more details.
