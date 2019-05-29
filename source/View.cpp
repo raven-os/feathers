@@ -101,10 +101,10 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 
   auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
-  auto rootNode(windowTree.getRootIndex());
-  auto &rootNodeData(windowTree.getData(rootNode));
+  auto parentNode(windowTree.getParent(windowNode));
+  auto &parentNodeData(windowTree.getData(parentNode));
 
-  rootNodeData.getContainer().removeChild(rootNode, windowTree, windowNode);
+  parentNodeData.getContainer().removeChild(parentNode, windowTree, windowNode);
 };
 
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
