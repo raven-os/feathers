@@ -8,6 +8,7 @@
 # include "ServerCursor.hpp"
 # include "Popup.hpp"
 # include "wm/WindowNodeIndex.hpp"
+# include "util/FixedPoint.hpp"
 
 class Server;
 
@@ -46,7 +47,7 @@ public:
   Server *server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
-  int x, y;
+  FixedPoint<-4, int> x, y;
   std::unique_ptr<Popup> popup;
 
   std::array<int16_t, 2u> previous_size;

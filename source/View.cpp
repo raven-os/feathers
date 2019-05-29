@@ -78,7 +78,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    auto position(prevData.getPosition());
 	    auto size(prevData.getSize());
 
-	    prevData.data.emplace<wm::Container>(wm::Rect{position, size});
+	    prevData.data.emplace<wm::Container>(wm::Rect{position, {FixedPoint<0, uint32_t>(size[0]), FixedPoint<0, uint32_t>(size[1])}});
 
 	    auto &container(prevData.getContainer());
 
@@ -122,20 +122,20 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
       if (!output.getFullscreen())
 	{
 	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
-	  output.saved.x = x;
-	  output.saved.y = y;
+	  output.saved.x = x.value;
+	  output.saved.y = y.value;
 	  struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
-	  x = 0;
-	  y = 0;
+	  x = 0_FP;
+	  y = 0_FP;
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
 	}
       else
 	{
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
-	  x = output.saved.x;
-	  y = output.saved.y;
+	  x.value = output.saved.x;
+	  y.value = output.saved.y;
 	}
       output.setFullscreen(!output.getFullscreen());
     }
@@ -166,8 +166,8 @@ struct wlr_output *View::getOutput()
   double outputX;
   double outputY;
   wlr_output_layout_closest_point(server->output.getLayout(), nullptr,
-				  x + (double)viewBox.width/2,
-				  y + (double)viewBox.height/2,
+				  x.getDoubleValue() + (double)viewBox.width/2,
+				  y.getDoubleValue() + (double)viewBox.height/2,
 				  &outputX, &outputY);
   return wlr_output_layout_output_at(server->output.getLayout(), outputX, outputY);
 }
@@ -218,8 +218,8 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
   wlr_xdg_surface_v6_get_geometry(xdg_surface, &geo_box);
   if (mode == CursorMode::CURSOR_MOVE)
     {
-      server->grab_x = server->cursor.cursor->x - x;
-      server->grab_y = server->cursor.cursor->y - y;
+      server->grab_x = server->cursor.cursor->x - x.getDoubleValue();
+      server->grab_y = server->cursor.cursor->y - y.getDoubleValue();
     }
   else
     {
@@ -233,8 +233,8 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
 
 bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
 {
-  double view_sx = lx - x;
-  double view_sy = ly - y;
+  double view_sx = lx - x.getDoubleValue();
+  double view_sy = ly - y.getDoubleValue();
 
   struct wlr_surface_state *state = &xdg_surface->surface->current;
 
