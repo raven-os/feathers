@@ -94,12 +94,28 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
+  auto &output(server->output.getOutput(getOutput()));
+
   mapped = false;
 
+  if (output.getFullscreen())
+    {
+      for (auto &view : server->views)
+	{
+	  if (view.get() == this)
+	    {
+	      xdg_toplevel_request_fullscreen(nullptr, nullptr);
+	      break;
+	    }
+	  if (view->getOutput() == output.getWlrOutput())
+	    {
+	      break;
+	    }
+	}
+    }
   if (windowNode == wm::nullNode)
     return ;
 
-  auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
   auto parentNode(windowTree.getParent(windowNode));
   auto &parentNodeData(windowTree.getData(parentNode));
