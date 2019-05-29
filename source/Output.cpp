@@ -40,9 +40,6 @@ void Output::refreshImage()
     {
       int width, height, channels;
       char const *imagePath = server->configuration.get(setting);
-      // TODO load user wallpaper
-      std::cout << imagePath << std::endl;
-      
       unsigned char *image = stbi_load(imagePath,
 				       &width,
 				       &height,
@@ -56,7 +53,7 @@ void Output::refreshImage()
 			    &channels,
 			    STBI_rgb_alpha);
 	}
-      
+
       wallpaperTexture =
 	wlr_texture_from_pixels(server->renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
 				width, height, image);
