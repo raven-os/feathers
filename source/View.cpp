@@ -50,6 +50,12 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
   auto &output(server->output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
 
+  if (server->openType == OpenType::dontCare)
+    {
+      char const *tilling = server->configuration.get("tilling");
+      // tilling is either 'on' or 'off'
+      server->openType = (strcmp(tilling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
+    }
   if (server->openType != OpenType::floating &&
       (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
     {
@@ -90,7 +96,10 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	  }
 	  break;
 	case OpenType::floating:
-	  windowNode = wm::nullNode;
+	  {
+	    windowNode = wm::nullNode;
+	    server->openType = OpenType::dontCare;
+	  }
 	  break;
 	}
     }
