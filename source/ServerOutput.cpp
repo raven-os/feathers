@@ -19,7 +19,7 @@ void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listene
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
 
-  std::unique_ptr<Output> output(new Output(server, wlr_output, output_layout));
+  std::unique_ptr<Output> output(new Output(server, wlr_output));
   output->setFrameListener();
   outputs.emplace_back(std::move(output));
 

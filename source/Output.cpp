@@ -14,13 +14,13 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(Server *server, struct wlr_output *wlr_output, struct wlr_output_layout *wlr_output_layout) :
+Output::Output(Server *server, struct wlr_output *wlr_output) :
   server(server),
   wlr_output(wlr_output),
   fullscreen(false),
   windowTree([&]()
 	     {
-	       auto box = wlr_output_layout_get_box(wlr_output_layout, wlr_output);
+	       auto box = wlr_output_layout_get_box(server->output.getLayout(), wlr_output);
 
 	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
 							      FixedPoint<0, int>(box->y)}},
@@ -102,6 +102,10 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_renderer_end(renderer);
   wlr_output_swap_buffers(wlr_output, NULL, NULL);
   refreshImage();
+  auto *box = wlr_output_layout_get_box(server->output.getLayout(), wlr_output);
+  windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, {FixedPoint<0, int>(box->x),
+											     FixedPoint<0, int>(box->y)});
+  windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, {box->width, box->height});
 }
 
 void Output::setFrameListener()
