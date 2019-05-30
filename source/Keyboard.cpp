@@ -19,7 +19,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
 {
   key_repeat_source = wl_event_loop_add_timer(server->wl_event_loop, keyboard_handle_repeat, this);
 
-  shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
+  shortcuts["Alt+Return"] = {"Terminal", [server](){ Commands::open_terminal(server); }};
   shortcuts["Alt+F4"] = {"destroy", [server](){
     for (auto &view : server->views)
       {

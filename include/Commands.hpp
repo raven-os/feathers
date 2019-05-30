@@ -5,11 +5,24 @@
 
 namespace Commands
 {
-  void open_terminal() {
+  void open_terminal(Server *server) {
     if (fork() == 0)
-    {
-      execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
-    }
+      {
+	std::string term = server->configuration.getOnce("terminal");
+
+	if (!term.empty())
+	  {
+	    std::string command(server->configuration.getOnce("terminal"));
+
+	    command += " || weston-terminal"; // fall back on weston-terminal in case of error
+	    std::cout << command << std::endl;
+	    execl("/bin/sh", "/bin/sh", "-c", command.c_str(), nullptr);
+	  }
+	else // no configured term, let's use weston-terminal
+	  {
+	    execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
+	  }
+      }
   }
 
   void toggle_fullscreen(Server *server) {
