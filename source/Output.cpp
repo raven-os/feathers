@@ -76,11 +76,20 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_output_effective_resolution(wlr_output, &width, &height);
   wlr_renderer_begin(renderer, width, height);
 
-  float color[4] = {0.5, 0.5, 0.5, 1.0};
-  wlr_renderer_clear(renderer, color);
+  // float color[4] = {0.5, 0.5, 0.5, 1.0};
+  // wlr_renderer_clear(renderer, color);
 
   // render wallpaper
-  wlr_render_texture(renderer, wallpaperTexture, wlr_output->transform_matrix, 0, 0, 1.0f);
+  {
+    std::array<float, 9> transform;
+    std::copy(wlr_output->transform_matrix, wlr_output->transform_matrix + 9, transform.begin());
+
+    std::array<int, 2> size;
+    wlr_texture_get_size(wallpaperTexture, &size[0], &size[1]);
+
+    wlr_matrix_scale(transform.data(), float(width) / float(size[0]), float(height) / float(size[1]));
+    wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
+  }
 
   for (auto it = server->views.rbegin(); it != server->views.rend(); ++it)
     {
