@@ -41,6 +41,7 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
+  shortcuts["Alt+F1"] = {"Open config editore", [server](){ Commands::open_config_editor(server); }};
 }
 
 Keyboard::~Keyboard() {

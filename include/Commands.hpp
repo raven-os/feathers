@@ -1,5 +1,7 @@
 #pragma once
 
+# include <cstring>
+
 # include "Wlroots.hpp"
 # include "Server.hpp"
 
@@ -23,6 +25,38 @@ namespace Commands
 	    execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
 	  }
       }
+  }
+
+  #define DEFAULT_EDITOR_COMMAND =
+  void open_config_editor(Server *server) {
+    if (fork() == 0)
+    {
+      std::unordered_map<std::string, std::string> commands;
+
+      commands["gnome-terminal"] = "-- $PWD/openConfig.sh";
+      commands["xfce4-terminal"] =  "-e $PWD/openConfig.sh";
+      commands["weston-terminal"] = "--shell=$PWD/openConfig.sh";
+      commands["fake-terminal"] = "fake";
+
+      std::array<std::string, 3u> terminals{
+	{
+	 server->configuration.getOnce("config_terminal"),
+	 server->configuration.getOnce("terminal"),
+	 "weston-terminal"
+	}
+      };
+
+      std::stringstream command;
+
+      for (auto &term : terminals)
+	if (!term.empty())
+	  {
+	    command << term << " " << commands[term] << " || ";
+	  }
+      command << "echo";
+      
+      execl("/bin/bash", "/bin/bash", "-c", command.str().c_str(), nullptr);
+    }
   }
 
   void toggle_fullscreen(Server *server) {

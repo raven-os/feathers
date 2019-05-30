@@ -30,6 +30,7 @@ These are the current shortcuts:
 - Alt+Space: Toggle floating mode
 - Alt+Tab: Switch window (will be removed when movement key shortcuts are added)
 - Alt+Escape: Quit feathers 
+- Alt+F1: Open config editor
 
 ## Albinos integration
 
