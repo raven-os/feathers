@@ -15,7 +15,7 @@ static void switch_focus_down_or_right(Server *server, bool parallelDirection)
   auto &output(server->output.getOutput(view->getOutput()));
   auto &windowTree(output.getWindowTree());
   auto containerNode(windowTree.getParent(viewNode));
-  auto *container(&std::get<wm::Container>(windowTree.getData(containerNode).data));
+  auto *container(&windowTree.getData(containerNode).getContainer());
 
   if (container->direction == !parallelDirection)
     {
@@ -23,7 +23,7 @@ static void switch_focus_down_or_right(Server *server, bool parallelDirection)
 	{
 	  viewNode = containerNode;
 	  containerNode = windowTree.getParent(containerNode);
-	  container = &(std::get<wm::Container>(windowTree.getData(containerNode).data));
+	  container = &windowTree.getData(containerNode).getContainer();
 	}
       else
 	return;
@@ -34,7 +34,7 @@ static void switch_focus_down_or_right(Server *server, bool parallelDirection)
     {
       auto tmpNode(containerNode);
       auto newContainerNode(windowTree.getParent(tmpNode));
-      auto *newContainer(&std::get<wm::Container>(windowTree.getData(newContainerNode).data));
+      auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
 
       while (newContainerNode != windowTree.getRootIndex() &&
 	     (newContainer->direction == !parallelDirection ||
@@ -42,7 +42,7 @@ static void switch_focus_down_or_right(Server *server, bool parallelDirection)
 	{
 	  tmpNode = newContainerNode;
 	  newContainerNode = windowTree.getParent(tmpNode);
-	  newContainer = &(std::get<wm::Container>(windowTree.getData(newContainerNode).data));
+	  newContainer = &windowTree.getData(newContainerNode).getContainer();
 	}
       auto siblingNode(windowTree.getSibling(tmpNode));
 
@@ -105,7 +105,7 @@ static void switch_focus_up_or_left(Server *server, bool parallelDirection)
   auto &output(server->output.getOutput(view->getOutput()));
   auto &windowTree(output.getWindowTree());
   auto containerNode(windowTree.getParent(viewNode));
-  auto *container(&std::get<wm::Container>(windowTree.getData(containerNode).data));
+  auto *container(&windowTree.getData(containerNode).getContainer());
 
   if (container->direction == !parallelDirection)
     {
@@ -113,7 +113,7 @@ static void switch_focus_up_or_left(Server *server, bool parallelDirection)
 	{
 	  viewNode = containerNode;
 	  containerNode = windowTree.getParent(containerNode);
-	  container = &(std::get<wm::Container>(windowTree.getData(containerNode).data));
+	  container = &windowTree.getData(containerNode).getContainer();
 	}
       else
 	return;
@@ -124,7 +124,7 @@ static void switch_focus_up_or_left(Server *server, bool parallelDirection)
     {
       auto tmpNode(containerNode);
       auto newContainerNode(windowTree.getParent(tmpNode));
-      auto *newContainer(&std::get<wm::Container>(windowTree.getData(newContainerNode).data));
+      auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
 
       while (newContainerNode != windowTree.getRootIndex() &&
 	     (newContainer->direction == !parallelDirection ||
@@ -132,7 +132,7 @@ static void switch_focus_up_or_left(Server *server, bool parallelDirection)
 	{
 	  tmpNode = newContainerNode;
 	  newContainerNode = windowTree.getParent(tmpNode);
-	  newContainer = &(std::get<wm::Container>(windowTree.getData(newContainerNode).data));
+	  newContainer = &windowTree.getData(newContainerNode).getContainer();
 	}
       auto siblingNode(windowTree.getFirstChild(newContainerNode));
 
