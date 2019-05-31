@@ -235,6 +235,15 @@ namespace Commands
   void switch_window(Server *server) {
     if (server->views.size() >= 2)
       {
+	if (server->views.front()->windowNode != wm::nullNode)
+	  {
+	    std::partition(server->views.begin() + 1, server->views.end(),
+			   [](auto &view) noexcept
+			   {
+			     return view->windowNode == wm::nullNode;
+			   });
+	  }
+      
 	std::unique_ptr<View> &view = server->views[1];
 
 	view->focus_view();
