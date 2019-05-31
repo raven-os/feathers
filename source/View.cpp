@@ -111,21 +111,8 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 
   mapped = false;
 
-  if (output.getFullscreen())
-    {
-      for (auto &view : server->views)
-	{
-	  if (view.get() == this)
-	    {
-	      xdg_toplevel_request_fullscreen(nullptr, nullptr);
-	      break;
-	    }
-	  if (view->getOutput() == output.getWlrOutput())
-	    {
-	      break;
-	    }
-	}
-    }
+  if (output.getFullscreenView() == this)
+    xdg_toplevel_request_fullscreen(nullptr, nullptr);
   if (windowNode == wm::nullNode)
     return;
 
@@ -148,25 +135,22 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
     {
       auto &output = server->output.getOutput(getOutput());
 
-      if (!output.getFullscreen())
+      if (!output.getFullscreenView())
 	{
 	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
-	  output.saved.x = x.value;
-	  output.saved.y = y.value;
 	  struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
-	  x = 0_FP;
-	  y = 0_FP;
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+	  output.setFullscreenView(this);
+	  fullscreen = true;
 	}
       else
 	{
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
-	  x.value = output.saved.x;
-	  y.value = output.saved.y;
+	  output.setFullscreenView(nullptr);
+	  fullscreen = false;
 	}
-      output.setFullscreen(!output.getFullscreen());
     }
 }
 

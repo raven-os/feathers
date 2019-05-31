@@ -35,7 +35,7 @@ namespace
     auto viewNode(view->windowNode);
     auto &output(server->output.getOutput(view->getOutput()));
 
-    if (view->windowNode == wm::nullNode || output.getFullscreen())
+    if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
 
     auto &windowTree(output.getWindowTree());
@@ -99,7 +99,7 @@ void switch_focus_up_or_left(Server *server, bool parallelDirection)
   auto viewNode(view->windowNode);
   auto &output(server->output.getOutput(view->getOutput()));
 
-  if (view->windowNode == wm::nullNode || output.getFullscreen())
+  if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
 
   auto &windowTree(output.getWindowTree());

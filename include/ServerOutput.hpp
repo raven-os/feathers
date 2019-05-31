@@ -15,6 +15,7 @@ struct render_data
   struct wlr_renderer *renderer;
   View *view;
   struct timespec *when;
+  bool fullscreen;
 };
 
 struct ServerOutputListeners
