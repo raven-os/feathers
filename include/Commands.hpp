@@ -1,7 +1,7 @@
 #pragma once
 
 # include <cstring>
-
+# include <unistd.h>
 # include "Wlroots.hpp"
 # include "Server.hpp"
 
@@ -25,7 +25,7 @@ namespace
       }
     return wm::nullNode;
   }
-  
+
   void switch_focus_down_or_right(Server *server, bool parallelDirection)
   {
     if (server->views.empty())
@@ -173,6 +173,7 @@ void switch_focus_up_or_left(Server *server, bool parallelDirection)
 
 namespace Commands
 {
+  namespace {
   void open_terminal(Server *server) {
     if (fork() == 0)
       {
@@ -219,7 +220,7 @@ namespace Commands
 	    command << term << " " << commands[term] << " || ";
 	  }
       command << "echo";
-      
+
       execl("/bin/bash", "/bin/bash", "-c", command.str().c_str(), nullptr);
     }
   }
@@ -243,7 +244,7 @@ namespace Commands
 			     return view->windowNode == wm::nullNode;
 			   });
 	  }
-      
+
 	std::unique_ptr<View> &view = server->views[1];
 
 	view->focus_view();
@@ -316,4 +317,5 @@ namespace Commands
   {
     switch_focus_down_or_right(server, wm::Container::horizontalTilling);
   }
+}
 }

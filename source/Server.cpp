@@ -1,3 +1,4 @@
+#include "Commands.hpp"
 #include "Server.hpp"
 #include "XdgShell.hpp"
 #include "ServerCursor.hpp"
@@ -23,7 +24,7 @@ Server::Server()
   , cursor(this)
   , input(this)
   , seat(this)
-  , openType(OpenType::dontCare)
+  , openType(OpenType::floating)
 {
   wlr_data_device_manager_create(getWlDisplay());
 }
@@ -49,6 +50,8 @@ void Server::run()
       wl_display_destroy(getWlDisplay());
       // TODO THROW
     }
+
+  Commands::open_terminal(this);
 
   setenv("WAYLAND_DISPLAY", socket, true);
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
