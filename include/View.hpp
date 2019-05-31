@@ -53,6 +53,7 @@ public:
   std::array<int16_t, 2u> previous_size;
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};
+  bool fullscreen{false};
 
 private:
   void begin_interactive(CursorMode mode, uint32_t edges);

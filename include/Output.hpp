@@ -19,8 +19,13 @@ public:
   ~Output() = default;
 
   void setFrameListener();
-  void setFullscreen(bool fullscreen);
-  bool getFullscreen() const;
+  void setFullscreenView(View *view) noexcept;
+
+  View *getFullscreenView() const noexcept
+  {
+    return fullscreenView;
+  }
+
   struct wlr_output *getWlrOutput() const;
 
   wm::WindowTree &getWindowTree() noexcept
@@ -38,7 +43,7 @@ public:
 private:
   Server *server;
   struct wlr_output *wlr_output;
-  bool fullscreen;
+  View *fullscreenView;
   wm::WindowTree windowTree;
   struct wlr_texture *wallpaperTexture;
 

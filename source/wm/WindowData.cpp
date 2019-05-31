@@ -1,4 +1,5 @@
 #include "wm/WindowData.hpp"
+#include "Server.hpp"
 
 namespace wm
 {
@@ -36,7 +37,15 @@ namespace wm
 
   void ClientData::resize(WindowNodeIndex, WindowTree &, std::array<uint16_t, 2u> size)
   {
-    wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
+    if (!view->fullscreen)
+      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
+    else
+      {
+	auto &output(view->server->output.getOutput(view->getOutput()));
+
+        output.saved.width = size[0];
+	output.saved.height = size[1];
+      }
   }
 
   void ClientData::move(WindowNodeIndex, WindowTree &, std::array<FixedPoint<-4, int32_t>, 2u> position)
