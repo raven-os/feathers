@@ -9,7 +9,7 @@ namespace
 {
   auto getContainerFocusedView(Server *server, wm::WindowTree &windowTree, wm::WindowNodeIndex containerNode, wm::WindowNodeIndex viewNode)
   {
-    for (std::unique_ptr<View> &tmpView: server->views)
+    for (auto &tmpView: server->views)
       {
 	if (tmpView->windowNode != viewNode)
 	  {
