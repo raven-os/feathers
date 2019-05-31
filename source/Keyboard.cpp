@@ -38,6 +38,10 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
   shortcuts["Alt+E"] = {"Switch position", [server](){ Commands::switch_container_direction(server); }};
   shortcuts["Alt+H"] = {"Open below", [server](){ server->openType = OpenType::below; }};
   shortcuts["Alt+V"] = {"Open right", [server](){ server->openType = OpenType::right; }};
+  shortcuts["Alt+Up"] = {"Switch focus up", [server](){ Commands::switch_focus_up(server); }};
+  shortcuts["Alt+Left"] = {"Switch focus left", [server](){ Commands::switch_focus_left(server); }};
+  shortcuts["Alt+Down"] = {"Switch focus Down", [server](){ Commands::switch_focus_down(server); }};
+  shortcuts["Alt+Right"] = {"Switch focus Right", [server](){ Commands::switch_focus_right(server); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
