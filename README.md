@@ -24,7 +24,7 @@ XKB_DEFAULT_LAYOUT=fr ./build/<build_type>/feathers
 These are the current shortcuts:
 - Alt+Return: Open terminal
 - Alt+F2: Toggle fullscreen
-- Alt+E: Change parent container tilling direction
+- Alt+E: Change parent container tiling direction
 - Alt+H: Open next window below
 - Alt+V: Open next window on the right
 - Alt+Space: Toggle floating mode

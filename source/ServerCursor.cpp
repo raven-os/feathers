@@ -82,10 +82,10 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
       Output &output(server->output.getOutput(view->getOutput()));
       wm::WindowTree &windowTree(output.getWindowTree());
 
-      for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTilling, wm::Container::verticalTilling})
+      for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTiling, wm::Container::verticalTiling})
 	{
 	  // TODO: clamp cursor position to not cause negative sizes and moving windows
-	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * (direction == wm::Container::horizontalTilling ? cursor->x : cursor->y));
+	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * (direction == wm::Container::horizontalTiling ? cursor->x : cursor->y));
 
 	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
 	    {
@@ -94,7 +94,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 
 	      if (parentData.direction == direction)
 		{
-		  if ((server->resize_edges & (direction == wm::Container::horizontalTilling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
+		  if ((server->resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
 		      && windowTree.getFirstChild(parentNode) != node)
 		    {
 		      auto &data(windowTree.getData(node));
@@ -104,7 +104,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 		      data.move(node, windowTree, newPos);
 		      parentData.updateChildWidths(parentNode, windowTree);
 		    }
-		  else if ((server->resize_edges & (direction == wm::Container::horizontalTilling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
+		  else if ((server->resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
 		  	   && windowTree.getSibling(node) != wm::nullNode)
 		    {
 		      auto nextNode(windowTree.getSibling(node));

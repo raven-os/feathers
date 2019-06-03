@@ -52,9 +52,9 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   if (server->openType == OpenType::dontCare)
     {
-      char const *tilling = server->configuration.get("tilling");
-      // tilling is either 'on' or 'off'
-      server->openType = (strcmp(tilling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
+      char const *tiling = server->configuration.get("tiling");
+      // tiling is either 'on' or 'off'
+      server->openType = (strcmp(tiling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
     }
   if (server->openType != OpenType::floating &&
       (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
@@ -89,7 +89,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 	    auto &container(prevData.getContainer());
 
-	    container.direction = (server->openType == OpenType::below) ? wm::Container::verticalTilling : wm::Container::horizontalTilling;
+	    container.direction = (server->openType == OpenType::below) ? wm::Container::verticalTiling : wm::Container::horizontalTiling;
 	    server->views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server->views[1].get()});
 	    windowNode = container.addChild(prevNode, windowTree, server->views[1]->windowNode, wm::ClientData{this});
 	    server->openType = OpenType::dontCare;
