@@ -41,7 +41,7 @@ namespace wm
       wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
     else
       {
-	auto &output(view->server->output.getOutput(view->getOutput()));
+	auto &output(Server::getInstance().output.getOutput(view->getOutput()));
 
         output.saved.width = size[0];
 	output.saved.height = size[1];
@@ -73,7 +73,7 @@ namespace wm
   {
     struct wlr_box box[1];
     wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
-    
+
     return {box->width, box->height};
   }
 

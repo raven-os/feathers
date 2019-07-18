@@ -26,7 +26,7 @@ struct ViewListeners
 class View : public ViewListeners
 {
 public:
-  View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface);
+  View(struct wlr_xdg_surface_v6 *xdg_surface);
   ~View();
 
   void xdg_surface_map(struct wl_listener *listener, void *data);
@@ -39,12 +39,12 @@ public:
   void close();
   void focus_view();
 
-  static View *desktop_view_at(Server *server, double lx, double ly,
+  static View *desktop_view_at(Server &server, double lx, double ly,
 			struct wlr_surface **surface, double *sx, double *sy);
 
   struct wlr_output *getOutput();
 
-  Server *server;
+  Server &server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   FixedPoint<-4, int> x, y;
@@ -60,11 +60,3 @@ private:
   bool at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 
 };
-
-namespace ServerView
-{
-  bool view_at(View *view, double lx, double ly,
-	       struct wlr_surface **surface, double *sx, double *sy);
-  View *desktop_view_at(Server *server, double lx, double ly,
-			struct wlr_surface **surface, double *sx, double *sy);
-}

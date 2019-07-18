@@ -14,13 +14,13 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(Server *server, struct wlr_output *wlr_output) :
-  server(server),
+Output::Output(struct wlr_output *wlr_output) :
+  server(Server::getInstance()),
   wlr_output(wlr_output),
   fullscreenView(nullptr),
   windowTree([&]()
 	     {
-	       auto box = wlr_output_layout_get_box(server->output.getLayout(), wlr_output);
+	       auto box = wlr_output_layout_get_box(server.output.getLayout(), wlr_output);
 
 	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
 							      FixedPoint<0, int>(box->y)}},
@@ -35,11 +35,11 @@ void Output::refreshImage()
 {
   char const *setting("background_image");
 
-  server->configuration.poll();
-  if (server->configuration.consumeChanged(setting))
+  server.configuration.poll();
+  if (server.configuration.consumeChanged(setting))
     {
       int width, height, channels;
-      char const *imagePath = server->configuration.get(setting);
+      char const *imagePath = server.configuration.get(setting);
       unsigned char *image = stbi_load(imagePath,
 				       &width,
 				       &height,
@@ -55,7 +55,7 @@ void Output::refreshImage()
 	}
 
       wallpaperTexture =
-	wlr_texture_from_pixels(server->renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
+	wlr_texture_from_pixels(server.renderer, WL_SHM_FORMAT_ABGR8888, width * 4,
 				width, height, image);
       stbi_image_free(image);
     }
@@ -63,7 +63,7 @@ void Output::refreshImage()
 
 void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_renderer *renderer = server->renderer;
+  struct wlr_renderer *renderer = server.renderer;
 
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
@@ -105,7 +105,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
       }
 
-      for (auto it = server->views.rbegin(); it != server->views.rend(); ++it)
+      for (auto it = server.views.rbegin(); it != server.views.rend(); ++it)
 	{
 	  auto &view(*it);
 
@@ -119,7 +119,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	      .view = view.get(),
 	      .when = &now,
 	      .fullscreen = false
-	      };	
+	      };
 	  wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
 	}
     }
@@ -128,7 +128,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_renderer_end(renderer);
   wlr_output_swap_buffers(wlr_output, NULL, NULL);
   refreshImage();
-  auto *box = wlr_output_layout_get_box(server->output.getLayout(), wlr_output);
+  auto *box = wlr_output_layout_get_box(server.output.getLayout(), wlr_output);
   {
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)

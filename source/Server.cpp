@@ -5,7 +5,7 @@
 #include "ServerInput.hpp"
 #include "Seat.hpp"
 
-std::unique_ptr<Server> Server::_instance(nullptr);
+Server Server::_instance = Server();
 
 Server::Server()
   : display(wl_display_create())
@@ -20,11 +20,11 @@ Server::Server()
 	       return renderer;
 	     }())
   , wl_event_loop(wl_display_get_event_loop(getWlDisplay()))
-  , output(this)
-  , xdgShell(new XdgShell(this))
-  , cursor(this)
-  , input(this)
-  , seat(this)
+  , output()
+  , xdgShell(new XdgShell())
+  , cursor()
+  , input()
+  , seat()
   , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
@@ -38,7 +38,7 @@ Server::~Server()
 
 Server &Server::getInstance()
 {
-  return *_instance;
+  return _instance;
 }
 
 void Server::run()

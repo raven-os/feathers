@@ -24,7 +24,7 @@ struct ServerCursorListeners
 class ServerCursor : public ServerCursorListeners
 {
 public:
-  ServerCursor(Server *server);
+  ServerCursor();
   ~ServerCursor() = default;
 
   void server_cursor_motion(struct wl_listener *listener, void *data);
@@ -39,7 +39,7 @@ public:
   CursorMode cursor_mode;
 
 private:
-  Server *server;
+  Server &server;
 
   void process_cursor_move(uint32_t time);
   void process_cursor_resize(uint32_t time);

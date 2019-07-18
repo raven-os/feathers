@@ -15,7 +15,7 @@ class Output : public OutputListeners
 {
 public:
 
-  Output(Server *server, struct wlr_output *wlr_output);
+  Output(struct wlr_output *wlr_output);
   ~Output() = default;
 
   void setFrameListener();
@@ -41,7 +41,7 @@ public:
   wlr_box saved;
 
 private:
-  Server *server;
+  Server &server;
   struct wlr_output *wlr_output;
   View *fullscreenView;
   wm::WindowTree windowTree;
