@@ -12,16 +12,17 @@ std::map<std::string, uint32_t> modifiersLst = {
   {"Ctrl", WLR_MODIFIER_CTRL}
 };
 
-Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
+Keyboard::Keyboard(struct wlr_input_device *device)
   : keymap(nullptr)
-  , server(server)
+  , server(Server::getInstance())
   , device(device)
 {
-  key_repeat_source = wl_event_loop_add_timer(server->wl_event_loop, keyboard_handle_repeat, this);
+  key_repeat_source = wl_event_loop_add_timer(server.wl_event_loop, keyboard_handle_repeat, this);
 
-  shortcuts["Alt+Return"] = {"Terminal", [server](){ Commands::open_terminal(server); }};
-  shortcuts["Alt+F4"] = {"destroy", [server](){
-    for (auto &view : server->views)
+  shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
+  shortcuts["Alt+F4"] = {"destroy", [](){
+    Server &server = Server::getInstance();
+    for (auto &view : server.views)
       {
 	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
 	    view->xdg_surface->toplevel->server_pending.activated)
@@ -31,21 +32,21 @@ Keyboard::Keyboard(Server *server, struct wlr_input_device *device)
 	  }
       }
   }};
-  shortcuts["Alt+F2"] = {"Toggle fullscreen", [server](){ Commands::toggle_fullscreen(server); }};
-  shortcuts["Alt+Tab"] = {"Switch window", [server](){ Commands::switch_window(server); }};
-  shortcuts["Alt+Escape"] = {"Leave", [server](){ Commands::close_compositor(server); }};
-  shortcuts["Alt+Space"] = {"Toggle float", [server](){ Commands::toggle_float_window(server); }};
-  shortcuts["Alt+E"] = {"Switch position", [server](){ Commands::switch_container_direction(server); }};
-  shortcuts["Alt+H"] = {"Open below", [server](){ server->openType = OpenType::below; }};
-  shortcuts["Alt+V"] = {"Open right", [server](){ server->openType = OpenType::right; }};
-  shortcuts["Alt+Up"] = {"Switch focus up", [server](){ Commands::switch_focus_up(server); }};
-  shortcuts["Alt+Left"] = {"Switch focus left", [server](){ Commands::switch_focus_left(server); }};
-  shortcuts["Alt+Down"] = {"Switch focus Down", [server](){ Commands::switch_focus_down(server); }};
-  shortcuts["Alt+Right"] = {"Switch focus Right", [server](){ Commands::switch_focus_right(server); }};
+  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](){ Commands::toggle_fullscreen(); }};
+  shortcuts["Alt+Tab"] = {"Switch window", [](){ Commands::switch_window(); }};
+  shortcuts["Alt+Escape"] = {"Leave", [](){ Commands::close_compositor(); }};
+  shortcuts["Alt+Space"] = {"Toggle float", [](){ Commands::toggle_float_window(); }};
+  shortcuts["Alt+E"] = {"Switch position", [](){ Commands::switch_container_direction(); }};
+  shortcuts["Alt+H"] = {"Open below", [](){ Server::getInstance().openType = OpenType::below; }};
+  shortcuts["Alt+V"] = {"Open right", [](){ Server::getInstance().openType = OpenType::right; }};
+  shortcuts["Alt+Up"] = {"Switch focus up", [](){ Commands::switch_focus_up(); }};
+  shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
+  shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
+  shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
-  shortcuts["Alt+F1"] = {"Open config editore", [server](){ Commands::open_config_editor(server); }};
+  shortcuts["Alt+F1"] = {"Open config editore", [](){ Commands::open_config_editor(); }};
 }
 
 Keyboard::~Keyboard() {
@@ -101,7 +102,7 @@ bool Keyboard::handle_keybinding()
 
 void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_seat *seat = server->seat.getSeat();
+  struct wlr_seat *seat = server.seat.getSeat();
   wlr_seat_set_keyboard(seat, device);
   wlr_seat_keyboard_notify_modifiers(seat,
 				     &device->keyboard->modifiers);
@@ -110,7 +111,7 @@ void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *lis
 void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_event_keyboard_key *event = static_cast<struct wlr_event_keyboard_key *>(data);
-  struct wlr_seat *seat = server->seat.getSeat();
+  struct wlr_seat *seat = server.seat.getSeat();
 
   uint32_t keycode = event->keycode + 8;
   const xkb_keysym_t *syms;

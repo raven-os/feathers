@@ -31,7 +31,7 @@ void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener,
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
 {
-  std::unique_ptr<Keyboard> keyboard(new Keyboard(server, device));
+  std::unique_ptr<Keyboard> keyboard(new Keyboard(device));
 
   keyboard->configure();
   keyboard->setModifiersListener();

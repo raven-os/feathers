@@ -4,9 +4,11 @@
 
 namespace
 {
-  auto getContainerFocusedView(Server *server, wm::WindowTree &windowTree, wm::WindowNodeIndex containerNode, wm::WindowNodeIndex viewNode)
+  auto getContainerFocusedView(wm::WindowTree &windowTree, wm::WindowNodeIndex containerNode, wm::WindowNodeIndex viewNode)
   {
-    for (auto &tmpView: server->views)
+    Server &server = Server::getInstance();
+
+    for (auto &tmpView: server.views)
       {
 	if (tmpView->windowNode != viewNode)
 	  {
@@ -23,14 +25,16 @@ namespace
     return wm::nullNode;
   }
 
-  void switch_focus_down_or_right(Server *server, bool parallelDirection)
+  void switch_focus_down_or_right(bool parallelDirection)
   {
-    if (server->views.empty())
+    Server &server = Server::getInstance();
+
+    if (server.views.empty())
       return ;
 
-    std::unique_ptr<View> &view = server->views.front();
+    std::unique_ptr<View> &view = server.views.front();
     auto viewNode(view->windowNode);
-    auto &output(server->output.getOutput(view->getOutput()));
+    auto &output(server.output.getOutput(view->getOutput()));
 
     if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
@@ -71,13 +75,13 @@ namespace
 	if (siblingNode == wm::nullNode || newContainer->direction == !parallelDirection)
 	  return;
 	if (std::holds_alternative<wm::Container>(windowTree.getData(siblingNode).data))
-	  newViewNode = getContainerFocusedView(server, windowTree, siblingNode, viewNode);
+	  newViewNode = getContainerFocusedView(windowTree, siblingNode, viewNode);
 	else
 	  newViewNode = siblingNode;
       }
     else if (newViewNode != wm::nullNode && std::holds_alternative<wm::Container>(windowTree.getData(newViewNode).data))
       {
-	newViewNode = getContainerFocusedView(server, windowTree, newViewNode, viewNode);
+	newViewNode = getContainerFocusedView(windowTree, newViewNode, viewNode);
       }
     if (newViewNode != viewNode && newViewNode != wm::nullNode)
       {
@@ -87,14 +91,16 @@ namespace
       }
   }
 
-void switch_focus_up_or_left(Server *server, bool parallelDirection)
+void switch_focus_up_or_left(bool parallelDirection)
 {
-  if (server->views.empty())
+  Server &server = Server::getInstance();
+
+  if (server.views.empty())
     return ;
 
-  std::unique_ptr<View> &view = server->views.front();
+  std::unique_ptr<View> &view = server.views.front();
   auto viewNode(view->windowNode);
-  auto &output(server->output.getOutput(view->getOutput()));
+  auto &output(server.output.getOutput(view->getOutput()));
 
   if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
@@ -138,7 +144,7 @@ void switch_focus_up_or_left(Server *server, bool parallelDirection)
 	{
 	  while (windowTree.getSibling(siblingNode) != tmpNode && windowTree.getSibling(siblingNode) != wm::nullNode)
 	    siblingNode = windowTree.getSibling(siblingNode);
-	  newViewNode = getContainerFocusedView(server, windowTree, siblingNode, viewNode);
+	  newViewNode = getContainerFocusedView(windowTree, siblingNode, viewNode);
 	}
       else
 	newViewNode = siblingNode;
@@ -156,7 +162,7 @@ void switch_focus_up_or_left(Server *server, bool parallelDirection)
 	{
 	  while (windowTree.getSibling(newViewNode) != tmpNode && windowTree.getSibling(newViewNode) != wm::nullNode)
 	    newViewNode = windowTree.getSibling(newViewNode);
-	  newViewNode = getContainerFocusedView(server, windowTree, newViewNode, viewNode);
+	  newViewNode = getContainerFocusedView(windowTree, newViewNode, viewNode);
 	}
     }
   if (newViewNode != viewNode)
@@ -170,14 +176,15 @@ void switch_focus_up_or_left(Server *server, bool parallelDirection)
 
 namespace Commands
 {
-  void open_terminal(Server *server) {
+  void open_terminal() {
+    Server &server = Server::getInstance();
     if (fork() == 0)
       {
-	std::string term = server->configuration.getOnce("terminal");
+	std::string term = server.configuration.getOnce("terminal");
 
 	if (!term.empty())
 	  {
-	    std::string command(server->configuration.getOnce("terminal"));
+	    std::string command(server.configuration.getOnce("terminal"));
 
 	    command += " || weston-terminal"; // fall back on weston-terminal in case of error
 	    std::cout << command << std::endl;
@@ -190,7 +197,9 @@ namespace Commands
       }
   }
 
-  void open_config_editor(Server *server) {
+  void open_config_editor() {
+    Server &server = Server::getInstance();
+
     if (fork() == 0)
     {
       std::unordered_map<std::string, std::string> commands;
@@ -202,8 +211,8 @@ namespace Commands
 
       std::array<std::string, 3u> terminals{
 	{
-	 server->configuration.getOnce("config_terminal"),
-	 server->configuration.getOnce("terminal"),
+	 server.configuration.getOnce("config_terminal"),
+	 server.configuration.getOnce("terminal"),
 	 "weston-terminal"
 	}
       };
@@ -221,42 +230,48 @@ namespace Commands
     }
   }
 
-  void toggle_fullscreen(Server *server) {
-    if (server->views.size() <= 0)
+  void toggle_fullscreen() {
+    Server &server = Server::getInstance();
+
+    if (server.views.size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server->views.front();
+    std::unique_ptr<View> &view = server.views.front();
 
     view->xdg_toplevel_request_fullscreen(nullptr, nullptr);
   }
 
-  void switch_window(Server *server) {
-    if (server->views.size() >= 2)
+  void switch_window() {
+    Server &server = Server::getInstance();
+
+    if (server.views.size() >= 2)
       {
-	if (server->views.front()->windowNode != wm::nullNode)
+	if (server.views.front()->windowNode != wm::nullNode)
 	  {
-	    std::partition(server->views.begin() + 1, server->views.end(),
+	    std::partition(server.views.begin() + 1, server.views.end(),
 			   [](auto &view) noexcept
 			   {
 			     return view->windowNode == wm::nullNode;
 			   });
 	  }
 
-	std::unique_ptr<View> &view = server->views[1];
+	std::unique_ptr<View> &view = server.views[1];
 
 	view->focus_view();
 	// focus view put the newly focused view in front
 	// so we put it back to its position and then rotate
-	std::iter_swap(server->views.begin(), server->views.begin() + 1);
-	std::rotate(server->views.begin(), server->views.begin() + 1, server->views.end());
+	std::iter_swap(server.views.begin(), server.views.begin() + 1);
+	std::rotate(server.views.begin(), server.views.begin() + 1, server.views.end());
       }
   }
 
-  void toggle_float_window(Server *server) {
-    if (server->views.size() <= 0)
-      return ;
-    std::unique_ptr<View> &view = server->views.front();
+  void toggle_float_window() {
+    Server &server = Server::getInstance();
 
-    auto &output = server->output.getOutput(view->getOutput());
+    if (server.views.size() <= 0)
+      return ;
+    std::unique_ptr<View> &view = server.views.front();
+
+    auto &output = server.output.getOutput(view->getOutput());
     auto &windowTree(output.getWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
@@ -275,14 +290,16 @@ namespace Commands
       view->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{view.get()});
   }
 
-  void switch_container_direction(Server *server) {
-    if (server->views.size() <= 0)
+  void switch_container_direction() {
+    Server &server = Server::getInstance();
+
+    if (server.views.size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server->views.front();
+    std::unique_ptr<View> &view = server.views.front();
 
     if (view->windowNode == wm::nullNode)
       return ;
-    auto &output = server->output.getOutput(view->getOutput());
+    auto &output = server.output.getOutput(view->getOutput());
     auto &windowTree(output.getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
     auto &parentData(windowTree.getData(parent).getContainer());
@@ -290,27 +307,29 @@ namespace Commands
     parentData.changeDirection(parent, windowTree);
   }
 
-  void close_compositor(Server *server) {
-    wl_display_terminate(server->getWlDisplay());
+  void close_compositor()
+  {
+    Server &server = Server::getInstance();
+    wl_display_terminate(server.getWlDisplay());
   }
 
-  void switch_focus_up(Server *server)
+  void switch_focus_up()
   {
-    switch_focus_up_or_left(server, wm::Container::verticalTiling);
+    switch_focus_up_or_left(wm::Container::verticalTiling);
   }
 
-  void switch_focus_left(Server *server)
+  void switch_focus_left()
   {
-    switch_focus_up_or_left(server, wm::Container::horizontalTiling);
+    switch_focus_up_or_left(wm::Container::horizontalTiling);
   }
 
-  void switch_focus_down(Server *server)
+  void switch_focus_down()
   {
-    switch_focus_down_or_right(server, wm::Container::verticalTiling);
+    switch_focus_down_or_right(wm::Container::verticalTiling);
   }
 
-  void switch_focus_right(Server *server)
+  void switch_focus_right()
   {
-    switch_focus_down_or_right(server, wm::Container::horizontalTiling);
+    switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 }
