@@ -17,7 +17,7 @@ struct KeyboardListeners
 class Keyboard : public KeyboardListeners
 {
 public:
-  Keyboard(Server *server, struct wlr_input_device *device);
+  Keyboard(struct wlr_input_device *device);
   ~Keyboard();
 
   void setModifiersListener();
@@ -29,7 +29,8 @@ public:
   bool debug = false;
 
 private:
-  Server *server;
+  Server &server;
+
   struct wlr_input_device *device;
   struct wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;

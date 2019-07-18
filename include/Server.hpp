@@ -21,8 +21,8 @@ enum class OpenType : uint8_t
 class Server
 {
 public:
-  Server();
   ~Server();
+
 
   void run();
 
@@ -36,6 +36,8 @@ public:
       wl_display_destroy(display);
     }
   };
+
+  static Server &getInstance();
 
   std::unique_ptr<struct wl_display, DisplayDeleter> display;
   struct wlr_backend *backend;
@@ -60,4 +62,9 @@ public:
   {
     return display.get();
   }
+
+private:
+  Server();
+
+  static std::unique_ptr<Server> _instance;
 };

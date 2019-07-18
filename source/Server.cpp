@@ -5,6 +5,8 @@
 #include "ServerInput.hpp"
 #include "Seat.hpp"
 
+std::unique_ptr<Server> Server::_instance(nullptr);
+
 Server::Server()
   : display(wl_display_create())
   , backend(wlr_backend_autocreate(getWlDisplay(), nullptr)) // nullptr can be replaced with a custom rendererx
@@ -32,6 +34,11 @@ Server::~Server()
 {
   // wl_display_destroy_clients(display);
   // wl_display_destroy(display);
+}
+
+Server &Server::getInstance()
+{
+  return *_instance;
 }
 
 void Server::run()
