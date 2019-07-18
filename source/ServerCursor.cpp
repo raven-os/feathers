@@ -4,12 +4,12 @@
 #include <cassert>
 #include <stdio.h>
 
-ServerCursor::ServerCursor(Server *server)
-  : server(server),
+ServerCursor::ServerCursor()
+  : server(Server::getInstance()),
     cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
 {
   cursor = wlr_cursor_create();
-  wlr_cursor_attach_output_layout(cursor, server->output.getLayout());
+  wlr_cursor_attach_output_layout(cursor, server.output.getLayout());
 
   cursor_mgr = wlr_xcursor_manager_create(nullptr, 24);
   wlr_xcursor_manager_load(cursor_mgr, 1);
@@ -27,25 +27,25 @@ ServerCursor::ServerCursor(Server *server)
 
 void ServerCursor::process_cursor_move([[maybe_unused]]uint32_t time)
 {
-  server->grabbed_view->x = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->x - server->grab_x)));
-  server->grabbed_view->y = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->y - server->grab_y)));
+  server.grabbed_view->x = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->x - server.grab_x)));
+  server.grabbed_view->y = FixedPoint<-4, int>(int(double(1 << 4) * (cursor->y - server.grab_y)));
 }
 
 void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 {
-  View *view = server->grabbed_view;
+  View *view = server.grabbed_view;
 
   if (view->windowNode == wm::nullNode)
     {
       struct wlr_box box[1];
       wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
 
-      double dx = cursor->x - server->grab_x + box->x;
-      double dy = cursor->y - server->grab_y + box->y;
-      int width = server->grab_width;
-      int height = server->grab_height;
+      double dx = cursor->x - server.grab_x + box->x;
+      double dy = cursor->y - server.grab_y + box->y;
+      int width = server.grab_width;
+      int height = server.grab_height;
 
-      if (server->resize_edges & WLR_EDGE_TOP)
+      if (server.resize_edges & WLR_EDGE_TOP)
 	{
 	  double y = cursor->y;
 
@@ -56,11 +56,11 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	    }
 	  view->y = FixedPoint<-4, int>(int(double(1 << 4) * (y - box->y)));
 	}
-      else if (server->resize_edges & WLR_EDGE_BOTTOM)
+      else if (server.resize_edges & WLR_EDGE_BOTTOM)
 	{
 	  height += dy;
 	}
-      if (server->resize_edges & WLR_EDGE_LEFT)
+      if (server.resize_edges & WLR_EDGE_LEFT)
 	{
 	  double x = cursor->x;
 
@@ -71,7 +71,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	    }
 	  view->x = FixedPoint<-4, int>(int(double(1 << 4) * (x - box->x)));
 	}
-      else if (server->resize_edges & WLR_EDGE_RIGHT)
+      else if (server.resize_edges & WLR_EDGE_RIGHT)
 	{
 	  width += dx;
 	}
@@ -79,7 +79,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
     }
   else
     {
-      Output &output(server->output.getOutput(view->getOutput()));
+      Output &output(server.output.getOutput(view->getOutput()));
       wm::WindowTree &windowTree(output.getWindowTree());
 
       for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTiling, wm::Container::verticalTiling})
@@ -94,7 +94,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 
 	      if (parentData.direction == direction)
 		{
-		  if ((server->resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
+		  if ((server.resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
 		      && windowTree.getFirstChild(parentNode) != node)
 		    {
 		      auto &data(windowTree.getData(node));
@@ -104,7 +104,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 		      data.move(node, windowTree, newPos);
 		      parentData.updateChildWidths(parentNode, windowTree);
 		    }
-		  else if ((server->resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
+		  else if ((server.resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
 		  	   && windowTree.getSibling(node) != wm::nullNode)
 		    {
 		      auto nextNode(windowTree.getSibling(node));
@@ -139,7 +139,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     default:
       {
 	double sx, sy;
-	struct wlr_seat *seat = server->seat.getSeat();
+	struct wlr_seat *seat = server.seat.getSeat();
 	struct wlr_surface *surface = NULL;
 	View *view = View::desktop_view_at(server, cursor->x,
 						 cursor->y, &surface, &sx, &sy);
@@ -181,7 +181,7 @@ void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]struct wl_liste
 void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
-  struct wlr_seat *seat = server->seat.getSeat();
+  struct wlr_seat *seat = server.seat.getSeat();
 
   wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
 
@@ -206,13 +206,13 @@ void ServerCursor::server_cursor_button([[maybe_unused]]struct wl_listener *list
 
 void ServerCursor::server_cursor_frame(struct wl_listener *, void *)
 {
-  wlr_seat_pointer_notify_frame(server->seat.getSeat());
+  wlr_seat_pointer_notify_frame(server.seat.getSeat());
 }
 
 void ServerCursor::server_cursor_axis([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
-  wlr_seat_pointer_notify_axis(server->seat.getSeat(),
+  wlr_seat_pointer_notify_axis(server.seat.getSeat(),
 			       event->time_msec, event->orientation, event->delta,
 			       event->delta_discrete, event->source);
 }

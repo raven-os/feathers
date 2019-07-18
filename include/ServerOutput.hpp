@@ -26,7 +26,7 @@ struct ServerOutputListeners
 class ServerOutput : public ServerOutputListeners
 {
 public:
-  ServerOutput(Server *server);
+  ServerOutput();
   ~ServerOutput() = default;
 
   void output_frame(struct wl_listener *listener, void *data);
@@ -40,7 +40,7 @@ public:
   Output const &getOutput(wlr_output *wlr_output) const noexcept;
 
 private:
-  Server *server;
+  Server &server;
 
   struct wlr_output_layout *output_layout;
   std::vector<std::unique_ptr<Output>> outputs;

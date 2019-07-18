@@ -13,13 +13,13 @@ struct SeatListeners
 class Seat : public SeatListeners
 {
 public:
-  Seat(Server *server);
+  Seat();
   ~Seat() = default;
 
   void seat_request_cursor(struct wl_listener *listener, void *data);
   struct wlr_seat *getSeat() const noexcept;
 
 private:
-  Server *server;
+  Server &server;
   struct wlr_seat *seat;
 };

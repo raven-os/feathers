@@ -15,7 +15,7 @@ struct XdgShellListeners
 class XdgShell : public XdgShellListeners
 {
 public:
-  XdgShell(Server *server);
+  XdgShell();
   ~XdgShell() = default;
 
   void xdg_surface_destroy(struct wl_listener *listener, void *data);
@@ -23,6 +23,6 @@ public:
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
 private:
-  Server *server;
+  Server &server;
   struct wlr_xdg_shell_v6 *xdg_shell;
 };

@@ -66,5 +66,5 @@ public:
 private:
   Server();
 
-  static std::unique_ptr<Server> _instance;
+  static Server _instance;
 };

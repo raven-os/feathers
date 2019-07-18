@@ -1,8 +1,8 @@
 #include "View.hpp"
 #include "Server.hpp"
 
-View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
-  server(server),
+View::View(struct wlr_xdg_surface_v6 *xdg_surface) :
+  server(Server::getInstance()),
   xdg_surface(xdg_surface),
   mapped(false),
   x(0),
@@ -14,7 +14,7 @@ View::View(Server *server, struct wlr_xdg_surface_v6 *xdg_surface) :
   wl_signal_add(&xdg_surface->events.map, &map);
   SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap);
   wl_signal_add(&xdg_surface->events.unmap, &unmap);
-  SET_LISTENER(View, ViewListeners, destroy, server->xdgShell->xdg_surface_destroy);
+  SET_LISTENER(View, ViewListeners, destroy, server.xdgShell->xdg_surface_destroy);
   wl_signal_add(&xdg_surface->events.destroy, &destroy);
   SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move);
   wl_signal_add(&toplevel->events.request_move, &request_move);
@@ -47,17 +47,17 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   previous_size = {box->width, box->height};
 
-  auto &output(server->output.getOutput(getOutput()));
+  auto &output(server.output.getOutput(getOutput()));
   auto &windowTree(output.getWindowTree());
 
-  if (server->openType == OpenType::dontCare)
+  if (server.openType == OpenType::dontCare)
     {
-      char const *tiling = server->configuration.get("tiling");
+      char const *tiling = server.configuration.get("tiling");
       // tiling is either 'on' or 'off'
-      server->openType = (strcmp(tiling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
+      server.openType = (strcmp(tiling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
     }
-  if (server->openType != OpenType::floating &&
-      (server->views.size() == 1 || server->views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
+  if (server.openType != OpenType::floating &&
+      (server.views.size() == 1 || server.views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
     {
       auto rootNode(windowTree.getRootIndex());
       auto &rootNodeData(windowTree.getData(rootNode));
@@ -66,11 +66,11 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
     }
   else
     {
-      switch (server->openType)
+      switch (server.openType)
 	{
 	case OpenType::dontCare:
 	  {
-	    auto prevNode(server->views[1]->windowNode);
+	    auto prevNode(server.views[1]->windowNode);
 	    auto parentNode(windowTree.getParent(prevNode));
 	    auto &parentNodeData(windowTree.getData(parentNode));
 
@@ -80,7 +80,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	case OpenType::below:
 	case OpenType::right:
 	  {
-	    auto prevNode(server->views[1]->windowNode);
+	    auto prevNode(server.views[1]->windowNode);
 	    auto &prevData(windowTree.getData(prevNode));
 	    auto position(prevData.getPosition());
 	    auto size(prevData.getSize());
@@ -89,16 +89,16 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 	    auto &container(prevData.getContainer());
 
-	    container.direction = (server->openType == OpenType::below) ? wm::Container::verticalTiling : wm::Container::horizontalTiling;
-	    server->views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server->views[1].get()});
-	    windowNode = container.addChild(prevNode, windowTree, server->views[1]->windowNode, wm::ClientData{this});
-	    server->openType = OpenType::dontCare;
+	    container.direction = (server.openType == OpenType::below) ? wm::Container::verticalTiling : wm::Container::horizontalTiling;
+	    server.views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server.views[1].get()});
+	    windowNode = container.addChild(prevNode, windowTree, server.views[1]->windowNode, wm::ClientData{this});
+	    server.openType = OpenType::dontCare;
 	  }
 	  break;
 	case OpenType::floating:
 	  {
 	    windowNode = wm::nullNode;
-	    server->openType = OpenType::dontCare;
+	    server.openType = OpenType::dontCare;
 	  }
 	  break;
 	}
@@ -107,7 +107,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  auto &output(server->output.getOutput(getOutput()));
+  auto &output(server.output.getOutput(getOutput()));
 
   mapped = false;
 
@@ -131,14 +131,14 @@ void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listene
 
 void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  if (server->views.size() >= 1)
+  if (server.views.size() >= 1)
     {
-      auto &output = server->output.getOutput(getOutput());
+      auto &output = server.output.getOutput(getOutput());
 
       if (!output.getFullscreenView())
 	{
 	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
-	  struct wlr_box *outputBox = wlr_output_layout_get_box(server->output.getLayout(), getOutput());
+	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.output.getLayout(), getOutput());
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
 	  output.setFullscreenView(this);
@@ -157,7 +157,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_popup_v6 *xdg_popup = static_cast<struct wlr_xdg_popup_v6 *>(data);
-  popup = std::make_unique<Popup>(Popup(server, this, xdg_popup->base));
+  popup = std::make_unique<Popup>(Popup(this, xdg_popup->base));
 }
 
 void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -178,17 +178,17 @@ struct wlr_output *View::getOutput()
 
   double outputX;
   double outputY;
-  wlr_output_layout_closest_point(server->output.getLayout(), nullptr,
+  wlr_output_layout_closest_point(server.output.getLayout(), nullptr,
 				  x.getDoubleValue() + (double)viewBox.width/2,
 				  y.getDoubleValue() + (double)viewBox.height/2,
 				  &outputX, &outputY);
-  return wlr_output_layout_output_at(server->output.getLayout(), outputX, outputY);
+  return wlr_output_layout_output_at(server.output.getLayout(), outputX, outputY);
 }
 
 void View::focus_view()
 {
   struct wlr_surface *surface = xdg_surface->surface;
-  struct wlr_seat *seat = server->seat.getSeat();
+  struct wlr_seat *seat = server.seat.getSeat();
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
   if (prev_surface == surface)
     {
@@ -203,15 +203,15 @@ void View::focus_view()
   struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
   {
-    auto it(std::find_if(server->views.begin(), server->views.end(),
+    auto it(std::find_if(server.views.begin(), server.views.end(),
 			 [this](auto const &ptr)
 			 {
 			   return ptr.get() == this;
 			 }));
     std::unique_ptr<View> ptr(std::move(*it));
 
-    std::move_backward(server->views.begin(), it, it + 1);
-    server->views.front() = std::move(ptr);
+    std::move_backward(server.views.begin(), it, it + 1);
+    server.views.front() = std::move(ptr);
   }
   wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
   wlr_seat_keyboard_notify_enter(seat, xdg_surface->surface, keyboard->keycodes,
@@ -220,28 +220,28 @@ void View::focus_view()
 
 void View::begin_interactive(CursorMode mode, uint32_t edges)
 {
-  struct wlr_surface *focused_surface = server->seat.getSeat()->pointer_state.focused_surface;
+  struct wlr_surface *focused_surface = server.seat.getSeat()->pointer_state.focused_surface;
   if (xdg_surface->surface != focused_surface)
     {
       return;
     }
-  server->grabbed_view = this;
-  server->cursor.cursor_mode = mode;
+  server.grabbed_view = this;
+  server.cursor.cursor_mode = mode;
   struct wlr_box geo_box;
   wlr_xdg_surface_v6_get_geometry(xdg_surface, &geo_box);
   if (mode == CursorMode::CURSOR_MOVE)
     {
-      server->grab_x = server->cursor.cursor->x - x.getDoubleValue();
-      server->grab_y = server->cursor.cursor->y - y.getDoubleValue();
+      server.grab_x = server.cursor.cursor->x - x.getDoubleValue();
+      server.grab_y = server.cursor.cursor->y - y.getDoubleValue();
     }
   else
     {
-      server->grab_x = server->cursor.cursor->x + geo_box.x;
-      server->grab_y = server->cursor.cursor->y + geo_box.y;
+      server.grab_x = server.cursor.cursor->x + geo_box.x;
+      server.grab_y = server.cursor.cursor->y + geo_box.y;
     }
-  server->grab_width = geo_box.width;
-  server->grab_height = geo_box.height;
-  server->resize_edges = edges;
+  server.grab_width = geo_box.width;
+  server.grab_height = geo_box.height;
+  server.resize_edges = edges;
 }
 
 bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
@@ -266,10 +266,10 @@ bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, do
   return false;
 }
 
-View *View::desktop_view_at(Server *server, double lx, double ly,
+View *View::desktop_view_at(Server &server, double lx, double ly,
 			    struct wlr_surface **surface, double *sx, double *sy)
 {
-  for (auto &view : server->views)
+  for (auto &view : server.views)
     {
       if (view->at(lx, ly, surface, sx, sy))
 	{

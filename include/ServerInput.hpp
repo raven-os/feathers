@@ -17,13 +17,13 @@ struct ServerInputListeners
 class ServerInput : public ServerInputListeners
 {
 public:
-  ServerInput(Server *server);
+  ServerInput();
   ~ServerInput() = default;
 
   void server_new_input(struct wl_listener *listener, void *data);
 
 private:
-  Server *server;
+  Server &server;
 
   std::vector<std::unique_ptr<Keyboard>> keyboards;
 

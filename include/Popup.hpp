@@ -15,13 +15,12 @@ struct PopupListeners
 class Popup : public PopupListeners
 {
   public:
-    Popup(Server *server, View *child, struct wlr_xdg_surface_v6 *xdg_surface);
+    Popup(View *child, struct wlr_xdg_surface_v6 *xdg_surface);
     ~Popup();
 
     struct wlr_xdg_surface_v6 *xdg_surface;
 
   private:
-    Server *server;
     View *child;
 
     void handle_new_popup(struct wl_listener *listener, void *data);

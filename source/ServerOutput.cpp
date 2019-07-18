@@ -1,10 +1,10 @@
 #include "ServerOutput.hpp"
 #include "Server.hpp"
 
-ServerOutput::ServerOutput(Server *server) : server(server) {
+ServerOutput::ServerOutput() : server(Server::getInstance()) {
   output_layout = wlr_output_layout_create();
   SET_LISTENER(ServerOutput, ServerOutputListeners, new_output, server_new_output);
-  wl_signal_add(&server->backend->events.new_output, &new_output);
+  wl_signal_add(&server.backend->events.new_output, &new_output);
 }
 
 void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
@@ -19,7 +19,7 @@ void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listene
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
 
-  std::unique_ptr<Output> output(new Output(server, wlr_output));
+  std::unique_ptr<Output> output(new Output(wlr_output));
   output->setFrameListener();
   outputs.emplace_back(std::move(output));
 
@@ -39,7 +39,7 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
     }
 
   double ox = 0, oy = 0;
-  wlr_output_layout_output_coords(view->server->output.getLayout(), output, &ox, &oy);
+  wlr_output_layout_output_coords(view->server.output.getLayout(), output, &ox, &oy);
   ox += sx;
   oy += sy;
   if (!rdata->fullscreen)
