@@ -1,9 +1,9 @@
 #include "ServerInput.hpp"
 #include "Server.hpp"
 
-ServerInput::ServerInput() : server(Server::getInstance()) {
+ServerInput::ServerInput() {
   SET_LISTENER(ServerInput, ServerInputListeners, new_input, server_new_input);
-  wl_signal_add(&server.backend->events.new_input, &new_input);
+  wl_signal_add(&Server::getInstance().backend->events.new_input, &new_input);
 }
 
 void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener, void *data)
@@ -26,7 +26,7 @@ void ServerInput::server_new_input([[maybe_unused]]struct wl_listener *listener,
     caps |= WL_SEAT_CAPABILITY_KEYBOARD;
   }
 
-  wlr_seat_set_capabilities(server.seat.getSeat(), caps);
+  wlr_seat_set_capabilities(Server::getInstance().seat.getSeat(), caps);
 }
 
 void ServerInput::server_new_keyboard(struct wlr_input_device *device)
@@ -37,11 +37,11 @@ void ServerInput::server_new_keyboard(struct wlr_input_device *device)
   keyboard->setModifiersListener();
   keyboard->setKeyListener();
 
-  wlr_seat_set_keyboard(server.seat.getSeat(), device);
+  wlr_seat_set_keyboard(Server::getInstance().seat.getSeat(), device);
   keyboards.emplace_back(std::move(keyboard));
 }
 
 void ServerInput::server_new_pointer(struct wlr_input_device *device)
 {
-  wlr_cursor_attach_input_device(server.cursor.cursor, device);
+  wlr_cursor_attach_input_device(Server::getInstance().cursor.cursor, device);
 }

@@ -40,8 +40,6 @@ public:
   Output const &getOutput(wlr_output *wlr_output) const noexcept;
 
 private:
-  Server &server;
-
   struct wlr_output_layout *output_layout;
   std::vector<std::unique_ptr<Output>> outputs;
 };

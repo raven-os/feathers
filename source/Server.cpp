@@ -36,7 +36,7 @@ Server::~Server()
   // wl_display_destroy(display);
 }
 
-Server &Server::getInstance()
+Server &Server::getInstance() noexcept
 {
   return _instance;
 }

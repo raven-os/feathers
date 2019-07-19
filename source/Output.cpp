@@ -15,12 +15,11 @@
 #pragma GCC diagnostic pop
 
 Output::Output(struct wlr_output *wlr_output) :
-  server(Server::getInstance()),
   wlr_output(wlr_output),
   fullscreenView(nullptr),
   windowTree([&]()
 	     {
-	       auto box = wlr_output_layout_get_box(server.output.getLayout(), wlr_output);
+	       auto box = wlr_output_layout_get_box(Server::getInstance().output.getLayout(), wlr_output);
 
 	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
 							      FixedPoint<0, int>(box->y)}},
@@ -33,6 +32,7 @@ Output::Output(struct wlr_output *wlr_output) :
 
 void Output::refreshImage()
 {
+  Server &server = Server::getInstance();
   char const *setting("background_image");
 
   server.configuration.poll();
@@ -63,6 +63,7 @@ void Output::refreshImage()
 
 void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
+  Server &server = Server::getInstance();
   struct wlr_renderer *renderer = server.renderer;
 
   struct timespec now;

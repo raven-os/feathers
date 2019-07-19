@@ -8,7 +8,7 @@ namespace
   {
     Server &server = Server::getInstance();
 
-    for (auto &tmpView: server.views)
+    for (auto &tmpView : server.views)
       {
 	if (tmpView->windowNode != viewNode)
 	  {

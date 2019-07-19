@@ -20,6 +20,5 @@ public:
   struct wlr_seat *getSeat() const noexcept;
 
 private:
-  Server &server;
   struct wlr_seat *seat;
 };

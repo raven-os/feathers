@@ -29,8 +29,6 @@ public:
   bool debug = false;
 
 private:
-  Server &server;
-
   struct wlr_input_device *device;
   struct wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;

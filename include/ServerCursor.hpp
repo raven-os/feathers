@@ -39,8 +39,6 @@ public:
   CursorMode cursor_mode;
 
 private:
-  Server &server;
-
   void process_cursor_move(uint32_t time);
   void process_cursor_resize(uint32_t time);
   void process_cursor_motion(uint32_t time);
