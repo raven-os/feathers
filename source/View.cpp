@@ -2,7 +2,6 @@
 #include "Server.hpp"
 
 View::View(struct wlr_xdg_surface_v6 *xdg_surface) :
-  server(Server::getInstance()),
   xdg_surface(xdg_surface),
   mapped(false),
   x(0),
@@ -39,6 +38,7 @@ View::~View()
 
 void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
+  Server &server = Server::getInstance();
   struct wlr_box box[1];
 
   mapped = true;
@@ -107,7 +107,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  auto &output(server.output.getOutput(getOutput()));
+  auto &output(Server::getInstance().output.getOutput(getOutput()));
 
   mapped = false;
 
@@ -131,6 +131,7 @@ void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listene
 
 void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
+  Server &server = Server::getInstance();
   if (server.views.size() >= 1)
     {
       auto &output = server.output.getOutput(getOutput());
@@ -173,6 +174,7 @@ void View::close()
 
 struct wlr_output *View::getOutput()
 {
+  Server &server = Server::getInstance();
   struct wlr_box viewBox;
   wlr_xdg_surface_v6_get_geometry(xdg_surface, &viewBox);
 
@@ -187,6 +189,7 @@ struct wlr_output *View::getOutput()
 
 void View::focus_view()
 {
+  Server &server = Server::getInstance();
   struct wlr_surface *surface = xdg_surface->surface;
   struct wlr_seat *seat = server.seat.getSeat();
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
@@ -220,6 +223,7 @@ void View::focus_view()
 
 void View::begin_interactive(CursorMode mode, uint32_t edges)
 {
+  Server &server = Server::getInstance();
   struct wlr_surface *focused_surface = server.seat.getSeat()->pointer_state.focused_surface;
   if (xdg_surface->surface != focused_surface)
     {
@@ -266,9 +270,10 @@ bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, do
   return false;
 }
 
-View *View::desktop_view_at(Server &server, double lx, double ly,
+View *View::desktop_view_at(double lx, double ly,
 			    struct wlr_surface **surface, double *sx, double *sy)
 {
+  Server &server  = Server::getInstance();
   for (auto &view : server.views)
     {
       if (view->at(lx, ly, surface, sx, sy))

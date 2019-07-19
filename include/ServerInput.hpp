@@ -23,8 +23,6 @@ public:
   void server_new_input(struct wl_listener *listener, void *data);
 
 private:
-  Server &server;
-
   std::vector<std::unique_ptr<Keyboard>> keyboards;
 
   bool handle_keybinding(xkb_keysym_t sym);

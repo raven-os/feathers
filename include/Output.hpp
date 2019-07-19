@@ -41,7 +41,6 @@ public:
   wlr_box saved;
 
 private:
-  Server &server;
   struct wlr_output *wlr_output;
   View *fullscreenView;
   wm::WindowTree windowTree;

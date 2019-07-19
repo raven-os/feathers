@@ -23,6 +23,5 @@ public:
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
 private:
-  Server &server;
   struct wlr_xdg_shell_v6 *xdg_shell;
 };

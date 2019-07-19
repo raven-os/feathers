@@ -39,12 +39,11 @@ public:
   void close();
   void focus_view();
 
-  static View *desktop_view_at(Server &server, double lx, double ly,
+  static View *desktop_view_at(double lx, double ly,
 			struct wlr_surface **surface, double *sx, double *sy);
 
   struct wlr_output *getOutput();
 
-  Server &server;
   struct wlr_xdg_surface_v6 *xdg_surface;
   bool mapped;
   FixedPoint<-4, int> x, y;
