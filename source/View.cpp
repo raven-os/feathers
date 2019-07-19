@@ -13,7 +13,8 @@ View::View(struct wlr_xdg_surface_v6 *xdg_surface) :
   wl_signal_add(&xdg_surface->events.map, &map);
   SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap);
   wl_signal_add(&xdg_surface->events.unmap, &unmap);
-  SET_LISTENER(View, ViewListeners, destroy, server.xdgShell->xdg_surface_destroy);
+  // external function (not class member) so manual assignement necessary
+  destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xdgShell->xdg_surface_destroy(listener, data); };
   wl_signal_add(&xdg_surface->events.destroy, &destroy);
   SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move);
   wl_signal_add(&toplevel->events.request_move, &request_move);
