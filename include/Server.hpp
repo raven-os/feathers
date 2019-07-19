@@ -39,7 +39,8 @@ public:
     }
   };
 
-  static Server &getInstance() noexcept {
+  static Server &getInstance() noexcept
+  {
       return _instance;
   };
 
