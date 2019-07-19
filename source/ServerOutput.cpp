@@ -49,10 +49,10 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
     }
 
   struct wlr_box box = {
-			.x = ox * output->scale,
-			.y = oy * output->scale,
-			.width = surface->current.width * output->scale,
-			.height = surface->current.height * output->scale,
+			.x = int(ox * output->scale),
+			.y = int(oy * output->scale),
+			.width = int(float(surface->current.width) * output->scale),
+			.height = int(float(surface->current.height) * output->scale),
   };
 
   float matrix[9];

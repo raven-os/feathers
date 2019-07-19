@@ -49,7 +49,7 @@ public:
   FixedPoint<-4, int> x, y;
   std::unique_ptr<Popup> popup;
 
-  std::array<int16_t, 2u> previous_size;
+  std::array<int, 2u> previous_size;
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};
   bool fullscreen{false};

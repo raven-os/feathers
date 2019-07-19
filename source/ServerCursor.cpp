@@ -50,31 +50,31 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	{
 	  double y = cursor->y;
 
-	  height -= dy;
+	  height -= int(dy);
 	  if (height < 1) // TODO: prevent moving the window downwards properly
 	    {
-	      y += height;
+	      y += double(height);
 	    }
 	  view->y = FixedPoint<-4, int>(int(double(1 << 4) * (y - box->y)));
 	}
       else if (server.resize_edges & WLR_EDGE_BOTTOM)
 	{
-	  height += dy;
+	  height += int(dy);
 	}
       if (server.resize_edges & WLR_EDGE_LEFT)
 	{
 	  double x = cursor->x;
 
-	  width -= dx;
+	  width -= int(dx);
 	  if (width < 1) // TODO: prevent moving the window to the right properly
 	    {
-	      x += width;
+	      x += double(width);
 	    }
 	  view->x = FixedPoint<-4, int>(int(double(1 << 4) * (x - box->x)));
 	}
       else if (server.resize_edges & WLR_EDGE_RIGHT)
 	{
-	  width += dx;
+	  width += int(dx);
 	}
       wlr_xdg_toplevel_v6_set_size(view->xdg_surface, width, height);
     }
@@ -86,7 +86,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
       for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTiling, wm::Container::verticalTiling})
 	{
 	  // TODO: clamp cursor position to not cause negative sizes and moving windows
-	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * (direction == wm::Container::horizontalTiling ? cursor->x : cursor->y));
+	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * int32_t((direction == wm::Container::horizontalTiling ? cursor->x : cursor->y)));
 
 	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
 	    {

@@ -27,7 +27,7 @@ namespace wm
   {
   }
 
-  FixedPoint<-4, uint32_t> Container::getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
+  FixedPoint<-4, uint32_t> Container::getChildWidth([[maybe_unused]]WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
   {
     auto &childData(windowTree.getData(childIndex));
     auto sibling(windowTree.getSibling(childIndex));
@@ -231,12 +231,12 @@ namespace wm
   {
     return rect.position;
   }
-  
+
   std::array<uint16_t, 2u> Container::getSize() const noexcept
   {
     std::array<uint16_t, 2u> size;
 
-    for (int i = 0; i < size.size(); ++i)
+    for (uint32_t i = 0; i < size.size(); ++i)
       size[i] = FixedPoint<0, uint32_t>(rect.size[i]).value;
     return size;
   }

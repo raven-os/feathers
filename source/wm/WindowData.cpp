@@ -74,7 +74,7 @@ namespace wm
     struct wlr_box box[1];
     wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
 
-    return {box->width, box->height};
+    return {uint16_t(box->width), uint16_t(box->height)};
   }
 
   Container &WindowData::getContainer() noexcept

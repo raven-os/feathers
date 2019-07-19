@@ -102,6 +102,8 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    server.openType = OpenType::dontCare;
 	  }
 	  break;
+  default:
+    break;
 	}
     }
 }
@@ -182,8 +184,8 @@ struct wlr_output *View::getOutput()
   double outputX;
   double outputY;
   wlr_output_layout_closest_point(server.output.getLayout(), nullptr,
-				  x.getDoubleValue() + (double)viewBox.width/2,
-				  y.getDoubleValue() + (double)viewBox.height/2,
+				  x.getDoubleValue() + static_cast<double>(viewBox.width/2),
+				  y.getDoubleValue() + static_cast<double>(viewBox.height/2),
 				  &outputX, &outputY);
   return wlr_output_layout_output_at(server.output.getLayout(), outputX, outputY);
 }
