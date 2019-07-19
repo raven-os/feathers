@@ -273,7 +273,7 @@ bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, do
 View *View::desktop_view_at(double lx, double ly,
 			    struct wlr_surface **surface, double *sx, double *sy)
 {
-  Server &server  = Server::getInstance();
+  Server &server = Server::getInstance();
   for (auto &view : server.views)
     {
       if (view->at(lx, ly, surface, sx, sy))
