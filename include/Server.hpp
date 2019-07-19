@@ -39,7 +39,9 @@ public:
     }
   };
 
-  static Server &getInstance() noexcept;
+  static Server &getInstance() noexcept {
+      return _instance;
+  };
 
   std::unique_ptr<struct wl_display, DisplayDeleter> display;
   struct wlr_backend *backend;
