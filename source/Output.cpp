@@ -134,8 +134,8 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
       windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
-    if (windowTree.getData(windowTree.getRootIndex()).getSize() != std::array<uint16_t, 2u>{box->width, box->height})
-      windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, {box->width, box->height});
+    if (windowTree.getData(windowTree.getRootIndex()).getSize() != std::array<uint16_t, 2u>{uint16_t(box->width), uint16_t(box->height)})
+      windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, {uint16_t(box->width), uint16_t(box->height)});
   }
 }
 
