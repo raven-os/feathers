@@ -1,3 +1,4 @@
+#include <cassert>
 #include "View.hpp"
 #include "Server.hpp"
 
@@ -103,6 +104,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	  }
 	  break;
   default:
+    assert("Unexpected openType value.");
     break;
 	}
     }
