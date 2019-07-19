@@ -36,11 +36,6 @@ Server::~Server()
   // wl_display_destroy(display);
 }
 
-Server &Server::getInstance() noexcept
-{
-  return _instance;
-}
-
 void Server::run()
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());
