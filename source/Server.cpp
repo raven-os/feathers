@@ -1,7 +1,7 @@
 #include "Server.hpp"
 #include "XdgShell.hpp"
 #include "ServerCursor.hpp"
-#include "ServerOutput.hpp"
+#include "OutputManager.hpp"
 #include "ServerInput.hpp"
 #include "Seat.hpp"
 
@@ -20,7 +20,7 @@ Server::Server()
 	       return renderer;
 	     }())
   , wl_event_loop(wl_display_get_event_loop(getWlDisplay()))
-  , output()
+  , outputManager()
   , xdgShell(new XdgShell())
   , cursor()
   , input()

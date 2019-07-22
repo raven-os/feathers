@@ -34,7 +34,7 @@ namespace
 
     std::unique_ptr<View> &view = server.views.front();
     auto viewNode(view->windowNode);
-    auto &output(server.output.getOutput(view->getOutput()));
+    auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
     if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
@@ -100,7 +100,7 @@ void switch_focus_up_or_left(bool parallelDirection)
 
   std::unique_ptr<View> &view = server.views.front();
   auto viewNode(view->windowNode);
-  auto &output(server.output.getOutput(view->getOutput()));
+  auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
   if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
@@ -271,7 +271,7 @@ namespace Commands
       return ;
     std::unique_ptr<View> &view = server.views.front();
 
-    auto &output = server.output.getOutput(view->getOutput());
+    auto &output = server.outputManager.getOutput(view->getWlrOutput());
     auto &windowTree(output.getWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
@@ -299,7 +299,7 @@ namespace Commands
 
     if (view->windowNode == wm::nullNode)
       return ;
-    auto &output = server.output.getOutput(view->getOutput());
+    auto &output = server.outputManager.getOutput(view->getWlrOutput());
     auto &windowTree(output.getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
     auto &parentData(windowTree.getData(parent).getContainer());
