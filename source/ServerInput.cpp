@@ -1,7 +1,8 @@
 #include "InputManager.hpp"
 #include "Server.hpp"
 
-InputManager::InputManager() {
+InputManager::InputManager()
+{
   SET_LISTENER(InputManager, InputManagerListeners, new_input, server_new_input);
   wl_signal_add(&Server::getInstance().backend->events.new_input, &new_input);
 }
