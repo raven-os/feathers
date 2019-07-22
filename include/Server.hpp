@@ -5,7 +5,7 @@
 # include "XdgShell.hpp"
 # include "Output.hpp"
 # include "ServerCursor.hpp"
-# include "ServerInput.hpp"
+# include "InputManager.hpp"
 # include "OutputManager.hpp"
 # include "Seat.hpp"
 # include "conf/Configuration.hpp"
@@ -54,7 +54,7 @@ public:
   OutputManager outputManager;
   XdgShell *xdgShell;
   ServerCursor cursor;
-  ServerInput input;
+  InputManager inputManager;
   Seat seat;
 
   View *grabbed_view;

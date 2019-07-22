@@ -9,16 +9,16 @@
 
 class Server;
 
-struct ServerInputListeners
+struct InputManagerListeners
 {
   struct wl_listener new_input;
 };
 
-class ServerInput : public ServerInputListeners
+class InputManager : public InputManagerListeners
 {
 public:
-  ServerInput();
-  ~ServerInput() = default;
+  InputManager();
+  ~InputManager() = default;
 
   void server_new_input(struct wl_listener *listener, void *data);
 

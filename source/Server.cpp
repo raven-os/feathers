@@ -2,7 +2,7 @@
 #include "XdgShell.hpp"
 #include "ServerCursor.hpp"
 #include "OutputManager.hpp"
-#include "ServerInput.hpp"
+#include "InputManager.hpp"
 #include "Seat.hpp"
 
 Server Server::_instance = Server();
@@ -23,7 +23,7 @@ Server::Server()
   , outputManager()
   , xdgShell(new XdgShell())
   , cursor()
-  , input()
+  , inputManager()
   , seat()
   , openType(OpenType::dontCare)
 {
