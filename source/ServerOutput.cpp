@@ -1,13 +1,13 @@
-#include "ServerOutput.hpp"
+#include "OutputManager.hpp"
 #include "Server.hpp"
 
-ServerOutput::ServerOutput() {
+OutputManager::OutputManager() {
   output_layout = wlr_output_layout_create();
-  SET_LISTENER(ServerOutput, ServerOutputListeners, new_output, server_new_output);
+  SET_LISTENER(OutputManager, OutputManagerListeners, new_output, server_new_output);
   wl_signal_add(&Server::getInstance().backend->events.new_output, &new_output);
 }
 
-void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
+void OutputManager::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
 {
   struct wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
 
@@ -26,7 +26,7 @@ void ServerOutput::server_new_output([[maybe_unused]]struct wl_listener *listene
   wlr_output_create_global(wlr_output);
 }
 
-void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
+void OutputManager::render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
 {
   render_data *rdata = static_cast<render_data*>(data);
   View *view = rdata->view;
@@ -39,7 +39,7 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
     }
 
   double ox = 0, oy = 0;
-  wlr_output_layout_output_coords(Server::getInstance().output.getLayout(), output, &ox, &oy);
+  wlr_output_layout_output_coords(Server::getInstance().outputManager.getLayout(), output, &ox, &oy);
   ox += sx;
   oy += sy;
   if (!rdata->fullscreen)
@@ -65,17 +65,17 @@ void ServerOutput::render_surface(struct wlr_surface *surface, int sx, int sy, v
   wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-struct wlr_output_layout *ServerOutput::getLayout() const noexcept
+struct wlr_output_layout *OutputManager::getLayout() const noexcept
 {
   return output_layout;
 }
 
-std::vector<std::unique_ptr<Output>> const& ServerOutput::getOutputs() const
+std::vector<std::unique_ptr<Output>> const& OutputManager::getOutputs() const
 {
   return outputs;
 }
 
-Output &ServerOutput::getOutput(wlr_output *wlr_output) noexcept
+Output &OutputManager::getOutput(wlr_output *wlr_output) noexcept
 {
   return *std::find_if(getOutputs().begin(), getOutputs().end(),
 		       [&wlr_output](auto &out) noexcept {
@@ -83,7 +83,7 @@ Output &ServerOutput::getOutput(wlr_output *wlr_output) noexcept
 		       })->get();
 }
 
-Output const &ServerOutput::getOutput(wlr_output *wlr_output) const noexcept
+Output const &OutputManager::getOutput(wlr_output *wlr_output) const noexcept
 {
-  return const_cast<ServerOutput *>(this)->getOutput(wlr_output);
+  return const_cast<OutputManager *>(this)->getOutput(wlr_output);
 }

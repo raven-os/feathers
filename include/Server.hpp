@@ -6,7 +6,7 @@
 # include "Output.hpp"
 # include "ServerCursor.hpp"
 # include "ServerInput.hpp"
-# include "ServerOutput.hpp"
+# include "OutputManager.hpp"
 # include "Seat.hpp"
 # include "conf/Configuration.hpp"
 
@@ -51,7 +51,7 @@ public:
 
   std::vector<std::unique_ptr<View>> views;
 
-  ServerOutput output;
+  OutputManager outputManager;
   XdgShell *xdgShell;
   ServerCursor cursor;
   ServerInput input;

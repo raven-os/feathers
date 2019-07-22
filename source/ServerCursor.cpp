@@ -8,7 +8,7 @@ ServerCursor::ServerCursor()
   : cursor_mode(CursorMode::CURSOR_PASSTHROUGH)
 {
   cursor = wlr_cursor_create();
-  wlr_cursor_attach_output_layout(cursor, Server::getInstance().output.getLayout());
+  wlr_cursor_attach_output_layout(cursor, Server::getInstance().outputManager.getLayout());
 
   cursor_mgr = wlr_xcursor_manager_create(nullptr, 24);
   wlr_xcursor_manager_load(cursor_mgr, 1);
@@ -80,7 +80,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
     }
   else
     {
-      Output &output(server.output.getOutput(view->getOutput()));
+      Output &output(server.outputManager.getOutput(view->getWlrOutput()));
       wm::WindowTree &windowTree(output.getWindowTree());
 
       for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTiling, wm::Container::verticalTiling})

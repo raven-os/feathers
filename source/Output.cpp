@@ -19,7 +19,7 @@ Output::Output(struct wlr_output *wlr_output) :
   fullscreenView(nullptr),
   windowTree([&]()
 	     {
-	       auto box = wlr_output_layout_get_box(Server::getInstance().output.getLayout(), wlr_output);
+	       auto box = wlr_output_layout_get_box(Server::getInstance().outputManager.getLayout(), wlr_output);
 
 	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
 							      FixedPoint<0, int>(box->y)}},
@@ -90,7 +90,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 			.fullscreen = true
       };
 
-      wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
+      wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, OutputManager::render_surface, &rdata);
     }
   else
     {
@@ -121,7 +121,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	      .when = &now,
 	      .fullscreen = false
 	      };
-	  wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, ServerOutput::render_surface, &rdata);
+	  wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, OutputManager::render_surface, &rdata);
 	}
     }
 
@@ -129,7 +129,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   wlr_renderer_end(renderer);
   wlr_output_swap_buffers(wlr_output, NULL, NULL);
   refreshImage();
-  auto *box = wlr_output_layout_get_box(server.output.getLayout(), wlr_output);
+  auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
   {
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)

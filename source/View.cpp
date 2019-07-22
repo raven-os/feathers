@@ -49,7 +49,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   previous_size = {box->width, box->height};
 
-  auto &output(server.output.getOutput(getOutput()));
+  auto &output(server.outputManager.getOutput(getWlrOutput()));
   auto &windowTree(output.getWindowTree());
 
   if (server.openType == OpenType::dontCare)
@@ -112,7 +112,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  auto &output(Server::getInstance().output.getOutput(getOutput()));
+  auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
 
   mapped = false;
 
@@ -139,12 +139,12 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
   Server &server = Server::getInstance();
   if (server.views.size() >= 1)
     {
-      auto &output = server.output.getOutput(getOutput());
+      auto &output = server.outputManager.getOutput(getWlrOutput());
 
       if (!output.getFullscreenView())
 	{
 	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
-	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.output.getLayout(), getOutput());
+	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
 	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
 	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
 	  output.setFullscreenView(this);
@@ -177,7 +177,7 @@ void View::close()
   wlr_xdg_surface_v6_send_close(xdg_surface);
 }
 
-struct wlr_output *View::getOutput()
+struct wlr_output *View::getWlrOutput()
 {
   Server &server = Server::getInstance();
   struct wlr_box viewBox;
@@ -185,11 +185,11 @@ struct wlr_output *View::getOutput()
 
   double outputX;
   double outputY;
-  wlr_output_layout_closest_point(server.output.getLayout(), nullptr,
+  wlr_output_layout_closest_point(server.outputManager.getLayout(), nullptr,
 				  x.getDoubleValue() + static_cast<double>(viewBox.width/2),
 				  y.getDoubleValue() + static_cast<double>(viewBox.height/2),
 				  &outputX, &outputY);
-  return wlr_output_layout_output_at(server.output.getLayout(), outputX, outputY);
+  return wlr_output_layout_output_at(server.outputManager.getLayout(), outputX, outputY);
 }
 
 void View::focus_view()

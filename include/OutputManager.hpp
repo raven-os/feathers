@@ -18,16 +18,16 @@ struct render_data
   bool fullscreen;
 };
 
-struct ServerOutputListeners
+struct OutputManagerListeners
 {
   struct wl_listener new_output;
 };
 
-class ServerOutput : public ServerOutputListeners
+class OutputManager : public OutputManagerListeners
 {
 public:
-  ServerOutput();
-  ~ServerOutput() = default;
+  OutputManager();
+  ~OutputManager() = default;
 
   void output_frame(struct wl_listener *listener, void *data);
   void server_new_output(struct wl_listener *listener, void *data);

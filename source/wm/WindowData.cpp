@@ -41,7 +41,7 @@ namespace wm
       wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
     else
       {
-	auto &output(Server::getInstance().output.getOutput(view->getOutput()));
+	auto &output(Server::getInstance().outputManager.getOutput(view->getWlrOutput()));
 
         output.saved.width = size[0];
 	output.saved.height = size[1];
