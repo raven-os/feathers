@@ -8,6 +8,7 @@
 # include "InputManager.hpp"
 # include "OutputManager.hpp"
 # include "Seat.hpp"
+# include "InputMethodRelay.hpp"
 # include "conf/Configuration.hpp"
 
 enum class OpenType : uint8_t
@@ -56,6 +57,7 @@ public:
   ServerCursor cursor;
   InputManager inputManager;
   Seat seat;
+  InputMethodRelay imr;
 
   View *grabbed_view;
   double grab_x, grab_y;
