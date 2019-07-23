@@ -69,7 +69,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
 
-  if (!wlr_output_make_current(wlr_output, NULL))
+  if (!wlr_output_attach_render(wlr_output, NULL))
     {
       return;
     }
@@ -127,7 +127,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 
   wlr_output_render_software_cursors(wlr_output, NULL);
   wlr_renderer_end(renderer);
-  wlr_output_swap_buffers(wlr_output, NULL, NULL);
+  wlr_output_commit(wlr_output);
   refreshImage();
   auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
   {
