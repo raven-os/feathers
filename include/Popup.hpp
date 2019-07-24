@@ -15,10 +15,10 @@ struct PopupListeners
 class Popup : public PopupListeners
 {
   public:
-    Popup(View *child, struct wlr_xdg_surface_v6 *xdg_surface);
+    Popup(View *child, struct wlr_surface *surface);
     ~Popup();
 
-    struct wlr_xdg_surface_v6 *xdg_surface;
+    struct wlr_surface *surface;
 
   private:
     View *child;

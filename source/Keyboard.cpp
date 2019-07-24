@@ -23,8 +23,12 @@ Keyboard::Keyboard(struct wlr_input_device *device)
     Server &server = Server::getInstance();
     for (auto &view : server.views)
       {
-	if (view->xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-	    view->xdg_surface->toplevel->server_pending.activated)
+	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
+	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
+	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->toplevel->server_pending.activated) ||
+	    (wlr_surface_is_xdg_surface(view->surface) &&
+	     wlr_xdg_surface_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL &&
+	     wlr_xdg_surface_from_wlr_surface(view->surface)->toplevel->server_pending.activated))
 	  {
 	    view->close();
 	    break;

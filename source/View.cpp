@@ -2,28 +2,56 @@
 #include "View.hpp"
 #include "Server.hpp"
 
-View::View(struct wlr_xdg_surface_v6 *xdg_surface) :
-  xdg_surface(xdg_surface),
+View::View(struct wlr_surface *surface) :
+  surface(surface),
   mapped(false),
   x(0),
   y(0)
 {
-  struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    {
+      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+      struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
-  SET_LISTENER(View, ViewListeners, map, xdg_surface_map);
-  wl_signal_add(&xdg_surface->events.map, &map);
-  SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap);
-  wl_signal_add(&xdg_surface->events.unmap, &unmap);
-  // external function (not class member) so manual assignement necessary
-  destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xdgShell->xdg_surface_destroy(listener, data); };
-  wl_signal_add(&xdg_surface->events.destroy, &destroy);
-  SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move);
-  wl_signal_add(&toplevel->events.request_move, &request_move);
-  SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize);
-  wl_signal_add(&toplevel->events.request_resize, &request_resize);
-  SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen);
-  SET_LISTENER(View, ViewListeners, new_popup, xdg_handle_new_popup);
-  wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
+      SET_LISTENER(View, ViewListeners, map, xdg_surface_map<SurfaceType::xdg_v6>);
+      wl_signal_add(&xdg_surface->events.map, &map);
+      SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xdg_v6>);
+      wl_signal_add(&xdg_surface->events.unmap, &unmap);
+      // external function (not class member) so manual assignement necessary
+      destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xdgShellV6->xdg_surface_destroy(listener, data); };
+      wl_signal_add(&xdg_surface->events.destroy, &destroy);
+      SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xdg_v6>);
+      wl_signal_add(&toplevel->events.request_move, &request_move);
+      SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xdg_v6>);
+      wl_signal_add(&toplevel->events.request_resize, &request_resize);
+      SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
+      SET_LISTENER(View, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg_v6>);
+      wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
+    }
+  else if (wlr_surface_is_xdg_surface(surface))
+    {
+      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+      struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
+
+      SET_LISTENER(View, ViewListeners, map, xdg_surface_map<SurfaceType::xdg>);
+      wl_signal_add(&xdg_surface->events.map, &map);
+      SET_LISTENER(View, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xdg>);
+      wl_signal_add(&xdg_surface->events.unmap, &unmap);
+      // external function (not class member) so manual assignement necessary
+      destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xdgShell->xdg_surface_destroy(listener, data); };
+      wl_signal_add(&xdg_surface->events.destroy, &destroy);
+      SET_LISTENER(View, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xdg>);
+      wl_signal_add(&toplevel->events.request_move, &request_move);
+      SET_LISTENER(View, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xdg>);
+      wl_signal_add(&toplevel->events.request_resize, &request_resize);
+      SET_LISTENER(View, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
+      SET_LISTENER(View, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
+      wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
+    }
+  else
+    {
+      assert(!"Unknown surface type");
+    }
 }
 
 View::~View()
@@ -38,6 +66,7 @@ View::~View()
   wl_list_remove(&new_popup.link);
 }
 
+template<SurfaceType surfaceType>
 void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
@@ -45,8 +74,10 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 
   mapped = true;
   focus_view();
-  wlr_xdg_surface_v6_get_geometry(xdg_surface, box);
-
+  if constexpr (surfaceType == SurfaceType::xdg_v6)
+    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
+  else if constexpr (surfaceType == SurfaceType::xdg)
+    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   previous_size = {box->width, box->height};
 
   auto &output(server.outputManager.getOutput(getWlrOutput()));
@@ -110,6 +141,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
     }
 }
 
+template<SurfaceType surfaceType>
 void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
@@ -117,7 +149,9 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   mapped = false;
 
   if (output.getFullscreenView() == this)
-    xdg_toplevel_request_fullscreen(nullptr, nullptr);
+    {
+      xdg_toplevel_request_fullscreen<surfaceType>(nullptr, nullptr);
+    }
   if (windowNode == wm::nullNode)
     return;
 
@@ -128,12 +162,14 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   parentNodeData.getContainer().removeChild(parentNode, windowTree, windowNode);
 };
 
+template<SurfaceType surfaceType>
 void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   if (windowNode == wm::nullNode)
     begin_interactive(CursorMode::CURSOR_MOVE, 0);
 };
 
+template<SurfaceType surfaceType>
 void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
@@ -143,45 +179,95 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 
       if (!output.getFullscreenView())
 	{
-	  wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
 	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
-	  wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
-	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+
+	  if constexpr (surfaceType == SurfaceType::xdg_v6)
+	    {
+	      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+
+	      wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
+	      wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
+	      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, true);
+	    }
+	  else if constexpr (surfaceType == SurfaceType::xdg)
+	    {
+	      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+
+	      wlr_xdg_surface_get_geometry(xdg_surface, &output.saved);
+	      wlr_xdg_toplevel_set_size(xdg_surface, outputBox->width, outputBox->height);
+	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, true);
+	    }
+
 	  output.setFullscreenView(this);
 	  fullscreen = true;
 	}
       else
 	{
-	  wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
-	  wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
+	  if constexpr (surfaceType == SurfaceType::xdg_v6)
+	    {
+	      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+
+	      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
+	      wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
+	    }
+	  else if constexpr (surfaceType == SurfaceType::xdg)
+	    {
+	      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+
+	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, false);
+	      wlr_xdg_toplevel_set_size(xdg_surface, output.saved.width, output.saved.height);
+	    }
 	  output.setFullscreenView(nullptr);
 	  fullscreen = false;
 	}
     }
 }
 
+template<SurfaceType surfaceType>
 void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_xdg_popup_v6 *xdg_popup = static_cast<struct wlr_xdg_popup_v6 *>(data);
-  popup = std::make_unique<Popup>(Popup(this, xdg_popup->base));
+  using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
+
+  wlr_xdg_popup_type *xdg_popup = static_cast<wlr_xdg_popup_type *>(data);
+  popup = std::make_unique<Popup>(Popup(this, xdg_popup->base->surface));
 }
 
+template<SurfaceType surfaceType>
 void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);
 };
 
+void View::requestFullscreen()
+{
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    xdg_toplevel_request_resize<SurfaceType::xdg_v6>(nullptr, nullptr);
+  else if (wlr_surface_is_xdg_surface(surface))
+    xdg_toplevel_request_resize<SurfaceType::xdg>(nullptr, nullptr);
+}
+
 void View::close()
 {
-  wlr_xdg_surface_v6_send_close(xdg_surface);
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_surface_v6_send_close(wlr_xdg_surface_v6_from_wlr_surface(surface));
+  else if (wlr_surface_is_xdg_surface(surface))
+    {
+      wlr_xdg_toplevel_send_close(wlr_xdg_surface_from_wlr_surface(surface));
+      // do nothing?
+    }
 }
 
 struct wlr_output *View::getWlrOutput()
 {
   Server &server = Server::getInstance();
   struct wlr_box viewBox;
-  wlr_xdg_surface_v6_get_geometry(xdg_surface, &viewBox);
+  {
+    if (wlr_surface_is_xdg_surface_v6(surface))
+      wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), &viewBox);
+    else if (wlr_surface_is_xdg_surface(surface))
+      wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), &viewBox);
+  }
 
   double outputX;
   double outputY;
@@ -195,7 +281,6 @@ struct wlr_output *View::getWlrOutput()
 void View::focus_view()
 {
   Server &server = Server::getInstance();
-  struct wlr_surface *surface = xdg_surface->surface;
   struct wlr_seat *seat = server.seat.getSeat();
   struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
   if (prev_surface == surface)
@@ -204,9 +289,18 @@ void View::focus_view()
     }
   if (prev_surface)
     {
-      struct wlr_xdg_surface_v6 *previous =
-	wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
-      wlr_xdg_toplevel_v6_set_activated(previous, false);
+      if (wlr_surface_is_xdg_surface_v6(seat->keyboard_state.focused_surface))
+	{
+	  struct wlr_xdg_surface_v6 *previous =
+	    wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
+	  wlr_xdg_toplevel_v6_set_activated(previous, false);
+	}
+      else if (wlr_surface_is_xdg_surface(seat->keyboard_state.focused_surface))
+	{
+	  struct wlr_xdg_surface *previous =
+	    wlr_xdg_surface_from_wlr_surface(seat->keyboard_state.focused_surface);
+	  wlr_xdg_toplevel_set_activated(previous, false);
+	}
     }
   struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
@@ -221,8 +315,11 @@ void View::focus_view()
     std::move_backward(server.views.begin(), it, it + 1);
     server.views.front() = std::move(ptr);
   }
-  wlr_xdg_toplevel_v6_set_activated(xdg_surface, true);
-  wlr_seat_keyboard_notify_enter(seat, xdg_surface->surface, keyboard->keycodes,
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_toplevel_v6_set_activated(wlr_xdg_surface_v6_from_wlr_surface(surface), true);
+  else if (wlr_surface_is_xdg_surface(surface))
+    wlr_xdg_toplevel_set_activated(wlr_xdg_surface_from_wlr_surface(surface), true);
+  wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes,
 				 keyboard->num_keycodes, &keyboard->modifiers);
 }
 
@@ -230,14 +327,19 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
 {
   Server &server = Server::getInstance();
   struct wlr_surface *focused_surface = server.seat.getSeat()->pointer_state.focused_surface;
-  if (xdg_surface->surface != focused_surface)
+  if (surface != focused_surface)
     {
       return;
     }
   server.grabbed_view = this;
   server.cursor.cursor_mode = mode;
   struct wlr_box geo_box;
-  wlr_xdg_surface_v6_get_geometry(xdg_surface, &geo_box);
+
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), &geo_box);
+  else if (wlr_surface_is_xdg_surface(surface))
+    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), &geo_box);
+
   if (mode == CursorMode::CURSOR_MOVE)
     {
       server.grab_x = server.cursor.cursor->x - x.getDoubleValue();
@@ -253,22 +355,24 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
   server.resize_edges = edges;
 }
 
-bool View::at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
+bool View::at(double lx, double ly, struct wlr_surface **out_surface, double *sx, double *sy)
 {
   double view_sx = lx - x.getDoubleValue();
   double view_sy = ly - y.getDoubleValue();
 
-  struct wlr_surface_state *state = &xdg_surface->surface->current;
+  struct wlr_surface_state *state = &surface->current;
 
   double _sx, _sy;
   struct wlr_surface *_surface = nullptr;
-  _surface = wlr_xdg_surface_v6_surface_at(xdg_surface, view_sx, view_sy, &_sx, &_sy);
-
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    _surface = wlr_xdg_surface_v6_surface_at(wlr_xdg_surface_v6_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
+  else if (wlr_surface_is_xdg_surface(surface))
+    _surface = wlr_xdg_surface_surface_at(wlr_xdg_surface_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
   if (_surface )
     {
       *sx = _sx;
       *sy = _sy;
-      *surface = _surface;
+      *out_surface = _surface;
       return true;
     }
 

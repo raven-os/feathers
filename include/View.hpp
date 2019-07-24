@@ -23,19 +23,38 @@ struct ViewListeners
   struct wl_listener request_fullscreen;
 };
 
+enum class SurfaceType
+  {
+   xdg,
+   xdg_v6,
+   unkonwn
+  };
+
 class View : public ViewListeners
 {
 public:
-  View(struct wlr_xdg_surface_v6 *xdg_surface);
+  View(struct wlr_surface *surface);
   ~View();
 
+  template<SurfaceType surfaceType>
   void xdg_surface_map(struct wl_listener *listener, void *data);
+
+  template<SurfaceType surfaceType>
   void xdg_surface_unmap(struct wl_listener *listener, void *data);
+
+  template<SurfaceType surfaceType>
   void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
+
+  template<SurfaceType surfaceType>
   void xdg_toplevel_request_resize(struct wl_listener *listener, void *data);
+
+  template<SurfaceType surfaceType>
   void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data);
+
+  template<SurfaceType surfaceType>
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
+  void requestFullscreen();
   void close();
   void focus_view();
 
@@ -44,7 +63,7 @@ public:
 
   struct wlr_output *getWlrOutput();
 
-  struct wlr_xdg_surface_v6 *xdg_surface;
+  struct wlr_surface *surface;
   bool mapped;
   FixedPoint<-4, int> x, y;
   std::unique_ptr<Popup> popup;
@@ -57,5 +76,4 @@ public:
 private:
   void begin_interactive(CursorMode mode, uint32_t edges);
   bool at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
-
 };

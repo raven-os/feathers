@@ -90,7 +90,10 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 			.fullscreen = true
       };
 
-      wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, OutputManager::render_surface, &rdata);
+      if (wlr_surface_is_xdg_surface(view->surface))
+	wlr_xdg_surface_for_each_surface(wlr_xdg_surface_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
+      else if (wlr_surface_is_xdg_surface_v6(view->surface))
+	wlr_xdg_surface_v6_for_each_surface(wlr_xdg_surface_v6_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
     }
   else
     {
@@ -121,7 +124,10 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	      .when = &now,
 	      .fullscreen = false
 	      };
-	  wlr_xdg_surface_v6_for_each_surface(view->xdg_surface, OutputManager::render_surface, &rdata);
+	  if (wlr_surface_is_xdg_surface(view->surface))
+	    wlr_xdg_surface_for_each_surface(wlr_xdg_surface_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
+	  else if (wlr_surface_is_xdg_surface_v6(view->surface))
+	    wlr_xdg_surface_v6_for_each_surface(wlr_xdg_surface_v6_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
 	}
     }
 

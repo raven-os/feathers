@@ -3,6 +3,7 @@
 # include "Wlroots.hpp"
 # include "View.hpp"
 # include "XdgShell.hpp"
+# include "XdgShellV6.hpp"
 # include "Output.hpp"
 # include "ServerCursor.hpp"
 # include "InputManager.hpp"
@@ -53,6 +54,7 @@ public:
 
   OutputManager outputManager;
   XdgShell *xdgShell;
+  XdgShellV6 *xdgShellV6;
   ServerCursor cursor;
   InputManager inputManager;
   Seat seat;

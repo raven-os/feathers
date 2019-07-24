@@ -237,7 +237,7 @@ namespace Commands
       return ;
     std::unique_ptr<View> &view = server.views.front();
 
-    view->xdg_toplevel_request_fullscreen(nullptr, nullptr);
+    view->requestFullscreen();
   }
 
   void switch_window() {
@@ -277,13 +277,14 @@ namespace Commands
     auto &rootNodeData(windowTree.getData(rootNode));
 
     if (view->windowNode != wm::nullNode) {
-      struct wlr_box box[1];
-
       rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
       view->x = 10_FP;
       view->y = 10_FP;
-      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
-      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, view->previous_size[0], view->previous_size[1]);
+      if (wlr_surface_is_xdg_surface_v6(view->surface))
+	wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
+      else if (wlr_surface_is_xdg_surface(view->surface))
+	wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
+
       view->windowNode = wm::nullNode;
     }
     else
