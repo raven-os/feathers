@@ -1,6 +1,7 @@
 #pragma once
 
 # include "Wlroots.hpp"
+
 # include "View.hpp"
 # include "Listeners.hpp"
 
@@ -23,5 +24,5 @@ public:
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
 private:
-  struct wlr_xdg_shell_v6 *xdg_shell;
+  struct wlr_xdg_shell *xdg_shell;
 };

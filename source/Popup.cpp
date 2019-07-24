@@ -3,8 +3,8 @@
 #include "Popup.hpp"
 
 
-Popup::Popup(View *child, struct wlr_xdg_surface_v6 *xdg_surface)
-  :xdg_surface(xdg_surface)
+Popup::Popup(View *child, struct wlr_surface *surface)
+  : surface(surface)
   , child(child)
 {
   SET_LISTENER(Popup, PopupListeners, new_popup, handle_new_popup);

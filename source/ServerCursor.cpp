@@ -39,7 +39,10 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
   if (view->windowNode == wm::nullNode)
     {
       struct wlr_box box[1];
-      wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+      if (wlr_surface_is_xdg_surface_v6(view->surface))
+	wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(view->surface), box);
+      else if (wlr_surface_is_xdg_surface(view->surface))
+	wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(view->surface), box);
 
       double dx = cursor->x - server.grab_x + box->x;
       double dy = cursor->y - server.grab_y + box->y;
@@ -76,7 +79,10 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	{
 	  width += int(dx);
 	}
-      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, width, height);
+      if (wlr_surface_is_xdg_surface(view->surface))
+	wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), width, height);
+      else if (wlr_surface_is_xdg_surface_v6(view->surface))
+	wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), width, height);
     }
   else
     {

@@ -38,7 +38,12 @@ namespace wm
   void ClientData::resize(WindowNodeIndex, WindowTree &, std::array<uint16_t, 2u> size)
   {
     if (!view->fullscreen)
-      wlr_xdg_toplevel_v6_set_size(view->xdg_surface, size[0], size[1]);
+      {
+	if (wlr_surface_is_xdg_surface_v6(view->surface))
+	  wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), size[0], size[1]);
+	else if (wlr_surface_is_xdg_surface(view->surface))
+	  wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), size[0], size[1]);
+      }
     else
       {
 	auto &output(Server::getInstance().outputManager.getOutput(view->getWlrOutput()));
@@ -51,7 +56,11 @@ namespace wm
   void ClientData::move(WindowNodeIndex, WindowTree &, std::array<FixedPoint<-4, int32_t>, 2u> position)
   {
     struct wlr_box box[1];
-    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
+    if (wlr_surface_is_xdg_surface_v6(view->surface))
+      wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(view->surface), box);
+    else if (wlr_surface_is_xdg_surface(view->surface))
+      wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(view->surface), box);
 
     (view->x = position[0]) -= FixedPoint<0, int32_t>(box->x);
     (view->y = position[1]) -= FixedPoint<0, int32_t>(box->y);
@@ -60,7 +69,11 @@ namespace wm
   std::array<FixedPoint<-4, int32_t>, 2u> ClientData::getPosition() const noexcept
   {
     struct wlr_box box[1];
-    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
+    if (wlr_surface_is_xdg_surface_v6(view->surface))
+      wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(view->surface), box);
+    else if (wlr_surface_is_xdg_surface(view->surface))
+      wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(view->surface), box);
 
     std::array<FixedPoint<-4, int32_t>, 2u> result{{view->x, view->y}};
 
@@ -72,7 +85,11 @@ namespace wm
   std::array<uint16_t, 2u> ClientData::getSize() const noexcept
   {
     struct wlr_box box[1];
-    wlr_xdg_surface_v6_get_geometry(view->xdg_surface, box);
+
+    if (wlr_surface_is_xdg_surface_v6(view->surface))
+      wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(view->surface), box);
+    else if (wlr_surface_is_xdg_surface(view->surface))
+      wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(view->surface), box);
 
     return {uint16_t(box->width), uint16_t(box->height)};
   }
