@@ -50,7 +50,7 @@ public:
   struct wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
 
-  std::vector<std::unique_ptr<View>> views;
+  std::vector<std::unique_ptr<View>> views; // TODO remove 
 
   OutputManager outputManager;
   XdgShell *xdgShell;

@@ -2,6 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "Listeners.hpp"
+# include "Workspace.hpp"
 # include "wm/WindowTree.hpp"
 
 class Server;
@@ -43,7 +44,8 @@ public:
 private:
   struct wlr_output *wlr_output;
   View *fullscreenView;
-  wm::WindowTree windowTree;
+  std::vector<std::unique_ptr<Workspace>> workspaces;
+  wm::WindowTree windowTree; // TODO remove
   struct wlr_texture *wallpaperTexture;
 
 private:
