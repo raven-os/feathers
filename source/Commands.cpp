@@ -40,7 +40,7 @@ namespace
     if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
 
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(server.getActiveWindowTree());
     auto containerNode(windowTree.getParent(viewNode));
     auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -106,7 +106,7 @@ void switch_focus_up_or_left(bool parallelDirection)
   if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
 
-  auto &windowTree(output.getWindowTree());
+  auto &windowTree(server.getActiveWindowTree());
   auto containerNode(windowTree.getParent(viewNode));
   auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -272,8 +272,7 @@ namespace Commands
       return ;
     std::unique_ptr<View> &view = server.getViews().front();
 
-    auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(server.getActiveWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
 
@@ -301,8 +300,7 @@ namespace Commands
 
     if (view->windowNode == wm::nullNode)
       return ;
-    auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(server.getActiveWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
     auto &parentData(windowTree.getData(parent).getContainer());
 
@@ -358,5 +356,18 @@ namespace Commands
       output.get()->getWorkspaces().emplace_back(new Workspace(*(output.get()), server.outputManager.workspacesNumber));
     }
     server.outputManager.workspacesNumber++;
+  //  switch_workspace(true);
   }
+
+  // void close_workspace()
+  // {
+  //   Server &server = Server::getInstance();
+  //   Workspace &workspace = *(server.outputManager.getActiveWorkspace());
+  //
+  //   for (auto const &output : server.outputManager.getOutputs())
+  //   {
+  //     output.get()->getWorkspaces().erase(output.get()->getWorkspaces().begin() + workspace.id);
+  //   }
+  //   server.outputManager.workspacesNumber--;
+  // }
 }

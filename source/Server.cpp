@@ -42,6 +42,11 @@ std::vector<std::unique_ptr<View>> &Server::getViews()
   return outputManager.getActiveWorkspace()->getViews();
 }
 
+wm::WindowTree &Server::getActiveWindowTree()
+{
+  return outputManager.getActiveWorkspace()->getWindowTree();
+}
+
 void Server::run()
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());
