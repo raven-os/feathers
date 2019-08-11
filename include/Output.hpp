@@ -27,25 +27,18 @@ public:
     return fullscreenView;
   }
 
+  Workspace &getActiveWorkspace() noexcept;
+  std::vector<std::unique_ptr<Workspace>> &getWorkspaces() noexcept;
+
   struct wlr_output *getWlrOutput() const;
 
-  wm::WindowTree &getWindowTree() noexcept
-  {
-    return windowTree;
-  }
-
-  wm::WindowTree const &getWindowTree() const noexcept
-  {
-    return windowTree;
-  }
-
   wlr_box saved;
+
+  std::vector<std::unique_ptr<Workspace>> workspaces;
 
 private:
   struct wlr_output *wlr_output;
   View *fullscreenView;
-  std::vector<std::unique_ptr<Workspace>> workspaces;
-  wm::WindowTree windowTree; // TODO remove
   struct wlr_texture *wallpaperTexture;
 
 private:

@@ -1,5 +1,18 @@
 #include "Workspace.hpp"
+# include "Server.hpp"
 
-Workspace::Workspace() {
+Workspace::Workspace(Output &output, int id) :
+  output(output),
+  id(id),
+  windowTree([&]()
+	     {
+	       auto box = wlr_output_layout_get_box(Server::getInstance().outputManager.getLayout(), nullptr);
+
+	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
+							      FixedPoint<0, int>(box->y)}},
+							    {{FixedPoint<0, int>(box->width),
+							      FixedPoint<0, int>(box->height)}}})};
+	     }())
+{
 
 }

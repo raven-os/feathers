@@ -37,6 +37,11 @@ Server::~Server()
   // wl_display_destroy(display);
 }
 
+std::vector<std::unique_ptr<View>> &Server::getViews()
+{
+  return outputManager.getActiveOutput().getActiveWorkspace().getViews();
+}
+
 void Server::run()
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());

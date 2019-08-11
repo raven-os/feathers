@@ -9,7 +9,8 @@
 
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},
-  {"Ctrl", WLR_MODIFIER_CTRL}
+  {"Ctrl", WLR_MODIFIER_CTRL},
+  {"Super", WLR_MODIFIER_LOGO}
 };
 
 Keyboard::Keyboard(struct wlr_input_device *device)
@@ -21,7 +22,7 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
   shortcuts["Alt+F4"] = {"destroy", [](){
     Server &server = Server::getInstance();
-    for (auto &view : server.views)
+    for (auto &view : server.getViews())
       {
 	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
 	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
@@ -46,6 +47,7 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
   shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
   shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
+  shortcuts["a+b"] = {"Switch workspace", [](){ Commands::switch_workspace(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};

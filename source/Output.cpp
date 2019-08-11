@@ -1,6 +1,8 @@
 #include "Output.hpp"
 #include "Server.hpp"
 
+#include <iostream>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -16,18 +18,13 @@
 
 Output::Output(struct wlr_output *wlr_output) :
   wlr_output(wlr_output),
-  fullscreenView(nullptr),
-  windowTree([&]()
-	     {
-	       auto box = wlr_output_layout_get_box(Server::getInstance().outputManager.getLayout(), wlr_output);
-
-	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
-							      FixedPoint<0, int>(box->y)}},
-							    {{FixedPoint<0, int>(box->width),
-							      FixedPoint<0, int>(box->height)}}})};
-	     }())
+  fullscreenView(nullptr)
 {
   refreshImage();
+  workspaces.emplace_back(new Workspace(*this, 0));
+  workspaces.emplace_back(new Workspace(*this, 1));
+
+  std::cout << "WORKSPACES NUMBER: " << workspaces.size() << std::endl;
 }
 
 void Output::refreshImage()
@@ -109,7 +106,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
       }
 
-      for (auto it = server.views.rbegin(); it != server.views.rend(); ++it)
+      for (auto it = server.getViews().rbegin(); it != server.getViews().rend(); ++it)
 	{
 	  auto &view(*it);
 
@@ -137,6 +134,8 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   refreshImage();
   auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
   {
+    wm::WindowTree &windowTree = getActiveWorkspace().getWindowTree();
+
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
       windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
@@ -154,6 +153,16 @@ void Output::setFrameListener()
 void Output::setFullscreenView(View *view) noexcept
 {
   this->fullscreenView = view;
+}
+
+Workspace &Output::getActiveWorkspace() noexcept
+{
+  return *(workspaces.front().get());
+}
+
+std::vector<std::unique_ptr<Workspace>> &Output::getWorkspaces() noexcept
+{
+  return workspaces;
 }
 
 struct wlr_output *Output::getWlrOutput() const

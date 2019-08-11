@@ -1,5 +1,6 @@
 # include <cstring>
 # include <unistd.h>
+# include <iostream>
 # include "Commands.hpp"
 
 namespace
@@ -8,7 +9,7 @@ namespace
   {
     Server &server = Server::getInstance();
 
-    for (auto &tmpView : server.views)
+    for (auto &tmpView : server.getViews())
       {
 	if (tmpView->windowNode != viewNode)
 	  {
@@ -29,17 +30,17 @@ namespace
   {
     Server &server = Server::getInstance();
 
-    if (server.views.empty())
+    if (server.getViews().empty())
       return ;
 
-    std::unique_ptr<View> &view = server.views.front();
+    std::unique_ptr<View> &view = server.getViews().front();
     auto viewNode(view->windowNode);
     auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
     if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
 
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(output.getActiveWorkspace().getWindowTree());
     auto containerNode(windowTree.getParent(viewNode));
     auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -95,17 +96,17 @@ void switch_focus_up_or_left(bool parallelDirection)
 {
   Server &server = Server::getInstance();
 
-  if (server.views.empty())
+  if (server.getViews().empty())
     return ;
 
-  std::unique_ptr<View> &view = server.views.front();
+  std::unique_ptr<View> &view = server.getViews().front();
   auto viewNode(view->windowNode);
   auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
   if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
 
-  auto &windowTree(output.getWindowTree());
+  auto &windowTree(output.getActiveWorkspace().getWindowTree());
   auto containerNode(windowTree.getParent(viewNode));
   auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -233,9 +234,9 @@ namespace Commands
   void toggle_fullscreen() {
     Server &server = Server::getInstance();
 
-    if (server.views.size() <= 0)
+    if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.views.front();
+    std::unique_ptr<View> &view = server.getViews().front();
 
     view->requestFullscreen();
   }
@@ -243,36 +244,36 @@ namespace Commands
   void switch_window() {
     Server &server = Server::getInstance();
 
-    if (server.views.size() >= 2)
+    if (server.getViews().size() >= 2)
       {
-	if (server.views.front()->windowNode != wm::nullNode)
+	if (server.getViews().front()->windowNode != wm::nullNode)
 	  {
-	    std::partition(server.views.begin() + 1, server.views.end(),
+	    std::partition(server.getViews().begin() + 1, server.getViews().end(),
 			   [](auto &view) noexcept
 			   {
 			     return view->windowNode == wm::nullNode;
 			   });
 	  }
 
-	std::unique_ptr<View> &view = server.views[1];
+	std::unique_ptr<View> &view = server.getViews()[1];
 
 	view->focus_view();
 	// focus view put the newly focused view in front
 	// so we put it back to its position and then rotate
-	std::iter_swap(server.views.begin(), server.views.begin() + 1);
-	std::rotate(server.views.begin(), server.views.begin() + 1, server.views.end());
+	std::iter_swap(server.getViews().begin(), server.getViews().begin() + 1);
+	std::rotate(server.getViews().begin(), server.getViews().begin() + 1, server.getViews().end());
       }
   }
 
   void toggle_float_window() {
     Server &server = Server::getInstance();
 
-    if (server.views.size() <= 0)
+    if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.views.front();
+    std::unique_ptr<View> &view = server.getViews().front();
 
     auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(output.getActiveWorkspace().getWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
 
@@ -294,14 +295,14 @@ namespace Commands
   void switch_container_direction() {
     Server &server = Server::getInstance();
 
-    if (server.views.size() <= 0)
+    if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.views.front();
+    std::unique_ptr<View> &view = server.getViews().front();
 
     if (view->windowNode == wm::nullNode)
       return ;
     auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getWindowTree());
+    auto &windowTree(output.getActiveWorkspace().getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
     auto &parentData(windowTree.getData(parent).getContainer());
 
@@ -332,5 +333,13 @@ namespace Commands
   void switch_focus_right()
   {
     switch_focus_down_or_right(wm::Container::horizontalTiling);
+  }
+
+  void switch_workspace()
+  {
+    std::vector<std::unique_ptr<Workspace>> &workspaces = Server::getInstance().outputManager.getActiveOutput().getWorkspaces();
+    std::iter_swap(workspaces.begin(), workspaces.begin() + 1);
+  	//std::rotate(workspaces.begin(), workspaces.begin() + 1, workspaces.end());
+    std::cout << "FIRST: " << workspaces[0]->id << " SECOND: " << workspaces[1]->id << std::endl;
   }
 }

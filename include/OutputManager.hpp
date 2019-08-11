@@ -36,6 +36,8 @@ public:
   struct wlr_output_layout *getLayout() const noexcept;
   std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
+  Output &getActiveOutput() noexcept;
+
   Output &getOutput(wlr_output *wlr_output) noexcept;
   Output const &getOutput(wlr_output *wlr_output) const noexcept;
 

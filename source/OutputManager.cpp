@@ -75,6 +75,11 @@ std::vector<std::unique_ptr<Output>> const& OutputManager::getOutputs() const
   return outputs;
 }
 
+Output &OutputManager::getActiveOutput() noexcept
+{
+  return *(outputs.front().get()); //TODO change this to focus the right Output, or make the output list rotate
+}
+
 Output &OutputManager::getOutput(wlr_output *wlr_output) noexcept
 {
   return *std::find_if(getOutputs().begin(), getOutputs().end(),
