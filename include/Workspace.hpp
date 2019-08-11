@@ -8,7 +8,8 @@ class Output;
 class Workspace
 {
 public:
-  Workspace(Output &output, int id);
+  Workspace() = default;
+  Workspace(Output &output);
   Workspace(Workspace &&) = delete;
   Workspace(Workspace const &) = delete;
 
@@ -23,8 +24,6 @@ public:
   {
     return views;
   };
-
-  int id = -1;
 
 private:
   Output &output;

@@ -1,8 +1,7 @@
 #include "Workspace.hpp"
 # include "Server.hpp"
 
-Workspace::Workspace(Output &output, int id) :
-  id(id),
+Workspace::Workspace(Output &output) :
   output(output),
   windowTree([&]()
 	     {

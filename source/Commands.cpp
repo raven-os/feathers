@@ -336,14 +336,19 @@ namespace Commands
   void switch_workspace(bool next)
   {
     Server &server = Server::getInstance();
-    Workspace &workspace = *(server.outputManager.getActiveWorkspace());
 
     for (auto const &output : server.outputManager.getOutputs())
     {
-      if ((next && workspace.id == output.get()->getWorkspaces().size() - 1) ||
-          (!next && workspace.id == 0))
-        return ;
-      server.outputManager.setActiveWorkspace(output.get()->getWorkspaces().at(workspace.id + (next ? 1 : -1)).get());
+      auto it = std::find_if(output.get()->workspaces.begin(), output.get()->workspaces.end(),
+                            [](auto &w) {
+                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            });
+      if ((next && it == output.get()->getWorkspaces().end() - 1) ||
+          (!next && it == output.get()->getWorkspaces().begin())) {
+            return ;
+      }
+      auto newActiveWorkspace = it + (next ? 1 : -1);
+      server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
     }
   }
 
@@ -353,10 +358,15 @@ namespace Commands
 
     for (auto const &output : server.outputManager.getOutputs())
     {
-      output.get()->getWorkspaces().emplace_back(new Workspace(*(output.get()), server.outputManager.workspacesNumber));
+      auto it = std::find_if(output.get()->workspaces.begin(), output.get()->workspaces.end(),
+                            [](auto &w) {
+                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            });
+      output.get()->getWorkspaces().insert(output.get()->getWorkspaces().begin() + (std::distance(output.get()->workspaces.begin(), it) + 1),
+                                          std::make_unique<Workspace>(*(output.get())));
     }
     server.outputManager.workspacesNumber++;
-  //  switch_workspace(true);
+    switch_workspace(true);
   }
 
   // void close_workspace()

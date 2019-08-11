@@ -23,7 +23,7 @@ Output::Output(struct wlr_output *wlr_output, uint16_t workspacesNumber) :
   refreshImage();
 
   for (uint16_t i = 0; i < workspacesNumber; ++i)
-    workspaces.emplace_back(new Workspace(*this, i));
+    workspaces.emplace_back(new Workspace(*this));
 
   std::cout << "WORKSPACES NUMBER: " << workspaces.size() << std::endl;
   if (Server::getInstance().outputManager.getActiveWorkspace() == nullptr) {
