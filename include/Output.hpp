@@ -16,7 +16,7 @@ class Output : public OutputListeners
 {
 public:
 
-  Output(struct wlr_output *wlr_output);
+  Output(struct wlr_output *wlr_output, uint16_t workspacesNumber);
   ~Output() = default;
 
   void setFrameListener();
@@ -27,8 +27,8 @@ public:
     return fullscreenView;
   }
 
-  Workspace &getActiveWorkspace() noexcept;
   std::vector<std::unique_ptr<Workspace>> &getWorkspaces() noexcept;
+  wm::WindowTree &getWindowTree() noexcept;
 
   struct wlr_output *getWlrOutput() const;
 

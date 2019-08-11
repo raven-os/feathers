@@ -87,7 +87,7 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
   else
     {
       Output &output(server.outputManager.getOutput(view->getWlrOutput()));
-      wm::WindowTree &windowTree(output.getActiveWorkspace().getWindowTree());
+      wm::WindowTree &windowTree(output.getWindowTree());
 
       for (bool direction : std::array<bool, 2u>{wm::Container::horizontalTiling, wm::Container::verticalTiling})
 	{

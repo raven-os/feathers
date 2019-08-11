@@ -10,7 +10,6 @@
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},
   {"Ctrl", WLR_MODIFIER_CTRL},
-  {"Super", WLR_MODIFIER_LOGO}
 };
 
 Keyboard::Keyboard(struct wlr_input_device *device)
@@ -18,6 +17,8 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   , device(device)
 {
   key_repeat_source = wl_event_loop_add_timer(Server::getInstance().wl_event_loop, keyboard_handle_repeat, this);
+
+  //debug = true;
 
   shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
   shortcuts["Alt+F4"] = {"destroy", [](){
@@ -47,7 +48,11 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
   shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
   shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
-  shortcuts["a+b"] = {"Switch workspace", [](){ Commands::switch_workspace(); }};
+  shortcuts["a+b+Down"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }};
+  shortcuts["Ctrl+Alt+Right"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }};
+  shortcuts["a+b+Up"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
+  shortcuts["Ctrl+Alt+Left"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
+  shortcuts["a+b+W"] = {"New workspace", [](){ Commands::new_workspace(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};

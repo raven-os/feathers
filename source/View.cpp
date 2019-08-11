@@ -81,7 +81,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
   previous_size = {box->width, box->height};
 
   auto &output(server.outputManager.getOutput(getWlrOutput()));
-  auto &windowTree(output.getActiveWorkspace().getWindowTree());
+  auto &windowTree(output.getWindowTree());
 
   if (server.openType == OpenType::dontCare)
     {
@@ -155,7 +155,7 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   if (windowNode == wm::nullNode)
     return;
 
-  auto &windowTree(output.getActiveWorkspace().getWindowTree());
+  auto &windowTree(output.getWindowTree());
   auto parentNode(windowTree.getParent(windowNode));
   auto &parentNodeData(windowTree.getData(parentNode));
 

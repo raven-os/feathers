@@ -16,15 +16,19 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(struct wlr_output *wlr_output) :
+Output::Output(struct wlr_output *wlr_output, uint16_t workspacesNumber) :
   wlr_output(wlr_output),
   fullscreenView(nullptr)
 {
   refreshImage();
-  workspaces.emplace_back(new Workspace(*this, 0));
-  workspaces.emplace_back(new Workspace(*this, 1));
+
+  for (uint16_t i = 0; i < workspacesNumber; ++i)
+    workspaces.emplace_back(new Workspace(*this, i));
 
   std::cout << "WORKSPACES NUMBER: " << workspaces.size() << std::endl;
+  if (Server::getInstance().outputManager.getActiveWorkspace() == nullptr) {
+    Server::getInstance().outputManager.setActiveWorkspace(workspaces[0].get());
+  }
 }
 
 void Output::refreshImage()
@@ -134,7 +138,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   refreshImage();
   auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
   {
-    wm::WindowTree &windowTree = getActiveWorkspace().getWindowTree();
+    wm::WindowTree &windowTree = getWindowTree();
 
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
@@ -155,10 +159,15 @@ void Output::setFullscreenView(View *view) noexcept
   this->fullscreenView = view;
 }
 
-Workspace &Output::getActiveWorkspace() noexcept
+wm::WindowTree &Output::getWindowTree() noexcept
 {
-  return *(workspaces.front().get());
+  return Server::getInstance().outputManager.getActiveWorkspace()->getWindowTree();
 }
+
+// Workspace &Output::getActiveWorkspace() noexcept
+// {
+//   return *(workspaces.front().get());
+// }
 
 std::vector<std::unique_ptr<Workspace>> &Output::getWorkspaces() noexcept
 {

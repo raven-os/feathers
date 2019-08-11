@@ -39,7 +39,7 @@ Server::~Server()
 
 std::vector<std::unique_ptr<View>> &Server::getViews()
 {
-  return outputManager.getActiveOutput().getActiveWorkspace().getViews();
+  return outputManager.getActiveWorkspace()->getViews();
 }
 
 void Server::run()

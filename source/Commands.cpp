@@ -40,7 +40,7 @@ namespace
     if (view->windowNode == wm::nullNode || output.getFullscreenView())
       return ;
 
-    auto &windowTree(output.getActiveWorkspace().getWindowTree());
+    auto &windowTree(output.getWindowTree());
     auto containerNode(windowTree.getParent(viewNode));
     auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -106,7 +106,7 @@ void switch_focus_up_or_left(bool parallelDirection)
   if (view->windowNode == wm::nullNode || output.getFullscreenView())
     return ;
 
-  auto &windowTree(output.getActiveWorkspace().getWindowTree());
+  auto &windowTree(output.getWindowTree());
   auto containerNode(windowTree.getParent(viewNode));
   auto *container(&windowTree.getData(containerNode).getContainer());
 
@@ -273,7 +273,7 @@ namespace Commands
     std::unique_ptr<View> &view = server.getViews().front();
 
     auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getActiveWorkspace().getWindowTree());
+    auto &windowTree(output.getWindowTree());
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
 
@@ -302,7 +302,7 @@ namespace Commands
     if (view->windowNode == wm::nullNode)
       return ;
     auto &output = server.outputManager.getOutput(view->getWlrOutput());
-    auto &windowTree(output.getActiveWorkspace().getWindowTree());
+    auto &windowTree(output.getWindowTree());
     auto parent = windowTree.getParent(view->windowNode);
     auto &parentData(windowTree.getData(parent).getContainer());
 
@@ -335,11 +335,28 @@ namespace Commands
     switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 
-  void switch_workspace()
+  void switch_workspace(bool next)
   {
-    std::vector<std::unique_ptr<Workspace>> &workspaces = Server::getInstance().outputManager.getActiveOutput().getWorkspaces();
-    std::iter_swap(workspaces.begin(), workspaces.begin() + 1);
-  	//std::rotate(workspaces.begin(), workspaces.begin() + 1, workspaces.end());
-    std::cout << "FIRST: " << workspaces[0]->id << " SECOND: " << workspaces[1]->id << std::endl;
+    Server &server = Server::getInstance();
+    Workspace &workspace = *(server.outputManager.getActiveWorkspace());
+
+    for (auto const &output : server.outputManager.getOutputs())
+    {
+      if ((next && workspace.id == output.get()->getWorkspaces().size() - 1) ||
+          (!next && workspace.id == 0))
+        return ;
+      server.outputManager.setActiveWorkspace(output.get()->getWorkspaces().at(workspace.id + (next ? 1 : -1)).get());
+    }
+  }
+
+  void new_workspace()
+  {
+    Server &server = Server::getInstance();
+
+    for (auto const &output : server.outputManager.getOutputs())
+    {
+      output.get()->getWorkspaces().emplace_back(new Workspace(*(output.get()), server.outputManager.workspacesNumber));
+    }
+    server.outputManager.workspacesNumber++;
   }
 }

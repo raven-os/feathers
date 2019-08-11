@@ -19,7 +19,7 @@ void OutputManager::server_new_output([[maybe_unused]]struct wl_listener *listen
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
 
-  std::unique_ptr<Output> output(new Output(wlr_output));
+  std::unique_ptr<Output> output(new Output(wlr_output, workspacesNumber));
   output->setFrameListener();
   outputs.emplace_back(std::move(output));
 
@@ -75,9 +75,9 @@ std::vector<std::unique_ptr<Output>> const& OutputManager::getOutputs() const
   return outputs;
 }
 
-Output &OutputManager::getActiveOutput() noexcept
+Workspace *OutputManager::getActiveWorkspace() noexcept
 {
-  return *(outputs.front().get()); //TODO change this to focus the right Output, or make the output list rotate
+  return activeWorkspace;
 }
 
 Output &OutputManager::getOutput(wlr_output *wlr_output) noexcept

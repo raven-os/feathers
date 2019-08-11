@@ -2,8 +2,8 @@
 # include "Server.hpp"
 
 Workspace::Workspace(Output &output, int id) :
-  output(output),
   id(id),
+  output(output),
   windowTree([&]()
 	     {
 	       auto box = wlr_output_layout_get_box(Server::getInstance().outputManager.getLayout(), nullptr);
