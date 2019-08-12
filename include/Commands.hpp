@@ -20,5 +20,5 @@ namespace Commands
   void switch_focus_right();
   void switch_workspace(bool next);
   void new_workspace();
-  //void close_workspace();
+  void close_workspace();
 }

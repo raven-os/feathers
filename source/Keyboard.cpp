@@ -52,8 +52,8 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Ctrl+Alt+Right"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }};
   shortcuts["a+b+Up"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
   shortcuts["Ctrl+Alt+Left"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
-  shortcuts["a+b+W"] = {"New workspace", [](){ Commands::new_workspace(); }};
-  //shortcuts["c+d"] = {"Close workspace", [](){ Commands::close_workspace(); }};
+  shortcuts["a+b+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
+  shortcuts["c+d"] = {"Close workspace", [](){ Commands::close_workspace(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};

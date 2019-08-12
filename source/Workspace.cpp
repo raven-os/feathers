@@ -15,3 +15,9 @@ Workspace::Workspace(Output &output) :
 {
 
 }
+
+Workspace::~Workspace()
+{
+    for (auto &view : views)
+      view->close();
+}

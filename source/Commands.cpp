@@ -369,15 +369,22 @@ namespace Commands
     switch_workspace(true);
   }
 
-  // void close_workspace()
-  // {
-  //   Server &server = Server::getInstance();
-  //   Workspace &workspace = *(server.outputManager.getActiveWorkspace());
-  //
-  //   for (auto const &output : server.outputManager.getOutputs())
-  //   {
-  //     output.get()->getWorkspaces().erase(output.get()->getWorkspaces().begin() + workspace.id);
-  //   }
-  //   server.outputManager.workspacesNumber--;
-  // }
+  void close_workspace()
+  {
+    Server &server = Server::getInstance();
+
+    if (server.outputManager.workspacesNumber == 2)
+      return ;
+    for (auto const &output : server.outputManager.getOutputs())
+    {
+      auto it = std::find_if(output.get()->workspaces.begin(), output.get()->workspaces.end(),
+                            [](auto &w) {
+                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            });
+      auto newActiveWorkspace = it + (it ==  output.get()->getWorkspaces().begin() ? 1 : -1);
+      server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
+      output.get()->getWorkspaces().erase(output.get()->getWorkspaces().begin() + (std::distance(output.get()->workspaces.begin(), it)));
+    }
+    server.outputManager.workspacesNumber--;
+  }
 }

@@ -13,7 +13,7 @@ public:
   Workspace(Workspace &&) = delete;
   Workspace(Workspace const &) = delete;
 
-  ~Workspace() = default;
+  ~Workspace();
 
   wm::WindowTree &getWindowTree() noexcept
   {
