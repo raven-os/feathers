@@ -25,7 +25,6 @@ Output::Output(struct wlr_output *wlr_output, uint16_t workspacesNumber) :
   for (uint16_t i = 0; i < workspacesNumber; ++i)
     workspaces.emplace_back(new Workspace(*this));
 
-  std::cout << "WORKSPACES NUMBER: " << workspaces.size() << std::endl;
   if (Server::getInstance().outputManager.getActiveWorkspace() == nullptr) {
     Server::getInstance().outputManager.setActiveWorkspace(workspaces[0].get());
   }
@@ -163,11 +162,6 @@ wm::WindowTree &Output::getWindowTree() noexcept
 {
   return Server::getInstance().outputManager.getActiveWorkspace()->getWindowTree();
 }
-
-// Workspace &Output::getActiveWorkspace() noexcept
-// {
-//   return *(workspaces.front().get());
-// }
 
 std::vector<std::unique_ptr<Workspace>> &Output::getWorkspaces() noexcept
 {

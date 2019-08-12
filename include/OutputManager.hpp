@@ -37,8 +37,15 @@ public:
   struct wlr_output_layout *getLayout() const noexcept;
   std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
-  Workspace *getActiveWorkspace() noexcept;
-  void setActiveWorkspace(Workspace *w) { activeWorkspace = w;}
+  Workspace *getActiveWorkspace() noexcept
+  {
+    return activeWorkspace;
+  }
+
+  void setActiveWorkspace(Workspace *w)
+  {
+    activeWorkspace = w;
+  }
 
   Output &getOutput(wlr_output *wlr_output) noexcept;
   Output const &getOutput(wlr_output *wlr_output) const noexcept;

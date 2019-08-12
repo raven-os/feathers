@@ -33,7 +33,7 @@ namespace wm
     }
 
   public:
-    WindowTree() = default;
+    WindowTree() = delete;
     WindowTree(WindowTree &&) = delete;
     WindowTree(WindowTree const &) = delete;
 

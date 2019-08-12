@@ -75,11 +75,6 @@ std::vector<std::unique_ptr<Output>> const& OutputManager::getOutputs() const
   return outputs;
 }
 
-Workspace *OutputManager::getActiveWorkspace() noexcept
-{
-  return activeWorkspace;
-}
-
 Output &OutputManager::getOutput(wlr_output *wlr_output) noexcept
 {
   return *std::find_if(getOutputs().begin(), getOutputs().end(),

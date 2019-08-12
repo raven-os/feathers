@@ -48,9 +48,9 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
   shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
   shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
-  shortcuts["a+b+Down"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }};
+  shortcuts["Ctrl+Alt+Down"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }}; // forward
   shortcuts["Ctrl+Alt+Right"] = {"Switch workspace", [](){ Commands::switch_workspace(true); }};
-  shortcuts["a+b+Up"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
+  shortcuts["Ctrl+Alt+Up"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }}; // backward
   shortcuts["Ctrl+Alt+Left"] = {"Switch workspace", [](){ Commands::switch_workspace(false); }};
   shortcuts["a+b+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
   shortcuts["c+d"] = {"Close workspace", [](){ Commands::close_workspace(); }};

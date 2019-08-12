@@ -8,7 +8,7 @@ class Output;
 class Workspace
 {
 public:
-  Workspace() = default;
+  Workspace() = delete;
   Workspace(Output &output);
   Workspace(Workspace &&) = delete;
   Workspace(Workspace const &) = delete;
