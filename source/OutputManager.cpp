@@ -19,7 +19,7 @@ void OutputManager::server_new_output([[maybe_unused]]struct wl_listener *listen
 
   wlr_output_layout_add_auto(output_layout, wlr_output);
 
-  std::unique_ptr<Output> output(new Output(wlr_output, workspacesNumber));
+  std::unique_ptr<Output> output(new Output(wlr_output, workspaceCount));
   output->setFrameListener();
   outputs.emplace_back(std::move(output));
 

@@ -333,7 +333,7 @@ namespace Commands
     switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 
-  void switch_workspace(int direction)
+  void switch_workspace(SwitchDirection direction)
   {
     Server &server = Server::getInstance();
 
@@ -343,11 +343,10 @@ namespace Commands
                             [](auto &w) noexcept {
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
-      if ((direction && it == output->getWorkspaces().end() - 1) ||
-          (!direction && it == output->getWorkspaces().begin())) {
-            return ;
-      }
-      auto newActiveWorkspace = it + (direction ? 1 : -1);
+
+      if (direction == SwitchDirection::RIGHT ? it == output->getWorkspaces().end() - 1 : it == output->getWorkspaces().begin())
+        return ;
+      auto newActiveWorkspace = it + direction;
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
     }
   }
@@ -365,15 +364,15 @@ namespace Commands
       output->getWorkspaces().insert(output->getWorkspaces().begin() + (std::distance(output->getWorkspaces().begin(), it) + 1),
                                           std::make_unique<Workspace>(*(output)));
     }
-    server.outputManager.workspacesNumber++;
-    switch_workspace(true);
+    server.outputManager.workspaceCount++;
+    switch_workspace(SwitchDirection::RIGHT);
   }
 
   void close_workspace()
   {
     Server &server = Server::getInstance();
 
-    if (server.outputManager.workspacesNumber == 2)
+    if (server.outputManager.workspaceCount == 2)
       return ;
     for (auto const &output : server.outputManager.getOutputs())
     {
@@ -385,6 +384,6 @@ namespace Commands
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
       output->getWorkspaces().erase(output->getWorkspaces().begin() + (std::distance(output->getWorkspaces().begin(), it)));
     }
-    server.outputManager.workspacesNumber--;
+    server.outputManager.workspaceCount--;
   }
 }

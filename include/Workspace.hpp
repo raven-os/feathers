@@ -5,6 +5,14 @@
 
 class Output;
 
+enum SwitchDirection {
+  LEFT = -1,
+  NOTHING,
+  RIGHT
+  //TODO UP ?
+  //TODO DOWN ?
+};
+
 class Workspace
 {
 public:

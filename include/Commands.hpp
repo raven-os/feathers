@@ -18,7 +18,7 @@ namespace Commands
   void switch_focus_left();
   void switch_focus_down();
   void switch_focus_right();
-  void switch_workspace(int direction);
+  void switch_workspace(SwitchDirection direction);
   void new_workspace();
   void close_workspace();
 }

@@ -16,13 +16,13 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(struct wlr_output *wlr_output, uint16_t workspacesNumber) :
+Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
   wlr_output(wlr_output),
   fullscreenView(nullptr)
 {
   refreshImage();
 
-  for (uint16_t i = 0; i < workspacesNumber; ++i)
+  for (uint16_t i = 0; i < workspaceCount; ++i)
     workspaces.emplace_back(new Workspace(*this));
 
   if (Server::getInstance().outputManager.getActiveWorkspace() == nullptr) {

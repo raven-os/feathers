@@ -16,7 +16,7 @@ class Output : public OutputListeners
 {
 public:
 
-  Output(struct wlr_output *wlr_output, uint16_t workspacesNumber);
+  Output(struct wlr_output *wlr_output, uint16_t workspaceCount);
   ~Output() = default;
 
   void setFrameListener();
