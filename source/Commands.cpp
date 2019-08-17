@@ -348,6 +348,8 @@ namespace Commands
         return ;
       auto newActiveWorkspace = it + direction;
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
+      if (server.getViews().size() > 0)
+        server.getViews().front()->focus_view();
     }
   }
 
@@ -361,8 +363,7 @@ namespace Commands
                             [](auto &w) noexcept {
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
-      output->getWorkspaces().insert(output->getWorkspaces().begin() + (std::distance(output->getWorkspaces().begin(), it) + 1),
-                                          std::make_unique<Workspace>(*(output)));
+      output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
     }
     server.outputManager.workspaceCount++;
     switch_workspace(SwitchDirection::RIGHT);
@@ -382,7 +383,7 @@ namespace Commands
                             });
       auto newActiveWorkspace = it + (it ==  output->getWorkspaces().begin() ? 1 : -1);
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
-      output->getWorkspaces().erase(output->getWorkspaces().begin() + (std::distance(output->getWorkspaces().begin(), it)));
+      output->getWorkspaces().erase(it);
     }
     server.outputManager.workspaceCount--;
   }
