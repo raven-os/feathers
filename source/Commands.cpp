@@ -344,7 +344,9 @@ namespace Commands
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
 
-      if (direction == SwitchDirection::RIGHT ? it == output->getWorkspaces().end() - 1 : it == output->getWorkspaces().begin())
+      if (direction == SwitchDirection::RIGHT ?
+          it == output->getWorkspaces().end() - 1 :
+          it == output->getWorkspaces().begin())
         return ;
       auto newActiveWorkspace = it + direction;
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
