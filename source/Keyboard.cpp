@@ -48,12 +48,12 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
   shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
   shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
-  shortcuts["a+b+Down"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(SwitchDirection::RIGHT); }};
-  shortcuts["Ctrl+Alt+Right"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(SwitchDirection::RIGHT); }};
-  shortcuts["a+b+Up"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(SwitchDirection::LEFT); }};
-  shortcuts["Ctrl+Alt+Left"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(SwitchDirection::LEFT); }};
-  shortcuts["a+b+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
-  shortcuts["c+d"] = {"Close workspace", [](){ Commands::close_workspace(); }};
+  shortcuts["Ctrl+Alt+Down"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
+  shortcuts["Ctrl+Alt+Right"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
+  shortcuts["Ctrl+Alt+Up"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+Left"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
+  shortcuts["Ctrl+W"] = {"Close workspace", [](){ Commands::close_workspace(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};

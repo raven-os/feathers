@@ -333,7 +333,7 @@ namespace Commands
     switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 
-  void switch_workspace(SwitchDirection direction)
+  void switch_workspace(int direction)
   {
     Server &server = Server::getInstance();
 
@@ -344,7 +344,7 @@ namespace Commands
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
 
-      if (direction == SwitchDirection::RIGHT ? it == output->getWorkspaces().end() - 1 : it == output->getWorkspaces().begin())
+      if (direction == Workspace::RIGHT ? it == output->getWorkspaces().end() - 1 : it == output->getWorkspaces().begin())
         return ;
       auto newActiveWorkspace = it + direction;
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
@@ -366,7 +366,7 @@ namespace Commands
       output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
     }
     server.outputManager.workspaceCount++;
-    switch_workspace(SwitchDirection::RIGHT);
+    switch_workspace(Workspace::RIGHT);
   }
 
   void close_workspace()

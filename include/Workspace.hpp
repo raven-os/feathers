@@ -5,14 +5,6 @@
 
 class Output;
 
-enum SwitchDirection {
-  LEFT = -1,
-  NOTHING,
-  RIGHT
-  //TODO UP ?
-  //TODO DOWN ?
-};
-
 class Workspace
 {
 public:
@@ -32,6 +24,9 @@ public:
   {
     return views;
   };
+
+  static constexpr int RIGHT = 1;
+  static constexpr int LEFT = -1;
 
 private:
   Output &output;
