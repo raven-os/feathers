@@ -112,7 +112,7 @@ namespace wm
     {
       return {Iterator{this, getFirstChild(nodeIndex)}, Iterator{this, nullNode}};
     }
-   
+
     WindowData &getData(WindowNodeIndex nodeIndex) noexcept
     {
       return getNode(nodeIndex).data;

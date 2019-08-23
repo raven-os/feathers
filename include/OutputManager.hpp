@@ -3,6 +3,7 @@
 # include "Wlroots.hpp"
 # include "Output.hpp"
 # include "Listeners.hpp"
+# include "Workspace.hpp"
 
 #include <vector>
 #include <memory>
@@ -36,10 +37,23 @@ public:
   struct wlr_output_layout *getLayout() const noexcept;
   std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
+  Workspace *getActiveWorkspace() noexcept
+  {
+    return activeWorkspace;
+  }
+
+  void setActiveWorkspace(Workspace *w)
+  {
+    activeWorkspace = w;
+  }
+
   Output &getOutput(wlr_output *wlr_output) noexcept;
   Output const &getOutput(wlr_output *wlr_output) const noexcept;
 
+  uint16_t workspaceCount = 2;
 private:
+  Workspace *activeWorkspace = nullptr;
+
   struct wlr_output_layout *output_layout;
   std::vector<std::unique_ptr<Output>> outputs;
 };

@@ -15,18 +15,18 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
   Server &server = Server::getInstance();
   View *view = wl_container_of(listener, view, destroy);
 
-  if (server.views.front().get() == view)
+  if (server.getViews().front().get() == view)
     {
       server.seat.getSeat()->keyboard_state.focused_surface = nullptr;
     }
-  server.views.erase(std::find_if(server.views.begin(), server.views.end(),
+  server.getViews().erase(std::find_if(server.getViews().begin(), server.getViews().end(),
 				   [view](auto const &ptr)
 				   {
 				     return ptr.get() == view;
 				   }));
-  if (!server.views.empty())
+  if (!server.getViews().empty())
     {
-      std::unique_ptr<View> &currentView = server.views.front();
+      std::unique_ptr<View> &currentView = server.getViews().front();
       currentView->focus_view();
     }
 };
@@ -36,5 +36,5 @@ void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listen
   struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
-    Server::getInstance().views.emplace_back(new View(xdg_surface->surface));
+    Server::getInstance().getViews().emplace_back(new View(xdg_surface->surface));
 };

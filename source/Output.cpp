@@ -14,20 +14,18 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-Output::Output(struct wlr_output *wlr_output) :
+Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
   wlr_output(wlr_output),
-  fullscreenView(nullptr),
-  windowTree([&]()
-	     {
-	       auto box = wlr_output_layout_get_box(Server::getInstance().outputManager.getLayout(), wlr_output);
-
-	       return wm::WindowData{wm::Container(wm::Rect{{{FixedPoint<0, int>(box->x),
-							      FixedPoint<0, int>(box->y)}},
-							    {{FixedPoint<0, int>(box->width),
-							      FixedPoint<0, int>(box->height)}}})};
-	     }())
+  fullscreenView(nullptr)
 {
   refreshImage();
+
+  for (uint16_t i = 0; i < workspaceCount; ++i)
+    workspaces.emplace_back(new Workspace(*this));
+
+  if (Server::getInstance().outputManager.getActiveWorkspace() == nullptr) {
+    Server::getInstance().outputManager.setActiveWorkspace(workspaces[0].get());
+  }
 }
 
 void Output::refreshImage()
@@ -109,7 +107,7 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
       }
 
-      for (auto it = server.views.rbegin(); it != server.views.rend(); ++it)
+      for (auto it = server.getViews().rbegin(); it != server.getViews().rend(); ++it)
 	{
 	  auto &view(*it);
 
@@ -137,6 +135,8 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
   refreshImage();
   auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
   {
+    wm::WindowTree &windowTree = getWindowTree();
+
     std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
     if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
       windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
@@ -154,6 +154,16 @@ void Output::setFrameListener()
 void Output::setFullscreenView(View *view) noexcept
 {
   this->fullscreenView = view;
+}
+
+wm::WindowTree &Output::getWindowTree() noexcept
+{
+  return Server::getInstance().outputManager.getActiveWorkspace()->getWindowTree();
+}
+
+std::vector<std::unique_ptr<Workspace>> &Output::getWorkspaces() noexcept
+{
+  return workspaces;
 }
 
 struct wlr_output *Output::getWlrOutput() const

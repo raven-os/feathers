@@ -10,6 +10,7 @@
 # include "OutputManager.hpp"
 # include "Seat.hpp"
 # include "conf/Configuration.hpp"
+# include "wm/WindowTree.hpp"
 
 enum class OpenType : uint8_t
   {
@@ -50,7 +51,8 @@ public:
   struct wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
 
-  std::vector<std::unique_ptr<View>> views;
+  std::vector<std::unique_ptr<View>> &getViews();
+  wm::WindowTree &getActiveWindowTree();
 
   OutputManager outputManager;
   XdgShell *xdgShell;

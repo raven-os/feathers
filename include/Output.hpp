@@ -2,6 +2,7 @@
 
 # include "Wlroots.hpp"
 # include "Listeners.hpp"
+# include "Workspace.hpp"
 # include "wm/WindowTree.hpp"
 
 class Server;
@@ -15,7 +16,7 @@ class Output : public OutputListeners
 {
 public:
 
-  Output(struct wlr_output *wlr_output);
+  Output(struct wlr_output *wlr_output, uint16_t workspaceCount);
   ~Output() = default;
 
   void setFrameListener();
@@ -26,24 +27,17 @@ public:
     return fullscreenView;
   }
 
+  std::vector<std::unique_ptr<Workspace>> &getWorkspaces() noexcept;
+  wm::WindowTree &getWindowTree() noexcept;
+
   struct wlr_output *getWlrOutput() const;
-
-  wm::WindowTree &getWindowTree() noexcept
-  {
-    return windowTree;
-  }
-
-  wm::WindowTree const &getWindowTree() const noexcept
-  {
-    return windowTree;
-  }
 
   wlr_box saved;
 
 private:
+  std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   View *fullscreenView;
-  wm::WindowTree windowTree;
   struct wlr_texture *wallpaperTexture;
 
 private:

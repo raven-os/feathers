@@ -80,8 +80,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   previous_size = {box->width, box->height};
 
-  auto &output(server.outputManager.getOutput(getWlrOutput()));
-  auto &windowTree(output.getWindowTree());
+  auto &windowTree(server.getActiveWindowTree());
 
   if (server.openType == OpenType::dontCare)
     {
@@ -90,7 +89,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
       server.openType = (strcmp(tiling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
     }
   if (server.openType != OpenType::floating &&
-      (server.views.size() == 1 || server.views[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
+      (server.getViews().size() == 1 || server.getViews()[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
     {
       auto rootNode(windowTree.getRootIndex());
       auto &rootNodeData(windowTree.getData(rootNode));
@@ -103,7 +102,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	{
 	case OpenType::dontCare:
 	  {
-	    auto prevNode(server.views[1]->windowNode);
+	    auto prevNode(server.getViews()[1]->windowNode);
 	    auto parentNode(windowTree.getParent(prevNode));
 	    auto &parentNodeData(windowTree.getData(parentNode));
 
@@ -113,7 +112,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	case OpenType::below:
 	case OpenType::right:
 	  {
-	    auto prevNode(server.views[1]->windowNode);
+	    auto prevNode(server.getViews()[1]->windowNode);
 	    auto &prevData(windowTree.getData(prevNode));
 	    auto position(prevData.getPosition());
 	    auto size(prevData.getSize());
@@ -123,8 +122,8 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    auto &container(prevData.getContainer());
 
 	    container.direction = (server.openType == OpenType::below) ? wm::Container::verticalTiling : wm::Container::horizontalTiling;
-	    server.views[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server.views[1].get()});
-	    windowNode = container.addChild(prevNode, windowTree, server.views[1]->windowNode, wm::ClientData{this});
+	    server.getViews()[1]->windowNode = container.addChild(prevNode, windowTree, wm::ClientData{server.getViews()[1].get()});
+	    windowNode = container.addChild(prevNode, windowTree, server.getViews()[1]->windowNode, wm::ClientData{this});
 	    server.openType = OpenType::dontCare;
 	  }
 	  break;
@@ -155,7 +154,7 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
   if (windowNode == wm::nullNode)
     return;
 
-  auto &windowTree(output.getWindowTree());
+  auto &windowTree(Server::getInstance().outputManager.getActiveWorkspace()->getWindowTree());
   auto parentNode(windowTree.getParent(windowNode));
   auto &parentNodeData(windowTree.getData(parentNode));
 
@@ -173,7 +172,7 @@ template<SurfaceType surfaceType>
 void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
-  if (server.views.size() >= 1)
+  if (server.getViews().size() >= 1)
     {
       auto &output = server.outputManager.getOutput(getWlrOutput());
 
@@ -305,15 +304,15 @@ void View::focus_view()
   struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
   {
-    auto it(std::find_if(server.views.begin(), server.views.end(),
+    auto it(std::find_if(server.getViews().begin(), server.getViews().end(),
 			 [this](auto const &ptr)
 			 {
 			   return ptr.get() == this;
 			 }));
     std::unique_ptr<View> ptr(std::move(*it));
 
-    std::move_backward(server.views.begin(), it, it + 1);
-    server.views.front() = std::move(ptr);
+    std::move_backward(server.getViews().begin(), it, it + 1);
+    server.getViews().front() = std::move(ptr);
   }
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_toplevel_v6_set_activated(wlr_xdg_surface_v6_from_wlr_surface(surface), true);
@@ -383,7 +382,7 @@ View *View::desktop_view_at(double lx, double ly,
 			    struct wlr_surface **surface, double *sx, double *sy)
 {
   Server &server = Server::getInstance();
-  for (auto &view : server.views)
+  for (auto &view : server.getViews())
     {
       if (view->at(lx, ly, surface, sx, sy))
 	{

@@ -9,7 +9,7 @@
 
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},
-  {"Ctrl", WLR_MODIFIER_CTRL}
+  {"Ctrl", WLR_MODIFIER_CTRL},
 };
 
 Keyboard::Keyboard(struct wlr_input_device *device)
@@ -18,10 +18,12 @@ Keyboard::Keyboard(struct wlr_input_device *device)
 {
   key_repeat_source = wl_event_loop_add_timer(Server::getInstance().wl_event_loop, keyboard_handle_repeat, this);
 
+  //debug = true;
+
   shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
   shortcuts["Alt+F4"] = {"destroy", [](){
     Server &server = Server::getInstance();
-    for (auto &view : server.views)
+    for (auto &view : server.getViews())
       {
 	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
 	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
@@ -46,6 +48,12 @@ Keyboard::Keyboard(struct wlr_input_device *device)
   shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
   shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
   shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
+  shortcuts["Ctrl+Alt+Down"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
+  shortcuts["Ctrl+Alt+Right"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
+  shortcuts["Ctrl+Alt+Up"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+Left"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
+  shortcuts["Ctrl+W"] = {"Close workspace", [](){ Commands::close_workspace(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
