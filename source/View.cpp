@@ -117,7 +117,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 	    auto position(prevData.getPosition());
 	    auto size(prevData.getSize());
 
-	    prevData.data.emplace<wm::Container>(wm::Rect{position, {FixedPoint<0, uint32_t>(size[0]), FixedPoint<0, uint32_t>(size[1])}});
+	    prevData.data.emplace<std::unique_ptr<wm::Container>>(new wm::Container{wm::Rect{position, {FixedPoint<0, uint32_t>(size[0]), FixedPoint<0, uint32_t>(size[1])}}});
 
 	    auto &container(prevData.getContainer());
 
@@ -390,4 +390,73 @@ View *View::desktop_view_at(double lx, double ly,
 	}
     }
   return nullptr;
+}
+
+void View::resize(wm::WindowNodeIndex, wm::WindowTree &, std::array<uint16_t, 2u> size)
+{
+  resize(size);
+}
+
+void View::resize(std::array<uint16_t, 2u> size)
+{
+  if (!fullscreen)
+    {
+      if (wlr_surface_is_xdg_surface_v6(surface))
+	wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(surface), size[0], size[1]);
+      else if (wlr_surface_is_xdg_surface(surface))
+	wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(surface), size[0], size[1]);
+    }
+  else
+    {
+      auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
+
+      output.saved.width = size[0];
+      output.saved.height = size[1];
+    }
+}
+
+void View::move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<-4, int32_t>, 2u> position)
+{
+  move(position);
+}
+
+void View::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
+{
+  struct wlr_box box[1];
+  
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
+  else if (wlr_surface_is_xdg_surface(surface))
+    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
+
+  (x = position[0]) -= FixedPoint<0, int32_t>(box->x);
+  (y = position[1]) -= FixedPoint<0, int32_t>(box->y);
+}
+
+std::array<FixedPoint<-4, int32_t>, 2u> View::getPosition() const noexcept
+{
+  struct wlr_box box[1];
+
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
+  else if (wlr_surface_is_xdg_surface(surface))
+    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
+
+  std::array<FixedPoint<-4, int32_t>, 2u> result{{x, y}};
+
+  result[0] += FixedPoint<0, int32_t>(box->x);
+  result[1] += FixedPoint<0, int32_t>(box->y);
+  return result;
+}
+
+std::array<uint16_t, 2u> View::getSize() const noexcept
+{
+  struct wlr_box box[1];
+
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
+  else if (wlr_surface_is_xdg_surface(surface))
+    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
+
+  return {uint16_t(box->width), uint16_t(box->height)};
 }

@@ -10,6 +10,11 @@
 # include "wm/WindowNodeIndex.hpp"
 # include "util/FixedPoint.hpp"
 
+namespace wm
+{
+  struct WindowTree;
+}
+
 class Server;
 
 struct ViewListeners
@@ -72,6 +77,13 @@ public:
   // while this is null the window is floating
   wm::WindowNodeIndex windowNode{wm::nullNode};
   bool fullscreen{false};
+
+  void resize(wm::WindowNodeIndex, wm::WindowTree &, std::array<uint16_t, 2u> size);
+  void resize(std::array<uint16_t, 2u> size);
+  void move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<-4, int32_t>, 2u> position);
+  void move(std::array<FixedPoint<-4, int32_t>, 2u> position);
+  std::array<FixedPoint<-4, int32_t>, 2u> getPosition() const noexcept;
+  std::array<uint16_t, 2u> getSize() const noexcept;
 
 private:
   void begin_interactive(CursorMode mode, uint32_t edges);
