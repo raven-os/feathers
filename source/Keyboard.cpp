@@ -69,7 +69,7 @@ Keyboard::~Keyboard() {
   wl_event_source_remove(key_repeat_source);
 }
 
-bool Keyboard::handle_keybinding()
+std::string Keyboard::get_active_binding()
 {
   for (auto const & shortcut : shortcuts) {
     std::string key = shortcut.first;
@@ -97,18 +97,10 @@ bool Keyboard::handle_keybinding()
     if (debug)
       std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
 
-    bool isBinding = keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum;
-
-    if (isBinding) {
-      if (debug)
-        std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl;
-      shortcut.second.action();
-      return true;
-    }
+    if (keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum)
+      return shortcut.first;
   }
-  if (debug)
-    std::cout << keycodes_states.sum << " + " << keycodes_states.last_raw_modifiers << std::endl << std::endl;
-  return false;
+  return "";
 }
 
 void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
@@ -127,6 +119,7 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
   uint32_t keycode = event->keycode + 8;
   const xkb_keysym_t *syms;
   int nsyms = xkb_state_key_get_syms(device->keyboard->xkb_state, keycode, &syms);
+  std::string binding = "";
 
   bool handled = false;
   uint32_t modifiers = wlr_keyboard_get_modifiers(device->keyboard);
@@ -134,70 +127,85 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
   char name[30] = {0};
   //std::cout << keycode << " " <<  "'A' sym:" <<xkb_keysym_from_name("a", XKB_KEYSYM_CASE_INSENSITIVE) << " " << xkb_state_key_get_utf32(device->keyboard->xkb_state, keycode) << std::endl;
   if (event->state == WLR_KEY_PRESSED)
-  {
-    for (int i = 0; i < nsyms; i++)
     {
-      if (debug) {
-        xkb_keysym_get_name(syms[i], name, 30);
-        std::cout << name << ": " << syms[i] << std::endl;
-      }
+      for (int i = 0; i < nsyms; i++)
+	{
+	  if (debug) {
+	    xkb_keysym_get_name(syms[i], name, 30);
+	    std::cout << name << ": " << syms[i] << std::endl;
+	  }
 
-      handled = handle_keybinding();
+	  binding = get_active_binding();
+	}
     }
+
+  if (binding.size() > 0 && device->keyboard->repeat_info.delay > 0) {
+    repeatBinding = binding;
+    if (wl_event_source_timer_update(key_repeat_source, device->keyboard->repeat_info.delay) < 0) {
+      std::cerr << "failed to set key repeat timer" << std::endl;
+    }
+  }
+  else if (repeatBinding.size() > 0) {
+    disarm_key_repeat();
+  }
+
+  if (binding.size() > 0) {
+    shortcuts[binding].action();
+    handled = true;
   }
 
   if (!handled)
-  {
-    wlr_seat_set_keyboard(seat, device);
-    wlr_seat_keyboard_notify_key(seat, event->time_msec,
-      event->keycode, event->state);
-  }
+    {
+      wlr_seat_set_keyboard(seat, device);
+      wlr_seat_keyboard_notify_key(seat, event->time_msec,
+				   event->keycode, event->state);
+    }
 }
 
 void Keyboard::configure() {
-    struct xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
-    struct xkb_context *context;
-    struct xkb_keymap *key_map;
+  struct xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
+  struct xkb_context *context;
+  struct xkb_keymap *key_map;
 
 
-  	if (!rules.layout) {
-  		rules.layout = getenv("XKB_DEFAULT_LAYOUT");
-  	}
-  	if (!rules.model) {
-  		rules.model = getenv("XKB_DEFAULT_MODEL");
-  	}
-  	if (!rules.options) {
-  		rules.options = getenv("XKB_DEFAULT_OPTIONS");
-  	}
-  	if (!rules.rules) {
-  		rules.rules = getenv("XKB_DEFAULT_RULES");
-  	}
-  	if (!rules.variant) {
-  		rules.variant = getenv("XKB_DEFAULT_VARIANT");
-  	}
+  if (!rules.layout) {
+    rules.layout = getenv("XKB_DEFAULT_LAYOUT");
+  }
+  if (!rules.model) {
+    rules.model = getenv("XKB_DEFAULT_MODEL");
+  }
+  if (!rules.options) {
+    rules.options = getenv("XKB_DEFAULT_OPTIONS");
+  }
+  if (!rules.rules) {
+    rules.rules = getenv("XKB_DEFAULT_RULES");
+  }
+  if (!rules.variant) {
+    rules.variant = getenv("XKB_DEFAULT_VARIANT");
+  }
 
-    if (!(context = xkb_context_new(XKB_CONTEXT_NO_FLAGS))) {
-      std::cerr << "Cannot create the xkb context" << std::endl;
-      return ;
-    }
-    if (!(key_map = xkb_map_new_from_names(context, &rules, XKB_KEYMAP_COMPILE_NO_FLAGS))) {
-      std::cerr << "Cannot configure keyboard: keymap not found" << std::endl;
-      xkb_context_unref(context);
-      return ;
-    }
-
-    xkb_keymap_unref(this->keymap);
-    this->keymap = key_map;
-    if (debug)
-      std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
-    wlr_keyboard_set_keymap(device->keyboard, this->keymap);
-
-    //TODO get info from config
-    int repeat_rate = 25;
-    int repeat_delay = 600;
-
+  if (!(context = xkb_context_new(XKB_CONTEXT_NO_FLAGS))) {
+    std::cerr << "Cannot create the xkb context" << std::endl;
+    return ;
+  }
+  if (!(key_map = xkb_map_new_from_names(context, &rules, XKB_KEYMAP_COMPILE_NO_FLAGS))) {
+    std::cerr << "Cannot configure keyboard: keymap not found" << std::endl;
     xkb_context_unref(context);
-    wlr_keyboard_set_repeat_info(device->keyboard, repeat_rate, repeat_delay);
+    return ;
+  }
+
+  xkb_keymap_unref(this->keymap);
+  this->keymap = key_map;
+  if (debug)
+    std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
+  wlr_keyboard_set_keymap(device->keyboard, this->keymap);
+
+  //TODO get info from config
+  int repeat_rate = 25;
+  int repeat_delay = 600;
+
+  xkb_context_unref(context);
+  wlr_keyboard_set_repeat_info(device->keyboard, repeat_rate, repeat_delay);
 }
 
 void Keyboard::setModifiersListener()
@@ -212,7 +220,22 @@ void Keyboard::setKeyListener()
   wl_signal_add(&device->keyboard->events.key, &key);
 }
 
+void Keyboard::disarm_key_repeat() {
+  repeatBinding.clear();
+  if (wl_event_source_timer_update(key_repeat_source, 0) < 0) {
+    std::cerr << "failed to disarm key repeat timer" << std::endl;
+  }
+}
+
 int Keyboard::keyboard_handle_repeat(void *data)
 {
+  Keyboard *k = static_cast<Keyboard *>(data);
+  if (k->repeatBinding.size() > 0) {
+    if (k->device->keyboard->repeat_info.rate > 0 &&  wl_event_source_timer_update(k->key_repeat_source, 1000 / k->device->keyboard->repeat_info.rate) < 0) {
+      std::cerr << "failed to update key repeat timer" << std::endl;
+    }
+    std::cout << k->repeatBinding << std::endl;
+    k->shortcuts[k->repeatBinding].action();
+  }
   return 0;
 }
