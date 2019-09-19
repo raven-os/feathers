@@ -74,18 +74,18 @@ namespace
 
 	if (siblingNode == wm::nullNode || newContainer->direction == !parallelDirection)
 	  return;
-	if (std::holds_alternative<wm::Container>(windowTree.getData(siblingNode).data))
+	if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(siblingNode).data))
 	  newViewNode = getContainerFocusedView(windowTree, siblingNode, viewNode);
 	else
 	  newViewNode = siblingNode;
       }
-    else if (newViewNode != wm::nullNode && std::holds_alternative<wm::Container>(windowTree.getData(newViewNode).data))
+    else if (newViewNode != wm::nullNode && std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(newViewNode).data))
       {
 	newViewNode = getContainerFocusedView(windowTree, newViewNode, viewNode);
       }
     if (newViewNode != viewNode && newViewNode != wm::nullNode)
       {
-	auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data).view);
+	auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data));
 
 	newView->focus_view();
       }
@@ -140,7 +140,7 @@ void switch_focus_up_or_left(bool parallelDirection)
 
       if (siblingNode == tmpNode || newContainer->direction == !parallelDirection)
 	return;
-      if (std::holds_alternative<wm::Container>(windowTree.getData(siblingNode).data))
+      if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(siblingNode).data))
 	{
 	  while (windowTree.getSibling(siblingNode) != tmpNode && windowTree.getSibling(siblingNode) != wm::nullNode)
 	    siblingNode = windowTree.getSibling(siblingNode);
@@ -158,7 +158,7 @@ void switch_focus_up_or_left(bool parallelDirection)
 	  newViewNode = tmpNode;
 	  tmpNode = windowTree.getSibling(newViewNode);
 	}
-      if (std::holds_alternative<wm::Container>(windowTree.getData(newViewNode).data))
+      if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(newViewNode).data))
 	{
 	  while (windowTree.getSibling(newViewNode) != tmpNode && windowTree.getSibling(newViewNode) != wm::nullNode)
 	    newViewNode = windowTree.getSibling(newViewNode);
@@ -167,7 +167,7 @@ void switch_focus_up_or_left(bool parallelDirection)
     }
   if (newViewNode != viewNode)
     {
-      auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data).view);
+      auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data));
 
       newView->focus_view();
     }

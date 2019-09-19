@@ -4,6 +4,7 @@
 #include <array>
 
 #include "wm/WindowNodeIndex.hpp"
+#include "wm/ClientData.hpp"
 
 #include "util/FixedPoint.hpp"
 
@@ -13,14 +14,12 @@ namespace wm
 {
   class WindowTree;
   class WindowData;
-  class ClientData;
 
   struct Rect
   {
     std::array<FixedPoint<-4, int32_t>, 2u> position;
     std::array<FixedPoint<-4, uint32_t>, 2u> size;
   };
-
 
   struct Container
   {
