@@ -36,7 +36,8 @@ private:
   std::map<std::string, binding> shortcuts;
 
 private:
-  bool handle_keybinding();
+  void disarm_key_repeat();
+  std::string get_active_binding();
   void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
   void keyboard_handle_key(struct wl_listener *listener, void *data);
   static int keyboard_handle_repeat(void *data);
