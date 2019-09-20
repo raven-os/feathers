@@ -241,9 +241,9 @@ void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *liste
 void View::requestFullscreen()
 {
   if (wlr_surface_is_xdg_surface_v6(surface))
-    xdg_toplevel_request_resize<SurfaceType::xdg_v6>(nullptr, nullptr);
+    xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>(nullptr, nullptr);
   else if (wlr_surface_is_xdg_surface(surface))
-    xdg_toplevel_request_resize<SurfaceType::xdg>(nullptr, nullptr);
+    xdg_toplevel_request_fullscreen<SurfaceType::xdg>(nullptr, nullptr);
 }
 
 void View::close()
@@ -423,7 +423,7 @@ void View::move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<-4,
 void View::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
 {
   struct wlr_box box[1];
-  
+
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
   else if (wlr_surface_is_xdg_surface(surface))
