@@ -20,10 +20,10 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
       server.seat.getSeat()->keyboard_state.focused_surface = nullptr;
     }
   server.getViews().erase(std::find_if(server.getViews().begin(), server.getViews().end(),
-				   [view](auto const &ptr)
-				   {
-				     return ptr.get() == view;
-				   }));
+				       [view](auto const &ptr)
+				       {
+					 return ptr.get() == view;
+				       }));
   if (!server.getViews().empty())
     {
       std::unique_ptr<View> &currentView = server.getViews().front();
