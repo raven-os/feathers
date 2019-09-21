@@ -1,17 +1,14 @@
 #pragma once
 
 # include "Wlroots.hpp"
-# include "View.hpp"
 # include "XdgShell.hpp"
 # include "XdgShellV6.hpp"
 # include "LayerShell.hpp"
-# include "Output.hpp"
 # include "ServerCursor.hpp"
 # include "InputManager.hpp"
 # include "OutputManager.hpp"
 # include "Seat.hpp"
 # include "conf/Configuration.hpp"
-# include "wm/WindowTree.hpp"
 
 enum class OpenType : uint8_t
   {
@@ -21,12 +18,14 @@ enum class OpenType : uint8_t
    floating
   };
 
+class View;
+
 class Server
 {
 public:
   Server(Server const &) = delete;
   Server(Server &&) = delete;
-  ~Server();
+  ~Server() noexcept;
 
 
   void run();

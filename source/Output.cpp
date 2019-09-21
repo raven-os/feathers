@@ -14,6 +14,8 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
+#include "LayerSurface.hpp"
+
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
   wlr_output(wlr_output),
   fullscreenView(nullptr)
@@ -27,6 +29,8 @@ Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
     Server::getInstance().outputManager.setActiveWorkspace(workspaces[0].get());
   }
 }
+
+Output::~Output() noexcept = default;
 
 void Output::refreshImage()
 {
@@ -107,6 +111,20 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
       }
 
+      
+      for (int i = ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND; i <= ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM; ++i)
+	for (auto &layerSurface : layers[i])
+	  {
+	    layer_render_data rdata{
+				    .output = wlr_output,
+				    .renderer = renderer,
+				    .layer_surface = layerSurface.get(),
+				    .when = &now,
+				    .fullscreen = false
+	    };
+	    if (wlr_surface_is_layer_surface(layerSurface->surface))
+	      wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_layer_surface, &rdata);
+	  }
       for (auto it = server.getViews().rbegin(); it != server.getViews().rend(); ++it)
 	{
 	  auto &view(*it);
@@ -128,6 +146,21 @@ void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_
 	    wlr_xdg_surface_v6_for_each_surface(wlr_xdg_surface_v6_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
 	}
     }
+
+  // these are above surfaces, even fullscree ones (TODO: config with albinos)
+  for (int i = ZWLR_LAYER_SHELL_V1_LAYER_TOP; i <= ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY; ++i)
+    for (auto &layerSurface : layers[i])
+      {
+	layer_render_data rdata{
+				.output = wlr_output,
+				.renderer = renderer,
+				.layer_surface = layerSurface.get(),
+				.when = &now,
+				.fullscreen = false
+	};
+	if (wlr_surface_is_layer_surface(layerSurface->surface))
+	  wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_layer_surface, &rdata);
+      }
 
   wlr_output_render_software_cursors(wlr_output, NULL);
   wlr_renderer_end(renderer);
@@ -169,4 +202,25 @@ std::vector<std::unique_ptr<Workspace>> &Output::getWorkspaces() noexcept
 struct wlr_output *Output::getWlrOutput() const
 {
   return wlr_output;
+}
+
+void Output::addLayerSurface(std::unique_ptr<LayerSurface> &&layerSurface)
+{
+  wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface);
+
+  if (shell_surface->layer < layers.size())
+     {
+       layers[shell_surface->layer].emplace_back(std::move(layerSurface));
+     }
+}
+
+void Output::removeLayerSurface(LayerSurface *layerSurface)
+{
+  wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface);
+
+  auto it(std::find_if(layers[shell_surface->layer].begin(),layers[shell_surface->layer].end(), [layerSurface](auto &a) noexcept
+												{
+												  return a.get() == layerSurface;
+												}));
+  layers[shell_surface->layer].erase(it);
 }
