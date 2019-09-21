@@ -4,6 +4,7 @@
 #include "OutputManager.hpp"
 #include "InputManager.hpp"
 #include "Seat.hpp"
+#include "LayerSurface.hpp"
 
 Server Server::_instance = Server();
 
@@ -31,11 +32,10 @@ Server::Server()
   wlr_data_device_manager_create(getWlDisplay());
 }
 
-Server::~Server()
-{
-  // wl_display_destroy_clients(display);
-  // wl_display_destroy(display);
-}
+Server::~Server() noexcept = default;
+// {
+//   // wl_display_destroy_clients(display);
+// }
 
 std::vector<std::unique_ptr<View>> &Server::getViews()
 {

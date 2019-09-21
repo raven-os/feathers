@@ -17,12 +17,13 @@ class LayerShell : public LayerShellListeners
 {
 public:
   LayerShell();
-  ~LayerShell() = default;
+  ~LayerShell() noexcept;
 
   void newSurface([[maybe_unused]]struct wl_listener *listener, void *data);
   void shell_surface_destroy([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data);
 
+  std::vector<std::unique_ptr<LayerSurface>> pending_surfaces; // surfaces that aren't mapped yet, so we can't put them in the right layer yet.
+
 private:
   wlr_layer_shell_v1 *layer_shell;
-  std::vector<LayerSurface *> pending_surfaces; // surfaces that aren't mapped yet, so we can't put them in the right layer yet.
 };

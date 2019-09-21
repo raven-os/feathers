@@ -1,7 +1,9 @@
 # include <cstring>
 # include <unistd.h>
 # include <iostream>
+
 # include "Commands.hpp"
+# include "Output.hpp"
 
 namespace
 {
