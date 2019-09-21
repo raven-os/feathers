@@ -1,4 +1,5 @@
 #include "OutputManager.hpp"
+#include "Output.hpp"
 #include "Server.hpp"
 
 OutputManager::OutputManager() {
@@ -6,6 +7,9 @@ OutputManager::OutputManager() {
   SET_LISTENER(OutputManager, OutputManagerListeners, new_output, server_new_output);
   wl_signal_add(&Server::getInstance().backend->events.new_output, &new_output);
 }
+
+OutputManager::~OutputManager() noexcept = default;
+
 
 void OutputManager::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
 {

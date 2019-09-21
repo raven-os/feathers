@@ -1,7 +1,6 @@
 #pragma once
 
 # include "Wlroots.hpp"
-# include "Output.hpp"
 # include "Listeners.hpp"
 # include "Workspace.hpp"
 
@@ -24,11 +23,13 @@ struct OutputManagerListeners
   struct wl_listener new_output;
 };
 
+class Output;
+
 class OutputManager : public OutputManagerListeners
 {
 public:
   OutputManager();
-  ~OutputManager() = default;
+  ~OutputManager() noexcept;
 
   void output_frame(struct wl_listener *listener, void *data);
   void server_new_output(struct wl_listener *listener, void *data);
