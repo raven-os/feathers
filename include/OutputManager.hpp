@@ -70,5 +70,6 @@ private:
   Workspace *activeWorkspace = nullptr;
 
   struct wlr_output_layout *output_layout;
+  wlr_xdg_output_manager_v1 *output_manager;
   std::vector<std::unique_ptr<Output>> outputs;
 };

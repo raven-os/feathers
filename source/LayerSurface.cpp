@@ -14,24 +14,15 @@ LayerSurface::LayerSurface(struct wlr_surface *surface) noexcept
   wl_signal_add(&shell_surface->events.map, &map);
   SET_LISTENER(LayerSurface, LayerSurfaceListeners, unmap, shell_surface_unmap);
   wl_signal_add(&shell_surface->events.unmap, &unmap);
-  // external function (not class member) so manual assignement necessary
   destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().layerShell.shell_surface_destroy(listener, data); };
   wl_signal_add(&shell_surface->events.destroy, &destroy);
   SET_LISTENER(LayerSurface, LayerSurfaceListeners, new_popup, shell_surface_new_popup);
   wl_signal_add(&shell_surface->events.new_popup, &new_popup);
-  // SET_LISTENER(LayerSurface, LayerSurfaceListeners, request_move, xdg_toplevel_request_move<SurfaceType::xdg>);
-  // wl_signal_add(&toplevel->events.request_move, &request_move);
-  // SET_LISTENER(LayerSurface, LayerSurfaceListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xdg>);
-  // wl_signal_add(&toplevel->events.request_resize, &request_resize);
-  // SET_LISTENER(LayerSurface, LayerSurfaceListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
-  // SET_LISTENER(LayerSurface, LayerSurfaceListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
-  // wl_signal_add(&shell_surface->events.new_popup, &new_popup);
-
   /// According to protocol spec:
-  /// "Note: the output may be NULL. In this case, it is your responsibility to assign an output before returning."
+  /// "Note: the output may be NULL. In this case, it is your responsibility to assign an output before returning.
   if (shell_surface->output == nullptr)
     shell_surface->output = Server::getInstance().outputManager.getOutputs()[0]->getWlrOutput();
-  wlr_layer_surface_v1_configure(shell_surface, 300, 400);
+  wlr_layer_surface_v1_configure(shell_surface, shell_surface->client_pending.desired_width, shell_surface->client_pending.desired_height);
 }
 
 LayerSurface::~LayerSurface() noexcept
