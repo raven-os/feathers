@@ -7,6 +7,9 @@ OutputManager::OutputManager() {
   output_layout = wlr_output_layout_create();
   SET_LISTENER(OutputManager, OutputManagerListeners, new_output, server_new_output);
   wl_signal_add(&Server::getInstance().backend->events.new_output, &new_output);
+
+  output_manager = wlr_xdg_output_manager_v1_create(Server::getInstance().getWlDisplay(), output_layout);
+  // TODO: handle signals
 }
 
 OutputManager::~OutputManager() noexcept = default;
