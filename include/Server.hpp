@@ -50,7 +50,6 @@ public:
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
-  std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
   std::vector<std::unique_ptr<View>> &getViews();
   wm::WindowTree &getActiveWindowTree();

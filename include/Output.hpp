@@ -6,6 +6,7 @@
 # include "wm/WindowTree.hpp"
 
 class Server;
+class LayerSurface;
 
 struct OutputListeners
 {
@@ -17,7 +18,7 @@ class Output : public OutputListeners
 public:
 
   Output(struct wlr_output *wlr_output, uint16_t workspaceCount);
-  ~Output() = default;
+  ~Output() noexcept;
 
   void setFrameListener();
   void setFullscreenView(View *view) noexcept;
@@ -34,13 +35,17 @@ public:
 
   wlr_box saved;
 
+  void addLayerSurface(std::unique_ptr<LayerSurface> &&layerSurface);
+  void removeLayerSurface(LayerSurface *layerSurface);
 private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   View *fullscreenView;
   struct wlr_texture *wallpaperTexture;
+  std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:
   void output_frame(struct wl_listener *listener, void *data);
   void refreshImage();
+  
 };

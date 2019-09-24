@@ -48,16 +48,14 @@ void LayerSurface::shell_surface_map(struct wl_listener *listener, void *data)
   Server &server(Server::getInstance());
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(surface);
 
-  if (shell_surface->layer < server.layers.size())
-    {
-      auto &pending_surfaces(server.layerShell.pending_surfaces);
-      auto it(--std::find_if(pending_surfaces.rbegin(), pending_surfaces.rend(), [this](auto &a) noexcept
-										 {
-										   return a.get() == this;
-										 }).base()); // tiny opti with reverse iterator
-      server.layers[shell_surface->layer].emplace_back(std::move(*it));
-      pending_surfaces.erase(it);
-    }
+  auto &pending_surfaces(server.layerShell.pending_surfaces);
+  auto it(--std::find_if(pending_surfaces.rbegin(), pending_surfaces.rend(), [this](auto &a) noexcept
+									     {
+									       return a.get() == this;
+									     }).base()); // tiny opti with reverse iterator
+      
+  server.outputManager.getOutput(shell_surface->output).addLayerSurface(std::move(*it));
+  pending_surfaces.erase(it);
 }
 
 void LayerSurface::shell_surface_unmap(struct wl_listener *listenr, void *data)
@@ -66,14 +64,7 @@ void LayerSurface::shell_surface_unmap(struct wl_listener *listenr, void *data)
   Server &server(Server::getInstance());
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(surface);
 
-  if (shell_surface->layer < server.layers.size())
-    {
-      auto it(std::find_if(server.layers[shell_surface->layer].begin(), server.layers[shell_surface->layer].end(), [this](auto &a) noexcept
-														   {
-														     return a.get() == this;
-														   }));
-      server.layers[shell_surface->layer].erase(it);
-    }  
+  server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this);
 }
 
 void LayerSurface::shell_surface_new_popup(struct wl_listener *listenr, void *data)
