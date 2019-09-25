@@ -5,6 +5,7 @@
 #include "InputManager.hpp"
 #include "Seat.hpp"
 #include "LayerSurface.hpp"
+#include <unistd.h>
 
 Server Server::_instance = Server();
 
@@ -47,6 +48,16 @@ wm::WindowTree &Server::getActiveWindowTree()
   return outputManager.getActiveWorkspace()->getWindowTree();
 }
 
+// TODO REFACTO IN ANOTHER CLASS
+void Server::startupCommands() const
+{
+  // Launch waybar
+  if (fork() == 0)
+    {
+      execl("/bin/sh", "/bin/sh", "-c", "waybar", nullptr);
+    }
+}
+
 void Server::run()
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());
@@ -66,5 +77,8 @@ void Server::run()
   setenv("WAYLAND_DISPLAY", socket, true);
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
 	  socket);
+
+  startupCommands();
+
   wl_display_run(getWlDisplay());
 }
