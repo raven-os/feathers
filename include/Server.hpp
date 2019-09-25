@@ -76,5 +76,7 @@ public:
 private:
   Server();
 
+  void startupCommands() const;
+
   static Server _instance;
 };
