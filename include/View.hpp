@@ -59,6 +59,11 @@ public:
   template<SurfaceType surfaceType>
   void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
 
+  template<SurfaceType surfaceType>
+  void set_tiled(uint32_t edges);
+
+  void set_tiled(uint32_t edges);
+
   void requestFullscreen();
   void close();
   void focus_view();

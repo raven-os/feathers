@@ -49,6 +49,7 @@ namespace wm
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, uint32_t>, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position);
 
+
     WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, ClientData &&newChildWindowData);
     WindowNodeIndex addChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex prev, ClientData &&newChildWindowData);
     void removeChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex);

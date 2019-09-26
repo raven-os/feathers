@@ -69,6 +69,23 @@ View::~View()
 }
 
 template<SurfaceType surfaceType>
+void View::set_tiled(uint32_t tiled_edges)
+{
+  if constexpr (surfaceType == SurfaceType::xdg_v6)
+    wlr_xdg_toplevel_set_tiled(wlr_xdg_surface_from_wlr_surface(surface), tiled_edges);
+  else
+    ; // not supported in v6
+}
+
+
+void View::set_tiled(uint32_t tiled_edges)
+{
+  if (wlr_surface_is_xdg_surface(surface))
+    set_tiled<SurfaceType::xdg>(tiled_edges);
+  // don't forward in v6 case since unsupported.
+}
+
+template<SurfaceType surfaceType>
 void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
@@ -97,6 +114,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
       auto &rootNodeData(windowTree.getData(rootNode));
 
       windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{this});
+      set_tiled<surfaceType>(~0u);
     }
   else
     {
