@@ -146,7 +146,6 @@ namespace conf
 	subscriptions.at(name).hasChanged = false;
       return result;
     } catch (std::out_of_range const &) {
-      subscriptions[name].hasChanged = false;
       return true;
     }
   }
