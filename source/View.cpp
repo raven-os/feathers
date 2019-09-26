@@ -480,3 +480,24 @@ std::array<uint16_t, 2u> View::getSize() const noexcept
 
   return {uint16_t(box->width), uint16_t(box->height)};
 }
+
+std::array<FixedPoint<-4, int32_t>, 2u> View::getMinSize() const noexcept
+{
+  std::array<FixedPoint<-4, int32_t>, 2u> result;
+  if (wlr_surface_is_xdg_surface_v6(surface))
+    {
+      result[0] = FixedPoint<0, int32_t>(wlr_xdg_surface_v6_from_wlr_surface(surface)->toplevel->current.min_width);
+      result[1] = FixedPoint<0, int32_t>(wlr_xdg_surface_v6_from_wlr_surface(surface)->toplevel->current.min_height);
+    }
+  else if (wlr_surface_is_xdg_surface(surface))
+    {
+      result[0] = FixedPoint<0, int32_t>(wlr_xdg_surface_from_wlr_surface(surface)->toplevel->current.min_width);
+      result[1] = FixedPoint<0, int32_t>(wlr_xdg_surface_from_wlr_surface(surface)->toplevel->current.min_height);
+    }
+  return result;
+}
+
+std::array<FixedPoint<-4, int32_t>, 2u> View::getMinSize(wm::WindowNodeIndex, wm::WindowTree &) const noexcept
+{
+  return getMinSize();
+}

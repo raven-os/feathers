@@ -45,6 +45,14 @@ namespace wm
 		      }, data);
   }
 
+  std::array<FixedPoint<-4, int32_t>, 2u> WindowData::getMinSize(WindowNodeIndex index, WindowTree &windowTree) const noexcept
+  {
+    return std::visit([&](auto &data) noexcept
+		      {
+			return data->getMinSize(index, windowTree);
+		      }, data);
+  }
+
   Container &WindowData::getContainer() noexcept
   {
     return *std::get<std::unique_ptr<Container>>(data);

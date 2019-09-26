@@ -93,6 +93,25 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	  // TODO: clamp cursor position to not cause negative sizes and moving windows
 	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * int32_t((direction == wm::Container::horizontalTiling ? cursor->x : cursor->y)));
 
+	  auto validataPrevAndNextNewPos([&](auto node)
+					 {
+					   if (node != wm::nullNode)
+					     {
+					       auto &data(windowTree.getData(node));
+					     
+					       if (data.getPosition()[direction] + FixedPoint<-4, int>(FixedPoint<0, int32_t>(data.getSize()[direction]))
+						   <= cursor_pos + data.getMinSize(node, windowTree)[direction])
+						 return false;
+					     }
+					   
+					   if (node == windowTree.getFirstChild(windowTree.getParent(node)))
+					     return true;
+					   auto prevNode(windowTree.getPrevSibling(node));
+					   auto &prevData(windowTree.getData(prevNode));
+
+					   return (prevData.getPosition()[direction] + prevData.getMinSize(prevNode, windowTree)[direction] < cursor_pos);
+					 });
+
 	  for (auto node = view->windowNode; node != windowTree.getRootIndex(); node = windowTree.getParent(node))
 	    {
 	      auto parentNode(windowTree.getParent(node));
@@ -103,23 +122,30 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 		  if ((server.resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_LEFT : WLR_EDGE_TOP))
 		      && windowTree.getFirstChild(parentNode) != node)
 		    {
-		      auto &data(windowTree.getData(node));
-		      auto newPos(data.getPosition());
+		      if (validataPrevAndNextNewPos(node))
+			{
+			  auto &data(windowTree.getData(node));
+			  auto newPos(data.getPosition());
 
-		      newPos[direction] = cursor_pos;
-		      data.move(node, windowTree, newPos);
-		      parentData.updateChildWidths(parentNode, windowTree);
+			  newPos[direction] = cursor_pos;
+			  data.move(node, windowTree, newPos);
+			  parentData.updateChildWidths(parentNode, windowTree);
+			}
 		    }
 		  else if ((server.resize_edges & (direction == wm::Container::horizontalTiling ? WLR_EDGE_RIGHT : WLR_EDGE_BOTTOM))
 		  	   && windowTree.getSibling(node) != wm::nullNode)
 		    {
 		      auto nextNode(windowTree.getSibling(node));
-		      auto &nextData(windowTree.getData(nextNode));
-		      auto newPos(nextData.getPosition());
 
-		      newPos[direction] = cursor_pos;
-		      nextData.move(nextNode, windowTree, newPos);
-		      parentData.updateChildWidths(parentNode, windowTree);
+		      if (validataPrevAndNextNewPos(nextNode))
+			{
+			  auto &nextData(windowTree.getData(nextNode));
+			  auto newPos(nextData.getPosition());
+
+			  newPos[direction] = cursor_pos;
+			  nextData.move(nextNode, windowTree, newPos);
+			  parentData.updateChildWidths(parentNode, windowTree);
+			}
 		    }
 		  else
 		    {
