@@ -241,4 +241,20 @@ namespace wm
     return size;
   }
 
+  std::array<FixedPoint<-4, int32_t>, 2u> Container::getMinSize(WindowNodeIndex index, WindowTree &windowTree) const noexcept
+  {
+    std::array<FixedPoint<-4, int32_t>, 2u> result{0_FP, 0_FP};
+
+    for (auto child : windowTree.getChildren(index))
+      {
+	auto &childData(windowTree.getData(child));
+	auto childMinSize(childData.getMinSize(child, windowTree));
+
+	result[direction] += childMinSize[direction];
+	result[!direction] = std::max(childMinSize[!direction], result[!direction]);
+      }
+    return result;
+  }
+
+
 }

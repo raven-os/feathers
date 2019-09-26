@@ -57,5 +57,6 @@ namespace wm
 
     std::array<FixedPoint<-4, int32_t>, 2u> getPosition() const noexcept;
     std::array<uint16_t, 2u> getSize() const noexcept;
+    std::array<FixedPoint<-4, int32_t>, 2u> getMinSize(WindowNodeIndex index, WindowTree &windowTree) const noexcept;
   };
 }

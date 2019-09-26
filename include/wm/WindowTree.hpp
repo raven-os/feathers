@@ -91,6 +91,15 @@ namespace wm
       return getNode(nodeIndex).nextSibling;
     }
 
+    WindowNodeIndex getPrevSibling(WindowNodeIndex nodeIndex) const noexcept
+    {
+      WindowNodeIndex result = getFirstChild(getParent(nodeIndex));
+
+      while (getSibling(result) != nodeIndex)
+	result = getSibling(result);
+      return result;
+    }
+
     struct IteratorPair
     {
       Iterator _begin;
