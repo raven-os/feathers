@@ -278,19 +278,24 @@ namespace Commands
     auto rootNode(windowTree.getRootIndex());
     auto &rootNodeData(windowTree.getData(rootNode));
 
-    if (view->windowNode != wm::nullNode) {
-      rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
-      view->x = 10_FP;
-      view->y = 10_FP;
-      if (wlr_surface_is_xdg_surface_v6(view->surface))
-	wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
-      else if (wlr_surface_is_xdg_surface(view->surface))
-	wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
+    if (view->windowNode != wm::nullNode)
+      {
+	rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
+	view->x = 10_FP;
+	view->y = 10_FP;
+	if (wlr_surface_is_xdg_surface_v6(view->surface))
+	  wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
+	else if (wlr_surface_is_xdg_surface(view->surface))
+	  wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
 
-      view->windowNode = wm::nullNode;
-    }
+	view->windowNode = wm::nullNode;
+	view->set_tiled(0);
+      }
     else
-      view->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{view.get()});
+      {
+	view->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{view.get()});
+	view->set_tiled(~0u);
+      }
   }
 
   void switch_container_direction() {
