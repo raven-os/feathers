@@ -14,7 +14,7 @@ LayerSurface::LayerSurface(wlr_surface *surface) noexcept
   wl_signal_add(&shell_surface->events.unmap, &unmap);
   destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().layerShell.shell_surface_destroy(listener, data); };
   wl_signal_add(&shell_surface->events.destroy, &destroy);
-  SET_LISTENER(LayerSurface, LayerSurfaceListeners, new_popup, shell_surface_new_popup);
+  SET_LISTENER(LayerSurface, LayerSurfaceListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
   wl_signal_add(&shell_surface->events.new_popup, &new_popup);
   /// According to protocol spec:
   /// "Note: the output may be NULL. In this case, it is your responsibility to assign an output before returning.
@@ -55,11 +55,6 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 
   server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this);
 }
-
-void LayerSurface::shell_surface_new_popup(wl_listener *listenr, void *data)
-{
-}
-
 
 void LayerSurface::close()
 {

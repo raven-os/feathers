@@ -14,15 +14,14 @@ struct PopupListeners
 
 class Popup : public PopupListeners
 {
-  public:
-    Popup(View *child, wlr_surface *surface);
-    ~Popup();
+public:
+  Popup(wlr_surface *surface);
+  ~Popup();
 
-    wlr_surface *surface;
-
-  private:
-    View *child;
-
-    void handle_new_popup(wl_listener *listener, void *data);
-    void handle_destroy_popup(wl_listener *listener, void *data);
+  wlr_surface *surface;
+  std::unique_ptr<Popup> popup;
+  
+private:
+  void handle_new_popup(wl_listener *listener, void *data);
+  void handle_destroy_popup(wl_listener *listener, void *data);
 };

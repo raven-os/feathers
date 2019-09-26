@@ -240,15 +240,6 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 }
 
 template<SurfaceType surfaceType>
-void XdgView::xdg_handle_new_popup(wl_listener *listener, void *data)
-{
-  using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
-
-  wlr_xdg_popup_type *xdg_popup = static_cast<wlr_xdg_popup_type *>(data);
-  popup = std::make_unique<Popup>(Popup(this, xdg_popup->base->surface));
-}
-
-template<SurfaceType surfaceType>
 void XdgView::xdg_toplevel_request_resize(wl_listener *listener, void *data)
 {
   wlr_xdg_toplevel_v6_resize_event *event = static_cast<wlr_xdg_toplevel_v6_resize_event *>(data);

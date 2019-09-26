@@ -35,7 +35,6 @@ public:
 
   void shell_surface_map(wl_listener *listenr, void *data);
   void shell_surface_unmap(wl_listener *listenr, void *data);
-  void shell_surface_new_popup(wl_listener *listenr, void *data);
 
   void requestFullscreen();
   void close();
