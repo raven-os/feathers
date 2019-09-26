@@ -93,17 +93,13 @@ void ServerCursor::process_cursor_resize([[maybe_unused]]uint32_t time)
 	  // TODO: clamp cursor position to not cause negative sizes and moving windows
 	  FixedPoint<-4, int32_t> cursor_pos((1 << 4) * int32_t((direction == wm::Container::horizontalTiling ? cursor->x : cursor->y)));
 
-	  auto validataPrevAndNextNewPos([&](auto node)
+	  auto validataPrevAndNextNewPos([&windowTree, direction, cursor_pos](auto node)
 					 {
-					   if (node != wm::nullNode)
-					     {
-					       auto &data(windowTree.getData(node));
-					     
-					       if (data.getPosition()[direction] + FixedPoint<-4, int>(FixedPoint<0, int32_t>(data.getSize()[direction]))
-						   <= cursor_pos + data.getMinSize(node, windowTree)[direction])
-						 return false;
-					     }
+					   auto &data(windowTree.getData(node));
 					   
+					   if (data.getPosition()[direction] + FixedPoint<-4, int>(FixedPoint<0, int32_t>(data.getSize()[direction]))
+					       <= cursor_pos + data.getMinSize(node, windowTree)[direction])
+					     return false;
 					   if (node == windowTree.getFirstChild(windowTree.getParent(node)))
 					     return true;
 					   auto prevNode(windowTree.getPrevSibling(node));
