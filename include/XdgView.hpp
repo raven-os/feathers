@@ -37,9 +37,6 @@ public:
   void xdg_toplevel_request_fullscreen(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_handle_new_popup(wl_listener *listenr, void *data);
-
-  template<SurfaceType surfaceType>
   void set_tiled(uint32_t edges);
 
   void set_tiled(uint32_t edges);

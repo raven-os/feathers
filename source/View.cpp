@@ -51,6 +51,22 @@ View *View::desktop_view_at(double lx, double ly,
   return nullptr;
 }
 
+template<SurfaceType surfaceType>
+void View::xdg_handle_new_popup(wl_listener *listener, void *data)
+{
+  using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
+
+  wlr_xdg_popup_type *xdg_popup = static_cast<wlr_xdg_popup_type *>(data);
+  popup = std::make_unique<Popup>(xdg_popup->base->surface);
+}
+
+template
+void View::xdg_handle_new_popup<SurfaceType::xdg>(wl_listener *listener, void *data);
+
+template
+void View::xdg_handle_new_popup<SurfaceType::xdg_v6>(wl_listener *listener, void *data);
+
+
 void View::focus_view()
 {
   Server &server = Server::getInstance();

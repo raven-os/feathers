@@ -40,6 +40,8 @@ public:
   FixedPoint<-4, int> x, y;
   std::unique_ptr<Popup> popup;
 
+  template<SurfaceType surfaceType>
+  void xdg_handle_new_popup(wl_listener *listener, void *data);
   void focus_view();
 private:
   bool at(double lx, double ly, wlr_surface **surface, double *sx, double *sy);
