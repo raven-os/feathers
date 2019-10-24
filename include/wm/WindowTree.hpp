@@ -116,6 +116,10 @@ namespace wm
       }
     };
 
+    void exchangeChildren(WindowNodeIndex first, WindowNodeIndex second) noexcept
+    {
+      std::swap(getNode(first).firstChild, getNode(second).firstChild);
+    }
 
     IteratorPair getChildren(WindowNodeIndex nodeIndex) const noexcept
     {
@@ -138,6 +142,6 @@ namespace wm
 
     WindowNodeIndex addChild(WindowNodeIndex parent);
     WindowNodeIndex addChildAfter(WindowNodeIndex parent, WindowNodeIndex index);
-
+    void dump();
   };
 }

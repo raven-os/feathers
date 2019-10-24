@@ -1,4 +1,5 @@
 #include "wm/WindowTree.hpp"
+#include <iostream>
 
 namespace wm
 {
@@ -62,5 +63,22 @@ namespace wm
     getNode(result).firstChild = nullNode;
     getNode(index).nextSibling = result;
     return result;
+  }
+
+  void WindowTree::dump()
+  {
+    struct rec : public WindowTree
+    {
+      void func(std::string prefix, WindowNodeIndex index)
+      {
+	std::cout << prefix << "* " << index.data << std::endl;
+	prefix += " ";
+	for(auto child: getChildren(index))
+	  {
+	    func(prefix, child);
+	  }
+      }
+    };
+    static_cast<rec *>(this)->func(std::string(""), getRootIndex());
   }
 }

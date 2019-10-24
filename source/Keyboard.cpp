@@ -40,6 +40,10 @@ Keyboard::Keyboard(wlr_input_device *device)
   shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
   shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(); }};
   shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
+  shortcuts["Alt+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
+  shortcuts["Alt+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
+  shortcuts["Alt+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};
+  shortcuts["Alt+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
 
   //Allowing keyboard debug
   shortcuts["Alt+D"] = {"Debug", [this](void*){debug = !debug;}};

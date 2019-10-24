@@ -29,6 +29,14 @@ namespace Commands
     {"9", 8}
   };
 
+  namespace WindowCommands
+  {
+    auto getContainerFocusedView(wm::WindowTree &windowTree, wm::WindowNodeIndex containerNode, wm::WindowNodeIndex viewNode);
+    void switch_focus_down_or_right(bool parallelDirection);
+    void switch_focus_up_or_left(bool parallelDirection);
+    void move_window(bool moveForward, bool moveVertical);
+  }
+
   void open_terminal();
   void open_config_editor();
   void toggle_fullscreen();
@@ -42,6 +50,11 @@ namespace Commands
   void switch_focus_right();
   void switch_workspace(int direction, void *data);
   void switch_window_from_workspace(int direction);
+  void move_window_left();
+  void move_window_right();
+  void move_window_up();
+  void move_window_down();
+  void switch_workspace(int direction);
   void new_workspace();
   void close_workspace();
   void close_view();
