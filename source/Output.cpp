@@ -112,7 +112,7 @@ void Output::output_frame(wl_listener *listener, void *data)
 	wlr_render_texture(renderer, wallpaperTexture, transform.data(), 0, 0, 1.0f);
       }
 
-      
+
       for (int i = ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND; i <= ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM; ++i)
 	for (auto &layerSurface : layers[i])
 	  {

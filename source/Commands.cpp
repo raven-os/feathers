@@ -6,176 +6,6 @@
 # include "Output.hpp"
 # include "XdgView.hpp"
 
-namespace
-{
-  auto getContainerFocusedView(wm::WindowTree &windowTree, wm::WindowNodeIndex containerNode, wm::WindowNodeIndex viewNode)
-  {
-    Server &server = Server::getInstance();
-
-    for (auto &tmpView : server.getViews())
-      {
-	if (tmpView->windowNode != viewNode)
-	  {
-	    auto tmpContainerNode(windowTree.getParent(tmpView->windowNode));
-
-	    while (tmpContainerNode != windowTree.getRootIndex() && tmpContainerNode != containerNode)
-	      tmpContainerNode = windowTree.getParent(tmpContainerNode);
-	    if (tmpContainerNode == containerNode)
-	      {
-		return tmpView->windowNode;
-	      }
-	  }
-      }
-    return wm::nullNode;
-  }
-
-  void switch_focus_down_or_right(bool parallelDirection)
-  {
-    Server &server = Server::getInstance();
-
-    if (XdgView *view = server.getFocusedView())
-      {
-	auto viewNode(view->windowNode);
-	auto &output(server.outputManager.getOutput(view->getWlrOutput()));
-
-	if (view->windowNode == wm::nullNode || output.getFullscreenView())
-	  return ;
-
-	auto &windowTree(server.getActiveWindowTree());
-	auto containerNode(windowTree.getParent(viewNode));
-	auto *container(&windowTree.getData(containerNode).getContainer());
-
-	if (container->direction == !parallelDirection)
-	  {
-	    if (containerNode != windowTree.getRootIndex())
-	      {
-		viewNode = containerNode;
-		containerNode = windowTree.getParent(containerNode);
-		container = &windowTree.getData(containerNode).getContainer();
-	      }
-	    else
-	      return;
-	  }
-	auto newViewNode(windowTree.getSibling(viewNode));
-
-	if (newViewNode == wm::nullNode && containerNode != windowTree.getRootIndex())
-	  {
-	    auto tmpNode(containerNode);
-	    auto newContainerNode(windowTree.getParent(tmpNode));
-	    auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
-
-	    while (newContainerNode != windowTree.getRootIndex() &&
-		   (newContainer->direction == !parallelDirection ||
-		    windowTree.getSibling(tmpNode) == wm::nullNode))
-	      {
-		tmpNode = newContainerNode;
-		newContainerNode = windowTree.getParent(tmpNode);
-		newContainer = &windowTree.getData(newContainerNode).getContainer();
-	      }
-	    auto siblingNode(windowTree.getSibling(tmpNode));
-
-	    if (siblingNode == wm::nullNode || newContainer->direction == !parallelDirection)
-	      return;
-	    if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(siblingNode).data))
-	      newViewNode = getContainerFocusedView(windowTree, siblingNode, viewNode);
-	    else
-	      newViewNode = siblingNode;
-	  }
-	else if (newViewNode != wm::nullNode && std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(newViewNode).data))
-	  {
-	    newViewNode = getContainerFocusedView(windowTree, newViewNode, viewNode);
-	  }
-	if (newViewNode != viewNode && newViewNode != wm::nullNode)
-	  {
-	    auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data));
-
-	    newView->focus_view();
-	  }
-      }
-  }
-
-  void switch_focus_up_or_left(bool parallelDirection)
-  {
-    Server &server = Server::getInstance();
-
-    if (XdgView *view = server.getFocusedView())
-      {
-	auto viewNode(view->windowNode);
-	auto &output(server.outputManager.getOutput(view->getWlrOutput()));
-
-	if (view->windowNode == wm::nullNode || output.getFullscreenView())
-	  return ;
-
-	auto &windowTree(server.getActiveWindowTree());
-	auto containerNode(windowTree.getParent(viewNode));
-	auto *container(&windowTree.getData(containerNode).getContainer());
-
-	if (container->direction == !parallelDirection)
-	  {
-	    if (containerNode != windowTree.getRootIndex())
-	      {
-		viewNode = containerNode;
-		containerNode = windowTree.getParent(containerNode);
-		container = &windowTree.getData(containerNode).getContainer();
-	      }
-	    else
-	      return;
-	  }
-	auto newViewNode(windowTree.getFirstChild(containerNode));
-
-	if (newViewNode == viewNode && containerNode != windowTree.getRootIndex())
-	  {
-	    auto tmpNode(containerNode);
-	    auto newContainerNode(windowTree.getParent(tmpNode));
-	    auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
-
-	    while (newContainerNode != windowTree.getRootIndex() &&
-		   (newContainer->direction == !parallelDirection ||
-		    windowTree.getFirstChild(newContainerNode) == tmpNode))
-	      {
-		tmpNode = newContainerNode;
-		newContainerNode = windowTree.getParent(tmpNode);
-		newContainer = &windowTree.getData(newContainerNode).getContainer();
-	      }
-	    auto siblingNode(windowTree.getFirstChild(newContainerNode));
-
-	    if (siblingNode == tmpNode || newContainer->direction == !parallelDirection)
-	      return;
-	    if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(siblingNode).data))
-	      {
-		while (windowTree.getSibling(siblingNode) != tmpNode && windowTree.getSibling(siblingNode) != wm::nullNode)
-		  siblingNode = windowTree.getSibling(siblingNode);
-		newViewNode = getContainerFocusedView(windowTree, siblingNode, viewNode);
-	      }
-	    else
-	      newViewNode = siblingNode;
-	  }
-	else if (newViewNode != viewNode)
-	  {
-	    auto tmpNode(windowTree.getSibling(newViewNode));
-
-	    while (tmpNode != viewNode && tmpNode != wm::nullNode)
-	      {
-		newViewNode = tmpNode;
-		tmpNode = windowTree.getSibling(newViewNode);
-	      }
-	    if (std::holds_alternative<std::unique_ptr<wm::Container>>(windowTree.getData(newViewNode).data))
-	      {
-		while (windowTree.getSibling(newViewNode) != tmpNode && windowTree.getSibling(newViewNode) != wm::nullNode)
-		  newViewNode = windowTree.getSibling(newViewNode);
-		newViewNode = getContainerFocusedView(windowTree, newViewNode, viewNode);
-	      }
-	  }
-	if (newViewNode != viewNode)
-	  {
-	    auto &newView(std::get<wm::ClientData>(windowTree.getData(newViewNode).data));
-
-	    newView->focus_view();
-	  }
-      }
-  }
-}
-
 namespace Commands
 {
   void open_terminal() {
@@ -317,24 +147,44 @@ namespace Commands
     wl_display_terminate(server.getWlDisplay());
   }
 
-  void switch_focus_up()
-  {
-    switch_focus_up_or_left(wm::Container::verticalTiling);
-  }
-
   void switch_focus_left()
   {
-    switch_focus_up_or_left(wm::Container::horizontalTiling);
-  }
-
-  void switch_focus_down()
-  {
-    switch_focus_down_or_right(wm::Container::verticalTiling);
+    WindowCommands::switch_focus_up_or_left(wm::Container::horizontalTiling);
   }
 
   void switch_focus_right()
   {
-    switch_focus_down_or_right(wm::Container::horizontalTiling);
+    WindowCommands::switch_focus_down_or_right(wm::Container::horizontalTiling);
+  }
+
+  void switch_focus_up()
+  {
+    WindowCommands::switch_focus_up_or_left(wm::Container::verticalTiling);
+  }
+
+  void switch_focus_down()
+  {
+    WindowCommands::switch_focus_down_or_right(wm::Container::verticalTiling);
+  }
+
+  void move_window_left()
+  {
+    WindowCommands::move_window(false, false);
+  }
+
+  void move_window_right()
+  {
+    WindowCommands::move_window(true, false);
+  }
+
+  void move_window_up()
+  {
+    WindowCommands::move_window(false, true);
+  }
+
+  void move_window_down()
+  {
+    WindowCommands::move_window(true, true);
   }
 
   void switch_workspace(int direction, void *data)
