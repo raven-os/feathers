@@ -208,9 +208,9 @@ void Output::addLayerSurface(std::unique_ptr<LayerSurface> &&layerSurface)
 {
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface);
 
-  if (shell_surface->layer < layers.size())
+  if (shell_surface->current.layer < layers.size())
      {
-       layers[shell_surface->layer].emplace_back(std::move(layerSurface));
+       layers[shell_surface->current.layer].emplace_back(std::move(layerSurface));
      }
 }
 
@@ -218,9 +218,9 @@ void Output::removeLayerSurface(LayerSurface *layerSurface)
 {
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface);
 
-  auto it(std::find_if(layers[shell_surface->layer].begin(),layers[shell_surface->layer].end(), [layerSurface](auto &a) noexcept
+  auto it(std::find_if(layers[shell_surface->current.layer].begin(),layers[shell_surface->current.layer].end(), [layerSurface](auto &a) noexcept
 												{
 												  return a.get() == layerSurface;
 												}));
-  layers[shell_surface->layer].erase(it);
+  layers[shell_surface->current.layer].erase(it);
 }
