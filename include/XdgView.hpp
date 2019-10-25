@@ -56,8 +56,9 @@ public:
   std::array<FixedPoint<-4, int32_t>, 2u> getMinSize() const noexcept;
   std::array<FixedPoint<-4, int32_t>, 2u> getMinSize(wm::WindowNodeIndex, wm::WindowTree &) const noexcept;
 
-  // while this is null the window is floating
+  // while the two following fields are null the window is in floating mode
   wm::WindowNodeIndex windowNode{wm::nullNode};
+  Workspace *workspace{nullptr};
   bool fullscreen{false};
   std::array<int, 2u> previous_size;
 };

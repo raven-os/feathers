@@ -6,6 +6,7 @@
 #include "Seat.hpp"
 #include "LayerSurface.hpp"
 #include "Output.hpp"
+#include "XdgView.hpp"
 #include <unistd.h>
 
 Server Server::_instance = Server();
@@ -42,7 +43,7 @@ wlr_surface *Server::getFocusedSurface() const noexcept
 
   if (LayerSurface *layerSurface = output.getFocusedLayerSurface())
     return layerSurface->surface;
-  if (View *view = getFocusedView())
+  if (XdgView *view = getFocusedView())
     return view->surface;
   return nullptr;
 }

@@ -42,7 +42,7 @@ public:
   wlr_output_layout *getLayout() const noexcept;
   std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
-  Workspace *getActiveWorkspace() noexcept
+  Workspace *getActiveWorkspace() const noexcept
   {
     return activeWorkspace;
   }
