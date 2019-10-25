@@ -7,9 +7,9 @@ InputManager::InputManager()
   wl_signal_add(&Server::getInstance().backend->events.new_input, &new_input);
 }
 
-void InputManager::server_new_input([[maybe_unused]]struct wl_listener *listener, void *data)
+void InputManager::server_new_input([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_input_device *device = static_cast<struct wlr_input_device *>(data);
+  wlr_input_device *device = static_cast<wlr_input_device *>(data);
   switch (device->type)
   {
     case WLR_INPUT_DEVICE_KEYBOARD:
@@ -30,7 +30,7 @@ void InputManager::server_new_input([[maybe_unused]]struct wl_listener *listener
   wlr_seat_set_capabilities(Server::getInstance().seat.getSeat(), caps);
 }
 
-void InputManager::server_new_keyboard(struct wlr_input_device *device)
+void InputManager::server_new_keyboard(wlr_input_device *device)
 {
   std::unique_ptr<Keyboard> keyboard(new Keyboard(device));
 
@@ -42,7 +42,7 @@ void InputManager::server_new_keyboard(struct wlr_input_device *device)
   keyboards.emplace_back(std::move(keyboard));
 }
 
-void InputManager::server_new_pointer(struct wlr_input_device *device)
+void InputManager::server_new_pointer(wlr_input_device *device)
 {
   wlr_cursor_attach_input_device(Server::getInstance().cursor.cursor, device);
 }

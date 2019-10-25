@@ -19,13 +19,13 @@ class Server;
 
 struct ViewListeners
 {
-  struct wl_listener new_popup;
-  struct wl_listener map;
-  struct wl_listener unmap;
-  struct wl_listener destroy;
-  struct wl_listener request_move;
-  struct wl_listener request_resize;
-  struct wl_listener request_fullscreen;
+  wl_listener new_popup;
+  wl_listener map;
+  wl_listener unmap;
+  wl_listener destroy;
+  wl_listener request_move;
+  wl_listener request_resize;
+  wl_listener request_fullscreen;
 };
 
 enum class SurfaceType
@@ -42,22 +42,22 @@ public:
   ~View();
 
   template<SurfaceType surfaceType>
-  void xdg_surface_map(struct wl_listener *listener, void *data);
+  void xdg_surface_map(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_surface_unmap(struct wl_listener *listener, void *data);
+  void xdg_surface_unmap(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_toplevel_request_move(struct wl_listener *listener, void *data);
+  void xdg_toplevel_request_move(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_toplevel_request_resize(struct wl_listener *listener, void *data);
+  void xdg_toplevel_request_resize(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data);
+  void xdg_toplevel_request_fullscreen(wl_listener *listener, void *data);
 
   template<SurfaceType surfaceType>
-  void xdg_handle_new_popup(struct wl_listener *listenr, void *data);
+  void xdg_handle_new_popup(wl_listener *listenr, void *data);
 
   template<SurfaceType surfaceType>
   void set_tiled(uint32_t edges);

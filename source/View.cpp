@@ -86,10 +86,10 @@ void View::set_tiled(uint32_t tiled_edges)
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_map([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   mapped = true;
   focus_view();
@@ -161,7 +161,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_unmap([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
 
@@ -182,14 +182,14 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_move([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   if (windowNode == wm::nullNode)
     begin_interactive(CursorMode::CURSOR_MOVE, 0);
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_fullscreen([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
   if (server.getViews().size() >= 1)
@@ -198,7 +198,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 
       if (!output.getFullscreenView())
 	{
-	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
+	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
 
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
@@ -243,7 +243,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_handle_new_popup([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
 
@@ -252,7 +252,7 @@ void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_resize([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
   begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);
@@ -280,7 +280,7 @@ void View::close()
 struct wlr_output *View::getWlrOutput()
 {
   Server &server = Server::getInstance();
-  struct wlr_box viewBox;
+  wlr_box viewBox;
   {
     if (wlr_surface_is_xdg_surface_v6(surface))
       wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), &viewBox);
@@ -471,7 +471,7 @@ std::array<FixedPoint<-4, int32_t>, 2u> View::getPosition() const noexcept
 
 std::array<uint16_t, 2u> View::getSize() const noexcept
 {
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);

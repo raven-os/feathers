@@ -14,7 +14,7 @@ struct render_data
   struct wlr_output *output;
   struct wlr_renderer *renderer;
   View *view;
-  struct timespec *when;
+  timespec *when;
   bool fullscreen;
 };
 
@@ -27,13 +27,13 @@ struct layer_render_data
   struct wlr_output *output;
   struct wlr_renderer *renderer;
   LayerSurface *layer_surface;
-  struct timespec *when;
+  timespec *when;
   bool fullscreen;
 };
 
 struct OutputManagerListeners
 {
-  struct wl_listener new_output;
+  wl_listener new_output;
 };
 
 class Output;
@@ -44,8 +44,8 @@ public:
   OutputManager();
   ~OutputManager() noexcept;
 
-  void output_frame(struct wl_listener *listener, void *data);
-  void server_new_output(struct wl_listener *listener, void *data);
+  void output_frame(wl_listener *listener, void *data);
+  void server_new_output(wl_listener *listener, void *data);
   static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data);
   static void render_layer_surface(struct wlr_surface *surface, int sx, int sy, void *data);
 

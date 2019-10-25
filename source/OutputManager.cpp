@@ -15,7 +15,7 @@ OutputManager::OutputManager() {
 OutputManager::~OutputManager() noexcept = default;
 
 
-void OutputManager::server_new_output([[maybe_unused]]struct wl_listener *listener, void *data)
+void OutputManager::server_new_output([[maybe_unused]]wl_listener *listener, void *data)
 {
   struct wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
 
@@ -56,7 +56,7 @@ void OutputManager::render_surface(struct wlr_surface *surface, int sx, int sy, 
       oy += view->y.getDoubleValue();
     }
 
-  struct wlr_box box = {
+  wlr_box box = {
 			.x = int(ox * output->scale),
 			.y = int(oy * output->scale),
 			.width = int(float(surface->current.width) * output->scale),
@@ -95,7 +95,7 @@ void OutputManager::render_layer_surface(struct wlr_surface *surface, int sx, in
       oy += view->y.getDoubleValue();
     }
 
-  struct wlr_box box = {
+  wlr_box box = {
 			.x = int(ox * output->scale),
 			.y = int(oy * output->scale),
 			.width = int(float(surface->current.width) * output->scale),

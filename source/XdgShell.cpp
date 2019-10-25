@@ -10,7 +10,7 @@ XdgShell::XdgShell() {
   wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 }
 
-void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void XdgShell::xdg_surface_destroy([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   Server &server = Server::getInstance();
   View *view = wl_container_of(listener, view, destroy);
@@ -31,7 +31,7 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener,
     }
 };
 
-void XdgShell::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void XdgShell::server_new_xdg_surface([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
   struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
 

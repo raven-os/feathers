@@ -19,32 +19,32 @@ class Server;
 
 struct LayerSurfaceListeners
 {
-  struct wl_listener map;
-  struct wl_listener unmap;
+  wl_listener map;
+  wl_listener unmap;
   // struct wl_listener set_anchor;
-  struct wl_listener destroy;
-  struct wl_listener new_popup;
+  wl_listener destroy;
+  wl_listener new_popup;
 };
 
 class LayerSurface : public LayerSurfaceListeners
 {
 public:
-  LayerSurface(struct wlr_surface *surface) noexcept;
+  LayerSurface(wlr_surface *surface) noexcept;
   ~LayerSurface() noexcept;
 
-  void shell_surface_map(struct wl_listener *listenr, void *data);
-  void shell_surface_unmap(struct wl_listener *listenr, void *data);
-  void shell_surface_new_popup(struct wl_listener *listenr, void *data);
+  void shell_surface_map(wl_listener *listenr, void *data);
+  void shell_surface_unmap(wl_listener *listenr, void *data);
+  void shell_surface_new_popup(wl_listener *listenr, void *data);
 
   void requestFullscreen();
   void close();
 
   static LayerSurface *desktop_view_at(double lx, double ly,
-				       struct wlr_surface **surface, double *sx, double *sy);
+				       wlr_surface **surface, double *sx, double *sy);
 
-  struct wlr_output *getWlrOutput();
+  wlr_output *getWlrOutput();
 
-  struct wlr_surface *surface;
+  wlr_surface *surface;
   FixedPoint<-4, int> x, y;
   std::unique_ptr<Popup> popup;
 

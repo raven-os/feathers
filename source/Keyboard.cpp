@@ -12,7 +12,7 @@ std::map<std::string, uint32_t> modifiersLst = {
   {"Ctrl", WLR_MODIFIER_CTRL},
 };
 
-Keyboard::Keyboard(struct wlr_input_device *device)
+Keyboard::Keyboard(wlr_input_device *device)
   : keymap(nullptr)
   , device(device)
 {
@@ -103,18 +103,18 @@ std::string Keyboard::get_active_binding()
   return "";
 }
 
-void Keyboard::keyboard_handle_modifiers([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void Keyboard::keyboard_handle_modifiers([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_seat *seat = Server::getInstance().seat.getSeat();
+  wlr_seat *seat = Server::getInstance().seat.getSeat();
   wlr_seat_set_keyboard(seat, device);
   wlr_seat_keyboard_notify_modifiers(seat,
 				     &device->keyboard->modifiers);
 }
 
-void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener, void *data)
+void Keyboard::keyboard_handle_key([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_event_keyboard_key *event = static_cast<struct wlr_event_keyboard_key *>(data);
-  struct wlr_seat *seat = Server::getInstance().seat.getSeat();
+  wlr_event_keyboard_key *event = static_cast<wlr_event_keyboard_key *>(data);
+  wlr_seat *seat = Server::getInstance().seat.getSeat();
 
   uint32_t keycode = event->keycode + 8;
   const xkb_keysym_t *syms;
@@ -163,9 +163,9 @@ void Keyboard::keyboard_handle_key([[maybe_unused]]struct wl_listener *listener,
 }
 
 void Keyboard::configure() {
-  struct xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
-  struct xkb_context *context;
-  struct xkb_keymap *key_map;
+  xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
+  xkb_context *context;
+  xkb_keymap *key_map;
 
 
   if (!rules.layout) {

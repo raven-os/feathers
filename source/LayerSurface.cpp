@@ -3,7 +3,7 @@
 #include "Server.hpp"
 #include "Output.hpp"
 
-LayerSurface::LayerSurface(struct wlr_surface *surface) noexcept
+LayerSurface::LayerSurface(wlr_surface *surface) noexcept
   : surface(surface)
   , x(0)
   , y(0)
@@ -33,7 +33,7 @@ LayerSurface::~LayerSurface() noexcept
   wl_list_remove(&new_popup.link);
 }
 
-void LayerSurface::shell_surface_map(struct wl_listener *listener, void *data)
+void LayerSurface::shell_surface_map(wl_listener *listener, void *data)
 {
   std::cout << "mapping layer surface!" << std::endl;
   Server &server(Server::getInstance());
@@ -49,7 +49,7 @@ void LayerSurface::shell_surface_map(struct wl_listener *listener, void *data)
   pending_surfaces.erase(it);
 }
 
-void LayerSurface::shell_surface_unmap(struct wl_listener *listenr, void *data)
+void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 {
   std::cout << "unmapping layer surface!" << std::endl;
   Server &server(Server::getInstance());
@@ -58,7 +58,7 @@ void LayerSurface::shell_surface_unmap(struct wl_listener *listenr, void *data)
   server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this);
 }
 
-void LayerSurface::shell_surface_new_popup(struct wl_listener *listenr, void *data)
+void LayerSurface::shell_surface_new_popup(wl_listener *listenr, void *data)
 {
 }
 

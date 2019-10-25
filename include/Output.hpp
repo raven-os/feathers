@@ -10,7 +10,7 @@ class LayerSurface;
 
 struct OutputListeners
 {
-  struct wl_listener frame;
+  wl_listener frame;
 };
 
 class Output : public OutputListeners
@@ -45,7 +45,7 @@ private:
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:
-  void output_frame(struct wl_listener *listener, void *data);
+  void output_frame(wl_listener *listener, void *data);
   void refreshImage();
   
 };

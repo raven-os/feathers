@@ -10,27 +10,27 @@ class Server;
 
 struct KeyboardListeners
 {
-  struct wl_listener modifiers;
-  struct wl_listener key;
+  wl_listener modifiers;
+  wl_listener key;
 };
 
 class Keyboard : public KeyboardListeners
 {
 public:
-  Keyboard(struct wlr_input_device *device);
+  Keyboard(wlr_input_device *device);
   ~Keyboard();
 
   void setModifiersListener();
   void setKeyListener();
   void configure();
 
-  struct xkb_keymap *keymap;
+  xkb_keymap *keymap;
 
   bool debug = false;
 
 private:
-  struct wlr_input_device *device;
-  struct wl_event_source *key_repeat_source;
+  wlr_input_device *device;
+  wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;
   std::string repeatBinding = "";
   std::map<std::string, binding> shortcuts;
@@ -38,7 +38,7 @@ private:
 private:
   void disarm_key_repeat();
   std::string get_active_binding();
-  void keyboard_handle_modifiers(struct wl_listener *listener, void *data);
-  void keyboard_handle_key(struct wl_listener *listener, void *data);
+  void keyboard_handle_modifiers(wl_listener *listener, void *data);
+  void keyboard_handle_key(wl_listener *listener, void *data);
   static int keyboard_handle_repeat(void *data);
 };
