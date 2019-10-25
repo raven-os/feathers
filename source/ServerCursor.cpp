@@ -167,8 +167,8 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     default:
       {
 	double sx, sy;
-	struct wlr_seat *seat = Server::getInstance().seat.getSeat();
-	struct wlr_surface *surface = NULL;
+	wlr_seat *seat = Server::getInstance().seat.getSeat();
+	wlr_surface *surface = NULL;
 	View *view = View::desktop_view_at(cursor->x,
 						 cursor->y, &surface, &sx, &sy);
 	if (!view)
@@ -194,22 +194,22 @@ void ServerCursor::process_cursor_motion(uint32_t time)
 
 void ServerCursor::server_cursor_motion([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_event_pointer_motion *event = static_cast<struct wlr_event_pointer_motion *>(data);
+  wlr_event_pointer_motion *event = static_cast<wlr_event_pointer_motion *>(data);
   wlr_cursor_move(cursor, event->device, event->delta_x, event->delta_y);
   process_cursor_motion(event->time_msec);
 }
 
 void ServerCursor::server_cursor_motion_absolute([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_event_pointer_motion_absolute *event = static_cast<struct wlr_event_pointer_motion_absolute *>(data);
+  wlr_event_pointer_motion_absolute *event = static_cast<wlr_event_pointer_motion_absolute *>(data);
   wlr_cursor_warp_absolute(cursor, event->device, event->x, event->y);
   process_cursor_motion(event->time_msec);
 }
 
 void ServerCursor::server_cursor_button([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_event_pointer_button *event = static_cast<struct wlr_event_pointer_button *>(data);
-  struct wlr_seat *seat = Server::getInstance().seat.getSeat();
+  wlr_event_pointer_button *event = static_cast<wlr_event_pointer_button *>(data);
+  wlr_seat *seat = Server::getInstance().seat.getSeat();
 
   wlr_seat_pointer_notify_button(seat, event->time_msec, event->button, event->state);
 
@@ -221,7 +221,7 @@ void ServerCursor::server_cursor_button([[maybe_unused]]wl_listener *listener, v
     case WLR_BUTTON_PRESSED:
       {
 	double sx, sy;
-	struct wlr_surface *surface;
+	wlr_surface *surface;
 
 	if (View *view = View::desktop_view_at(cursor->x, cursor->y, &surface, &sx, &sy))
 	  view->focus_view();
@@ -239,7 +239,7 @@ void ServerCursor::server_cursor_frame(wl_listener *, void *)
 
 void ServerCursor::server_cursor_axis([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_event_pointer_axis *event = static_cast<struct wlr_event_pointer_axis *>(data);
+  wlr_event_pointer_axis *event = static_cast<wlr_event_pointer_axis *>(data);
   wlr_seat_pointer_notify_axis(Server::getInstance().seat.getSeat(),
 			       event->time_msec, event->orientation, event->delta,
 			       event->delta_discrete, event->source);

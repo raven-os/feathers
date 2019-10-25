@@ -34,8 +34,8 @@ public:
   void server_cursor_axis(wl_listener *listener, void *data);
 
 
-  struct wlr_cursor *cursor;
-  struct wlr_xcursor_manager *cursor_mgr;
+  wlr_cursor *cursor;
+  wlr_xcursor_manager *cursor_mgr;
   CursorMode cursor_mode;
 
 private:

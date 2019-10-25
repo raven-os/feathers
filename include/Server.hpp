@@ -34,7 +34,7 @@ public:
 
   struct DisplayDeleter
   {
-    void operator()(struct wl_display *display) const noexcept
+    void operator()(wl_display *display) const noexcept
     {
       wl_display_destroy_clients(display);
       wl_display_destroy(display);
@@ -46,9 +46,9 @@ public:
       return _instance;
   };
 
-  std::unique_ptr<struct wl_display, DisplayDeleter> display;
-  struct wlr_backend *backend;
-  struct wlr_renderer *renderer;
+  std::unique_ptr<wl_display, DisplayDeleter> display;
+  wlr_backend *backend;
+  wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
 
   std::vector<std::unique_ptr<View>> &getViews();

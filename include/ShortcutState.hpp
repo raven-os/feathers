@@ -24,7 +24,7 @@ struct ShortcutState {
 
   uint32_t sum = 0;
 
-  void update_state(struct wlr_event_keyboard_key *event, uint32_t new_key,	uint32_t raw_modifiers, xkb_state *state) {
+  void update_state(wlr_event_keyboard_key *event, uint32_t new_key,	uint32_t raw_modifiers, xkb_state *state) {
     bool last_was_modifier = raw_modifiers != last_raw_modifiers;
     last_raw_modifiers = raw_modifiers;
 

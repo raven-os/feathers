@@ -3,7 +3,7 @@
 #include "Popup.hpp"
 
 
-Popup::Popup(View *child, struct wlr_surface *surface)
+Popup::Popup(View *child, wlr_surface *surface)
   : surface(surface)
   , child(child)
 {

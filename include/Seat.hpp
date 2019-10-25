@@ -22,8 +22,8 @@ public:
   void seat_request_set_primary_selection(wl_listener *listener, void *data);
   void seat_request_cursor(wl_listener *listener, void *data);
 
-  struct wlr_seat *getSeat() const noexcept;
+  wlr_seat *getSeat() const noexcept;
 
 private:
-  struct wlr_seat *seat;
+  wlr_seat *seat;
 };

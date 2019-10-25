@@ -41,7 +41,7 @@ private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   View *fullscreenView;
-  struct wlr_texture *wallpaperTexture;
+  wlr_texture *wallpaperTexture;
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:

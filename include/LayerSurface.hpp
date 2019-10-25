@@ -21,7 +21,7 @@ struct LayerSurfaceListeners
 {
   wl_listener map;
   wl_listener unmap;
-  // struct wl_listener set_anchor;
+  // wl_listener set_anchor;
   wl_listener destroy;
   wl_listener new_popup;
 };
@@ -54,8 +54,4 @@ public:
   void move(std::array<FixedPoint<-4, int32_t>, 2u> position);
   std::array<FixedPoint<-4, int32_t>, 2u> getPosition() const noexcept;
   std::array<uint16_t, 2u> getSize() const noexcept;
-
-// private:
-//   void begin_interactive(CursorMode mode, uint32_t edges);
-//   bool at(double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 };

@@ -11,8 +11,8 @@
  * frame handler to the per-surface render function. */
 struct render_data
 {
-  struct wlr_output *output;
-  struct wlr_renderer *renderer;
+  wlr_output *output;
+  wlr_renderer *renderer;
   View *view;
   timespec *when;
   bool fullscreen;
@@ -24,8 +24,8 @@ class LayerSurface;
  * frame handler to the per-surface render function. */
 struct layer_render_data
 {
-  struct wlr_output *output;
-  struct wlr_renderer *renderer;
+  wlr_output *output;
+  wlr_renderer *renderer;
   LayerSurface *layer_surface;
   timespec *when;
   bool fullscreen;
@@ -46,10 +46,10 @@ public:
 
   void output_frame(wl_listener *listener, void *data);
   void server_new_output(wl_listener *listener, void *data);
-  static void render_surface(struct wlr_surface *surface, int sx, int sy, void *data);
-  static void render_layer_surface(struct wlr_surface *surface, int sx, int sy, void *data);
+  static void render_surface(wlr_surface *surface, int sx, int sy, void *data);
+  static void render_layer_surface(wlr_surface *surface, int sx, int sy, void *data);
 
-  struct wlr_output_layout *getLayout() const noexcept;
+  wlr_output_layout *getLayout() const noexcept;
   std::vector<std::unique_ptr<Output>> const& getOutputs() const;
 
   Workspace *getActiveWorkspace() noexcept
@@ -69,7 +69,7 @@ public:
 private:
   Workspace *activeWorkspace = nullptr;
 
-  struct wlr_output_layout *output_layout;
+  wlr_output_layout *output_layout;
   wlr_xdg_output_manager_v1 *output_manager;
   std::vector<std::unique_ptr<Output>> outputs;
 };

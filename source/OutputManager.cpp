@@ -17,11 +17,11 @@ OutputManager::~OutputManager() noexcept = default;
 
 void OutputManager::server_new_output([[maybe_unused]]wl_listener *listener, void *data)
 {
-  struct wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
+  wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
 
   if (!wl_list_empty(&wlr_output->modes))
     {
-      struct wlr_output_mode *mode = wl_container_of(wlr_output->modes.prev, mode, link);
+      wlr_output_mode *mode = wl_container_of(wlr_output->modes.prev, mode, link);
       wlr_output_set_mode(wlr_output, mode);
     }
 
@@ -34,13 +34,13 @@ void OutputManager::server_new_output([[maybe_unused]]wl_listener *listener, voi
   wlr_output_create_global(wlr_output);
 }
 
-void OutputManager::render_surface(struct wlr_surface *surface, int sx, int sy, void *data)
+void OutputManager::render_surface(wlr_surface *surface, int sx, int sy, void *data)
 {
   render_data *rdata = static_cast<render_data*>(data);
   View *view = rdata->view;
-  struct wlr_output *output = rdata->output;
+  wlr_output *output = rdata->output;
 
-  struct wlr_texture *texture = wlr_surface_get_texture(surface);
+  wlr_texture *texture = wlr_surface_get_texture(surface);
   if (!texture)
     {
       return;
@@ -73,13 +73,13 @@ void OutputManager::render_surface(struct wlr_surface *surface, int sx, int sy, 
   wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-void OutputManager::render_layer_surface(struct wlr_surface *surface, int sx, int sy, void *data)
+void OutputManager::render_layer_surface(wlr_surface *surface, int sx, int sy, void *data)
 {
   layer_render_data *rdata = static_cast<layer_render_data*>(data);
   LayerSurface *view = rdata->layer_surface;
-  struct wlr_output *output = rdata->output;
+  wlr_output *output = rdata->output;
 
-  struct wlr_texture *texture = wlr_surface_get_texture(surface);
+  wlr_texture *texture = wlr_surface_get_texture(surface);
   if (!texture)
     {
       return;
@@ -112,7 +112,7 @@ void OutputManager::render_layer_surface(struct wlr_surface *surface, int sx, in
   wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-struct wlr_output_layout *OutputManager::getLayout() const noexcept
+wlr_output_layout *OutputManager::getLayout() const noexcept
 {
   return output_layout;
 }

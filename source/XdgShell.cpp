@@ -33,7 +33,7 @@ void XdgShell::xdg_surface_destroy([[maybe_unused]]wl_listener *listener, [[mayb
 
 void XdgShell::server_new_xdg_surface([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
 {
-  struct wlr_xdg_surface *xdg_surface = static_cast<struct wlr_xdg_surface *>(data);
+  wlr_xdg_surface *xdg_surface = static_cast<wlr_xdg_surface *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
     Server::getInstance().getViews().emplace_back(new View(xdg_surface->surface));
