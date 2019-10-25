@@ -2,6 +2,7 @@
 #include "LayerSurface.hpp"
 #include "Server.hpp"
 #include "Output.hpp"
+#include "XdgView.hpp"
 
 LayerSurface::LayerSurface(wlr_surface *surface) noexcept
   : View(surface)
@@ -88,7 +89,7 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 		}
 	    }
       }
-      if (View *view = server.getFocusedView())
+      if (XdgView *view = server.getFocusedView())
 	{
 	  if (wlr_surface_is_xdg_surface_v6(view->surface))
 	    wlr_xdg_toplevel_v6_set_activated(wlr_xdg_surface_v6_from_wlr_surface(view->surface), true);

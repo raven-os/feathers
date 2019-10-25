@@ -16,20 +16,19 @@ void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
   Server &server = Server::getInstance();
   XdgView *view = wl_container_of(listener, view, destroy);
 
-  if (server.getViews().front().get() == view)
+  if (server.getFocusedView() == view)
     {
       server.seat.getSeat()->keyboard_state.focused_surface = nullptr;
     }
-  server.getViews().erase(std::find_if(server.getViews().begin(), server.getViews().end(),
-				   [view](auto const &ptr) noexcept
-				   {
-				     return ptr.get() == view;
-				   }));
-  if (!server.getViews().empty())
-    {
-      auto &currentView = server.getViews().front();
-      currentView->focus_view();
-    }
+  auto &views(view->workspace->getViews());
+
+  views.erase(std::find_if(views.begin(), views.end(),
+			   [view](auto const &ptr) noexcept
+			   {
+			     return ptr.get() == view;
+			   }));
+  if (View *view = server.getFocusedView())
+    view->focus_view();
 };
 
 void XdgShellV6::server_new_xdg_surface(wl_listener *listener, void *data)

@@ -54,6 +54,15 @@ public:
   std::vector<std::unique_ptr<XdgView>> &getViews();
   wm::WindowTree &getActiveWindowTree();
 
+  XdgView *getFocusedView() const noexcept
+  {
+    if (outputManager.getActiveWorkspace()->getViews().empty())
+      return nullptr;
+    return outputManager.getActiveWorkspace()->getViews().front().get();
+  }
+    
+  wlr_surface *getFocusedSurface() const noexcept;
+
   OutputManager outputManager;
   XdgShell *xdgShell;
   XdgShellV6 *xdgShellV6;

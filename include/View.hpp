@@ -16,6 +16,7 @@ namespace wm
 }
 
 class Server;
+class Workspace;
 
 enum class SurfaceType
   {
@@ -43,6 +44,7 @@ public:
   template<SurfaceType surfaceType>
   void xdg_handle_new_popup(wl_listener *listener, void *data);
   void focus_view();
+
 private:
   bool at(double lx, double ly, wlr_surface **surface, double *sx, double *sy);
 };
