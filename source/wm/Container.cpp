@@ -27,7 +27,7 @@ namespace wm
   {
   }
 
-  FixedPoint<-4, uint32_t> Container::getChildWidth([[maybe_unused]]WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
+  FixedPoint<-4, uint32_t> Container::getChildWidth(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
   {
     auto &childData(windowTree.getData(childIndex));
     auto sibling(windowTree.getSibling(childIndex));
@@ -115,7 +115,7 @@ namespace wm
       auto children{windowTree.getChildren(index)};
       uint16_t count(0u);
 
-      for ([[maybe_unused]]auto _ : children)
+      for (auto _ : children)
 	++count;
       {
         auto position{rect.position};

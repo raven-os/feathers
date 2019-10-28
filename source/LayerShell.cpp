@@ -13,13 +13,13 @@ LayerShell::LayerShell()
 /// Desgtrucor is here so that LayerSurface.hpp doesn't need to be included in LayerShell.hpp
 LayerShell::~LayerShell() noexcept = default;
 
-void LayerShell::shell_surface_destroy([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void LayerShell::shell_surface_destroy(struct wl_listener *listener, void *data)
 {
   View *view = wl_container_of(listener, view, destroy);
 
 }
 
-void LayerShell::newSurface([[maybe_unused]]wl_listener *listener, void *data)
+void LayerShell::newSurface(struct wl_listener *listener, void *data)
 {
   wlr_layer_surface_v1 *shell_surface = static_cast<wlr_layer_surface_v1 *>(data);
 

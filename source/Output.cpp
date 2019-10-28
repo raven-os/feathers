@@ -63,7 +63,7 @@ void Output::refreshImage()
     }
 }
 
-void Output::output_frame([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void Output::output_frame(struct wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
   wlr_renderer *renderer = server.renderer;

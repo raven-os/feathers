@@ -15,7 +15,7 @@ OutputManager::OutputManager() {
 OutputManager::~OutputManager() noexcept = default;
 
 
-void OutputManager::server_new_output([[maybe_unused]]wl_listener *listener, void *data)
+void OutputManager::server_new_output(struct wl_listener *listener, void *data)
 {
   wlr_output *wlr_output = static_cast<struct wlr_output*>(data);
 

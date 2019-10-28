@@ -19,8 +19,8 @@ public:
   LayerShell();
   ~LayerShell() noexcept;
 
-  void newSurface([[maybe_unused]]wl_listener *listener, void *data);
-  void shell_surface_destroy([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data);
+  void newSurface(struct wl_listener *listener, void *data);
+  void shell_surface_destroy(struct wl_listener *listener, void *data);
 
   std::vector<std::unique_ptr<LayerSurface>> pending_surfaces; // surfaces that aren't mapped yet, so we can't put them in the right layer yet.
 
