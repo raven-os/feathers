@@ -8,21 +8,21 @@ class View;
 
 struct PopupListeners
 {
-    struct wl_listener new_popup;
-    struct wl_listener destroy;
+    wl_listener new_popup;
+    wl_listener destroy;
 };
 
 class Popup : public PopupListeners
 {
   public:
-    Popup(View *child, struct wlr_surface *surface);
+    Popup(View *child, wlr_surface *surface);
     ~Popup();
 
-    struct wlr_surface *surface;
+    wlr_surface *surface;
 
   private:
     View *child;
 
-    void handle_new_popup(struct wl_listener *listener, void *data);
-    void handle_destroy_popup(struct wl_listener *listener, void *data);
+    void handle_new_popup(wl_listener *listener, void *data);
+    void handle_destroy_popup(wl_listener *listener, void *data);
 };

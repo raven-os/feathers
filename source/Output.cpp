@@ -63,12 +63,12 @@ void Output::refreshImage()
     }
 }
 
-void Output::output_frame([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void Output::output_frame(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
-  struct wlr_renderer *renderer = server.renderer;
+  wlr_renderer *renderer = server.renderer;
 
-  struct timespec now;
+  timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
 
   if (!wlr_output_attach_render(wlr_output, NULL))

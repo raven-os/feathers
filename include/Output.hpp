@@ -10,7 +10,7 @@ class LayerSurface;
 
 struct OutputListeners
 {
-  struct wl_listener frame;
+  wl_listener frame;
 };
 
 class Output : public OutputListeners
@@ -41,11 +41,11 @@ private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   View *fullscreenView;
-  struct wlr_texture *wallpaperTexture;
+  wlr_texture *wallpaperTexture;
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:
-  void output_frame(struct wl_listener *listener, void *data);
+  void output_frame(wl_listener *listener, void *data);
   void refreshImage();
   
 };

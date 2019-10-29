@@ -3,7 +3,7 @@
 #include "Popup.hpp"
 
 
-Popup::Popup(View *child, struct wlr_surface *surface)
+Popup::Popup(View *child, wlr_surface *surface)
   : surface(surface)
   , child(child)
 {
@@ -15,11 +15,11 @@ Popup::~Popup()
 {
 }
 
-void Popup::handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void Popup::handle_new_popup(wl_listener *listener, void *data)
 {
 }
 
-void Popup::handle_destroy_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void Popup::handle_destroy_popup(wl_listener *listener, void *data)
 {
   wl_list_remove(&new_popup.link);
   wl_list_remove(&destroy.link);

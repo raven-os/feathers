@@ -4,7 +4,7 @@
 #include "Server.hpp"
 #include "Output.hpp"
 
-View::View(struct wlr_surface *surface) :
+View::View(wlr_surface *surface) :
   surface(surface),
   mapped(false),
   x(0),
@@ -12,8 +12,8 @@ View::View(struct wlr_surface *surface) :
 {
   if (wlr_surface_is_xdg_surface_v6(surface))
     {
-      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
-      struct wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
+      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+      wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
 
       SET_LISTENER(View, ViewListeners, map, xdg_surface_map<SurfaceType::xdg_v6>);
       wl_signal_add(&xdg_surface->events.map, &map);
@@ -32,8 +32,8 @@ View::View(struct wlr_surface *surface) :
     }
   else if (wlr_surface_is_xdg_surface(surface))
     {
-      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
-      struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
+      wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+      wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
 
       SET_LISTENER(View, ViewListeners, map, xdg_surface_map<SurfaceType::xdg>);
       wl_signal_add(&xdg_surface->events.map, &map);
@@ -86,10 +86,10 @@ void View::set_tiled(uint32_t tiled_edges)
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_map(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   mapped = true;
   focus_view();
@@ -161,7 +161,7 @@ void View::xdg_surface_map([[maybe_unused]]struct wl_listener *listener, [[maybe
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_unmap(wl_listener *listener, void *data)
 {
   auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
 
@@ -182,14 +182,14 @@ void View::xdg_surface_unmap([[maybe_unused]]struct wl_listener *listener, [[may
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_move([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_move(wl_listener *listener, void *data)
 {
   if (windowNode == wm::nullNode)
     begin_interactive(CursorMode::CURSOR_MOVE, 0);
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
   if (server.getViews().size() >= 1)
@@ -198,11 +198,11 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 
       if (!output.getFullscreenView())
 	{
-	  struct wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
+	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
 
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
-	      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
 
 	      wlr_xdg_surface_v6_get_geometry(xdg_surface, &output.saved);
 	      wlr_xdg_toplevel_v6_set_size(xdg_surface, outputBox->width, outputBox->height);
@@ -210,7 +210,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 	    }
 	  else if constexpr (surfaceType == SurfaceType::xdg)
 	    {
-	      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+	      wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
 
 	      wlr_xdg_surface_get_geometry(xdg_surface, &output.saved);
 	      wlr_xdg_toplevel_set_size(xdg_surface, outputBox->width, outputBox->height);
@@ -224,14 +224,14 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 	{
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
-	      struct wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
+	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
 
 	      wlr_xdg_toplevel_v6_set_fullscreen(xdg_surface, false);
 	      wlr_xdg_toplevel_v6_set_size(xdg_surface, output.saved.width, output.saved.height);
 	    }
 	  else if constexpr (surfaceType == SurfaceType::xdg)
 	    {
-	      struct wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
+	      wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
 
 	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, false);
 	      wlr_xdg_toplevel_set_size(xdg_surface, output.saved.width, output.saved.height);
@@ -243,7 +243,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]struct wl_listener *l
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_handle_new_popup(wl_listener *listener, void *data)
 {
   using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
 
@@ -252,9 +252,9 @@ void View::xdg_handle_new_popup([[maybe_unused]]struct wl_listener *listener, [[
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_resize([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_resize(wl_listener *listener, void *data)
 {
-  struct wlr_xdg_toplevel_v6_resize_event *event = static_cast<struct wlr_xdg_toplevel_v6_resize_event *>(data);
+  wlr_xdg_toplevel_v6_resize_event *event = static_cast<wlr_xdg_toplevel_v6_resize_event *>(data);
   begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);
 };
 
@@ -277,10 +277,10 @@ void View::close()
     }
 }
 
-struct wlr_output *View::getWlrOutput()
+wlr_output *View::getWlrOutput()
 {
   Server &server = Server::getInstance();
-  struct wlr_box viewBox;
+  wlr_box viewBox;
   {
     if (wlr_surface_is_xdg_surface_v6(surface))
       wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), &viewBox);
@@ -300,8 +300,8 @@ struct wlr_output *View::getWlrOutput()
 void View::focus_view()
 {
   Server &server = Server::getInstance();
-  struct wlr_seat *seat = server.seat.getSeat();
-  struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
+  wlr_seat *seat = server.seat.getSeat();
+  wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
   if (prev_surface == surface)
     {
       return;
@@ -310,18 +310,18 @@ void View::focus_view()
     {
       if (wlr_surface_is_xdg_surface_v6(seat->keyboard_state.focused_surface))
 	{
-	  struct wlr_xdg_surface_v6 *previous =
+	  wlr_xdg_surface_v6 *previous =
 	    wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
 	  wlr_xdg_toplevel_v6_set_activated(previous, false);
 	}
       else if (wlr_surface_is_xdg_surface(seat->keyboard_state.focused_surface))
 	{
-	  struct wlr_xdg_surface *previous =
+	  wlr_xdg_surface *previous =
 	    wlr_xdg_surface_from_wlr_surface(seat->keyboard_state.focused_surface);
 	  wlr_xdg_toplevel_set_activated(previous, false);
 	}
     }
-  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+  wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
 
   {
     auto it(std::find_if(server.getViews().begin(), server.getViews().end(),
@@ -345,14 +345,14 @@ void View::focus_view()
 void View::begin_interactive(CursorMode mode, uint32_t edges)
 {
   Server &server = Server::getInstance();
-  struct wlr_surface *focused_surface = server.seat.getSeat()->pointer_state.focused_surface;
+  wlr_surface *focused_surface = server.seat.getSeat()->pointer_state.focused_surface;
   if (surface != focused_surface)
     {
       return;
     }
   server.grabbed_view = this;
   server.cursor.cursor_mode = mode;
-  struct wlr_box geo_box;
+  wlr_box geo_box;
 
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), &geo_box);
@@ -374,15 +374,15 @@ void View::begin_interactive(CursorMode mode, uint32_t edges)
   server.resize_edges = edges;
 }
 
-bool View::at(double lx, double ly, struct wlr_surface **out_surface, double *sx, double *sy)
+bool View::at(double lx, double ly, wlr_surface **out_surface, double *sx, double *sy)
 {
   double view_sx = lx - x.getDoubleValue();
   double view_sy = ly - y.getDoubleValue();
 
-  struct wlr_surface_state *state = &surface->current;
+  wlr_surface_state *state = &surface->current;
 
   double _sx, _sy;
-  struct wlr_surface *_surface = nullptr;
+  wlr_surface *_surface = nullptr;
   if (wlr_surface_is_xdg_surface_v6(surface))
     _surface = wlr_xdg_surface_v6_surface_at(wlr_xdg_surface_v6_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
   else if (wlr_surface_is_xdg_surface(surface))
@@ -399,7 +399,7 @@ bool View::at(double lx, double ly, struct wlr_surface **out_surface, double *sx
 }
 
 View *View::desktop_view_at(double lx, double ly,
-			    struct wlr_surface **surface, double *sx, double *sy)
+			    wlr_surface **surface, double *sx, double *sy)
 {
   Server &server = Server::getInstance();
   for (auto &view : server.getViews())
@@ -442,7 +442,7 @@ void View::move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<-4,
 
 void View::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
 {
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
@@ -455,7 +455,7 @@ void View::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
 
 std::array<FixedPoint<-4, int32_t>, 2u> View::getPosition() const noexcept
 {
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
@@ -471,7 +471,7 @@ std::array<FixedPoint<-4, int32_t>, 2u> View::getPosition() const noexcept
 
 std::array<uint16_t, 2u> View::getSize() const noexcept
 {
-  struct wlr_box box[1];
+  wlr_box box[1];
 
   if (wlr_surface_is_xdg_surface_v6(surface))
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);

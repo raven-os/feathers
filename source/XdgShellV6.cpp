@@ -10,7 +10,7 @@ XdgShellV6::XdgShellV6() {
   wl_signal_add(&xdg_shell->events.new_surface, &new_xdg_surface);
 }
 
-void XdgShellV6::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
   View *view = wl_container_of(listener, view, destroy);
@@ -31,9 +31,9 @@ void XdgShellV6::xdg_surface_destroy([[maybe_unused]]struct wl_listener *listene
     }
 };
 
-void XdgShellV6::server_new_xdg_surface([[maybe_unused]]struct wl_listener *listener, [[maybe_unused]]void *data)
+void XdgShellV6::server_new_xdg_surface(wl_listener *listener, void *data)
 {
-  struct wlr_xdg_surface_v6 *xdg_surface = static_cast<struct wlr_xdg_surface_v6 *>(data);
+  wlr_xdg_surface_v6 *xdg_surface = static_cast<wlr_xdg_surface_v6 *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
     Server::getInstance().getViews().emplace_back(new View(xdg_surface->surface));
