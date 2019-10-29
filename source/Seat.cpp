@@ -15,7 +15,7 @@ Seat::Seat()
   wl_signal_add(&seat->events.request_set_primary_selection, &request_set_primary_selection);
 }
 
-void Seat::seat_request_cursor([[maybe_unused]]wl_listener *listener, void *data)
+void Seat::seat_request_cursor(wl_listener *listener, void *data)
 {
   wlr_seat_pointer_request_set_cursor_event *event = static_cast<wlr_seat_pointer_request_set_cursor_event *>(data);
   wlr_seat_client *focused_client = seat->pointer_state.focused_client;
@@ -25,14 +25,14 @@ void Seat::seat_request_cursor([[maybe_unused]]wl_listener *listener, void *data
     }
 }
 
-void Seat::seat_request_set_selection([[maybe_unused]]wl_listener *listener, void *data)
+void Seat::seat_request_set_selection(wl_listener *listener, void *data)
 {
   wlr_seat_request_set_selection_event *event =
     static_cast<wlr_seat_request_set_selection_event *>(data);
   wlr_seat_set_selection(seat, event->source, event->serial);
 }
 
-void Seat::seat_request_set_primary_selection([[maybe_unused]]wl_listener *listener, void *data)
+void Seat::seat_request_set_primary_selection(wl_listener *listener, void *data)
 {
   wlr_seat_request_set_primary_selection_event *event =
     static_cast<wlr_seat_request_set_primary_selection_event *>(data);

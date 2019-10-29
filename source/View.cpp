@@ -86,7 +86,7 @@ void View::set_tiled(uint32_t tiled_edges)
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_map([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_map(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
   wlr_box box[1];
@@ -161,7 +161,7 @@ void View::xdg_surface_map([[maybe_unused]]wl_listener *listener, [[maybe_unused
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_surface_unmap([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_surface_unmap(wl_listener *listener, void *data)
 {
   auto &output(Server::getInstance().outputManager.getOutput(getWlrOutput()));
 
@@ -182,14 +182,14 @@ void View::xdg_surface_unmap([[maybe_unused]]wl_listener *listener, [[maybe_unus
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_move([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_move(wl_listener *listener, void *data)
 {
   if (windowNode == wm::nullNode)
     begin_interactive(CursorMode::CURSOR_MOVE, 0);
 };
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_fullscreen([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
   if (server.getViews().size() >= 1)
@@ -243,7 +243,7 @@ void View::xdg_toplevel_request_fullscreen([[maybe_unused]]wl_listener *listener
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_handle_new_popup([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_handle_new_popup(wl_listener *listener, void *data)
 {
   using wlr_xdg_popup_type = std::conditional_t<surfaceType == SurfaceType::xdg, wlr_xdg_popup, wlr_xdg_popup_v6>;
 
@@ -252,7 +252,7 @@ void View::xdg_handle_new_popup([[maybe_unused]]wl_listener *listener, [[maybe_u
 }
 
 template<SurfaceType surfaceType>
-void View::xdg_toplevel_request_resize([[maybe_unused]]wl_listener *listener, [[maybe_unused]]void *data)
+void View::xdg_toplevel_request_resize(wl_listener *listener, void *data)
 {
   wlr_xdg_toplevel_v6_resize_event *event = static_cast<wlr_xdg_toplevel_v6_resize_event *>(data);
   begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);

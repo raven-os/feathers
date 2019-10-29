@@ -7,7 +7,7 @@ InputManager::InputManager()
   wl_signal_add(&Server::getInstance().backend->events.new_input, &new_input);
 }
 
-void InputManager::server_new_input([[maybe_unused]]wl_listener *listener, void *data)
+void InputManager::server_new_input(wl_listener *listener, void *data)
 {
   wlr_input_device *device = static_cast<wlr_input_device *>(data);
   switch (device->type)
