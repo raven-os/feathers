@@ -192,21 +192,21 @@ void ServerCursor::process_cursor_motion(uint32_t time)
     }
 }
 
-void ServerCursor::server_cursor_motion(struct wl_listener *listener, void *data)
+void ServerCursor::server_cursor_motion(wl_listener *listener, void *data)
 {
   wlr_event_pointer_motion *event = static_cast<wlr_event_pointer_motion *>(data);
   wlr_cursor_move(cursor, event->device, event->delta_x, event->delta_y);
   process_cursor_motion(event->time_msec);
 }
 
-void ServerCursor::server_cursor_motion_absolute(struct wl_listener *listener, void *data)
+void ServerCursor::server_cursor_motion_absolute(wl_listener *listener, void *data)
 {
   wlr_event_pointer_motion_absolute *event = static_cast<wlr_event_pointer_motion_absolute *>(data);
   wlr_cursor_warp_absolute(cursor, event->device, event->x, event->y);
   process_cursor_motion(event->time_msec);
 }
 
-void ServerCursor::server_cursor_button(struct wl_listener *listener, void *data)
+void ServerCursor::server_cursor_button(wl_listener *listener, void *data)
 {
   wlr_event_pointer_button *event = static_cast<wlr_event_pointer_button *>(data);
   wlr_seat *seat = Server::getInstance().seat.getSeat();
@@ -237,7 +237,7 @@ void ServerCursor::server_cursor_frame(wl_listener *, void *)
   wlr_seat_pointer_notify_frame(Server::getInstance().seat.getSeat());
 }
 
-void ServerCursor::server_cursor_axis(struct wl_listener *listener, void *data)
+void ServerCursor::server_cursor_axis(wl_listener *listener, void *data)
 {
   wlr_event_pointer_axis *event = static_cast<wlr_event_pointer_axis *>(data);
   wlr_seat_pointer_notify_axis(Server::getInstance().seat.getSeat(),
