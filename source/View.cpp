@@ -56,15 +56,6 @@ View::View(wlr_surface *surface) :
     }
 }
 
-View::View(View const &other)
-{
-  surface = other.surface;
-  mapped = other.mapped;
-  x = other.x;
-  y = other.y;
-  fullscreen = other.fullscreen;
-}
-
 View::~View()
 {
   wl_list_remove(&map.link);
