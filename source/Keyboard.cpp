@@ -10,6 +10,7 @@
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},
   {"Ctrl", WLR_MODIFIER_CTRL},
+  {"Shift", WLR_MODIFIER_SHIFT}
 };
 
 Keyboard::Keyboard(wlr_input_device *device)
@@ -52,6 +53,8 @@ Keyboard::Keyboard(wlr_input_device *device)
   shortcuts["Ctrl+Alt+Right"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
   shortcuts["Ctrl+Alt+Up"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
   shortcuts["Ctrl+Alt+Left"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
+  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
+  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
   shortcuts["Ctrl+Alt+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
   shortcuts["Ctrl+W"] = {"Close workspace", [](){ Commands::close_workspace(); }};
 

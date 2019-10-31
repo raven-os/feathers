@@ -362,6 +362,35 @@ namespace Commands
     }
   }
 
+  void switch_window_from_workspace(int direction)
+  {
+    Server &server = Server::getInstance();
+
+    auto &oldwindowTree(server.getActiveWindowTree());
+    auto oldrootNode(oldwindowTree.getRootIndex());
+    auto &oldrootNodeData(oldwindowTree.getData(oldrootNode));
+
+    if (server.getViews().size() <= 0)
+      return ;
+    std::unique_ptr<View> &view = server.getViews().front();
+    oldrootNodeData.getContainer().removeChild(oldrootNode, oldwindowTree, view->windowNode);
+    auto &oldViews = server.getViews();
+    
+    switch_workspace(direction);
+    
+    auto &windowTree(server.getActiveWindowTree());
+    auto rootNode(windowTree.getRootIndex());
+    auto &rootNodeData(windowTree.getData(rootNode));
+
+    auto it = std::find(oldViews.begin(), oldViews.end(), view);
+    it->get()->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{it->get()});
+    View *Nview = new View(*(it->get()));
+    oldViews.erase(it);
+    server.getViews().emplace_back(Nview);
+   // view->set_tiled(~0u);
+   // view->focus_view();
+  }
+
   void new_workspace()
   {
     Server &server = Server::getInstance();
