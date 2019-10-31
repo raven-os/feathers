@@ -39,7 +39,6 @@ class View : public ViewListeners
 {
 public:
   View(wlr_surface *surface);
-  View(View const &other);
   ~View();
 
   template<SurfaceType surfaceType>

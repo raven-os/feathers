@@ -365,30 +365,45 @@ namespace Commands
   void switch_window_from_workspace(int direction)
   {
     Server &server = Server::getInstance();
-
-    auto &oldwindowTree(server.getActiveWindowTree());
-    auto oldrootNode(oldwindowTree.getRootIndex());
-    auto &oldrootNodeData(oldwindowTree.getData(oldrootNode));
-
     if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.getViews().front();
-    oldrootNodeData.getContainer().removeChild(oldrootNode, oldwindowTree, view->windowNode);
-    auto &oldViews = server.getViews();
     
-    switch_workspace(direction);
-    
-    auto &windowTree(server.getActiveWindowTree());
-    auto rootNode(windowTree.getRootIndex());
-    auto &rootNodeData(windowTree.getData(rootNode));
+    for (auto const &output : server.outputManager.getOutputs())
+    {
+      auto currentWorkspace = std::find_if(output->getWorkspaces().begin(), output->getWorkspaces().end(),
+                            [](auto &w) noexcept {
+                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            });
+      if (direction == Workspace::RIGHT ?
+          currentWorkspace == output->getWorkspaces().end() - 1 :
+          currentWorkspace == output->getWorkspaces().begin())
+        return ;
+      auto nextWorkspace = currentWorkspace + direction;
+      auto const &view = currentWorkspace->get()->getViews().front();
 
-    auto it = std::find(oldViews.begin(), oldViews.end(), view);
-    it->get()->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{it->get()});
-    View *Nview = new View(*(it->get()));
-    oldViews.erase(it);
-    server.getViews().emplace_back(Nview);
-   // view->set_tiled(~0u);
-   // view->focus_view();
+      View *newView = new View(view->surface);
+      newView->mapped = true;
+      newView->x = view->getPosition()[0];
+      newView->y = view->getPosition()[1];
+    
+      {
+        auto &windowTree = currentWorkspace->get()->getWindowTree();
+        auto rootNode(windowTree.getRootIndex());
+        auto &rootNodeData(windowTree.getData(rootNode));
+        rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
+        currentWorkspace->get()->getViews().erase(std::find(currentWorkspace->get()->getViews().begin(), currentWorkspace->get()->getViews().end(), view));
+      }
+      {
+        auto &windowTree = nextWorkspace->get()->getWindowTree();
+        auto rootNode(windowTree.getRootIndex());
+        auto &rootNodeData(windowTree.getData(rootNode));
+        
+        newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView});
+        view->set_tiled(~0u);
+        nextWorkspace->get()->getViews().emplace_back(newView);
+      }
+       server.outputManager.setActiveWorkspace(nextWorkspace->get());
+    }
   }
 
   void new_workspace()
