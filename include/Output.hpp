@@ -37,11 +37,28 @@ public:
 
   void addLayerSurface(std::unique_ptr<LayerSurface> &&layerSurface);
   void removeLayerSurface(LayerSurface *layerSurface);
+
+  std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> const &getLayers() const noexcept
+  {
+    return layers;
+  }
+
+  LayerSurface *getFocusedLayerSurface() const noexcept
+  {
+    return layerSurface;
+  }
+
+  void setFocusedLayerSurface(LayerSurface *layerSurface)
+  {
+    this->layerSurface = layerSurface;
+  }
+
 private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   XdgView *fullscreenView;
   wlr_texture *wallpaperTexture;
+  LayerSurface *layerSurface;
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:

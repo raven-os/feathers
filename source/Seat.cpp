@@ -43,3 +43,27 @@ wlr_seat *Seat::getSeat() const noexcept
 {
   return seat;
 }
+
+void Seat::unfocusPrevious()
+{
+  if (auto *prev_surface = seat->keyboard_state.focused_surface)
+    {
+      if (wlr_surface_is_xdg_surface_v6(prev_surface))
+	{
+	  wlr_xdg_surface_v6 *previous = wlr_xdg_surface_v6_from_wlr_surface(prev_surface);
+	  wlr_xdg_toplevel_v6_set_activated(previous, false);
+	}
+      else if (wlr_surface_is_xdg_surface(prev_surface))
+	{
+	  wlr_xdg_surface *previous = wlr_xdg_surface_from_wlr_surface(prev_surface);
+	  wlr_xdg_toplevel_set_activated(previous, false);
+	}
+      else if (wlr_surface_is_layer_surface(prev_surface))
+	{
+	  wlr_layer_surface_v1 *previous = wlr_layer_surface_v1_from_wlr_surface(prev_surface);
+
+	  (void)previous; // do nothing for the moment
+	}
+    }
+
+}

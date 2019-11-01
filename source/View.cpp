@@ -71,28 +71,12 @@ void View::focus_view()
 {
   Server &server = Server::getInstance();
   wlr_seat *seat = server.seat.getSeat();
+  wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
   wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
   if (prev_surface == surface)
-    {
-      return;
-    }
-  if (prev_surface)
-    {
-      if (wlr_surface_is_xdg_surface_v6(seat->keyboard_state.focused_surface))
-	{
-	  wlr_xdg_surface_v6 *previous =
-	    wlr_xdg_surface_v6_from_wlr_surface(seat->keyboard_state.focused_surface);
-	  wlr_xdg_toplevel_v6_set_activated(previous, false);
-	}
-      else if (wlr_surface_is_xdg_surface(seat->keyboard_state.focused_surface))
-	{
-	  wlr_xdg_surface *previous =
-	    wlr_xdg_surface_from_wlr_surface(seat->keyboard_state.focused_surface);
-	  wlr_xdg_toplevel_set_activated(previous, false);
-	}
-    }
-  wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+    return;
 
+  server.seat.unfocusPrevious();
   {
     auto it(std::find_if(server.getViews().begin(), server.getViews().end(),
 			 [this](auto const &ptr) noexcept

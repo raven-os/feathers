@@ -47,7 +47,7 @@ public:
     return activeWorkspace;
   }
 
-  void setActiveWorkspace(Workspace *w)
+  void setActiveWorkspace(Workspace *w) noexcept
   {
     activeWorkspace = w;
   }
