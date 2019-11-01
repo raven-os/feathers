@@ -24,6 +24,8 @@ public:
 
   wlr_seat *getSeat() const noexcept;
 
+  void unfocusPrevious();
+
 private:
   wlr_seat *seat;
 };

@@ -25,6 +25,16 @@ public:
     return views;
   };
 
+  Output const &getOutput() const noexcept
+  {
+    return output;
+  }
+
+  Output &getOutput() noexcept
+  {
+    return output;
+  }
+
   static constexpr int RIGHT = 1;
   static constexpr int LEFT = -1;
 

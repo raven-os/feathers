@@ -45,6 +45,21 @@ void LayerSurface::shell_surface_map(wl_listener *listener, void *data)
       
   server.outputManager.getOutput(shell_surface->output).addLayerSurface(std::move(*it));
   pending_surfaces.erase(it);
+  if (shell_surface->current.keyboard_interactive)
+    {
+      wlr_seat *seat = server.seat.getSeat();
+      wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+
+      if (wlr_surface *surface = server.getFocusedSurface();
+	  !surface ||
+	  (wlr_surface_is_layer_surface(surface) &&
+	   wlr_layer_surface_v1_from_wlr_surface(surface)->current.layer <= shell_surface->current.layer))
+	{
+	  wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes,
+					 keyboard->num_keycodes, &keyboard->modifiers);
+	  server.outputManager.getOutput(shell_surface->output).setFocusedLayerSurface(this);
+	}
+    }
 }
 
 void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
@@ -53,7 +68,40 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
   Server &server(Server::getInstance());
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(surface);
 
+  wlr_seat *seat = server.seat.getSeat();
+  wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+  wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
+
+  if (prev_surface == surface)
+    {
+      {
+	Output &output(server.outputManager.getActiveWorkspace()->getOutput());
+	for (int i = ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY; i >= ZWLR_LAYER_SHELL_V1_LAYER_TOP; --i)
+	  for (auto const &layerSurfacePtr : output.getLayers()[i])
+	    {
+	      if (this != layerSurfacePtr.get() &&
+		  wlr_layer_surface_v1_from_wlr_surface(layerSurfacePtr->surface)->current.keyboard_interactive)
+		{
+		  wlr_seat_keyboard_notify_enter(seat, layerSurfacePtr->surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
+		  output.setFocusedLayerSurface(layerSurfacePtr.get());
+		  goto done;
+		}
+	    }
+      }
+      if (View *view = server.getFocusedView())
+	{
+	  if (wlr_surface_is_xdg_surface_v6(view->surface))
+	    wlr_xdg_toplevel_v6_set_activated(wlr_xdg_surface_v6_from_wlr_surface(view->surface), true);
+	  else if (wlr_surface_is_xdg_surface(view->surface))
+	    wlr_xdg_toplevel_set_activated(wlr_xdg_surface_from_wlr_surface(view->surface), true);
+	  wlr_seat_keyboard_notify_enter(seat, view->surface, keyboard->keycodes,
+					 keyboard->num_keycodes, &keyboard->modifiers);
+      
+	}
+    }
+ done:
   server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this);
+
 }
 
 void LayerSurface::close()
