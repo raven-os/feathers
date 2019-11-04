@@ -11,7 +11,7 @@
 
 struct binding {
   std::string name;
-  std::function<void()> action;
+  std::function<void(void*)> action;
 };
 
 struct ShortcutState {

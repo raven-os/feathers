@@ -341,9 +341,20 @@ namespace Commands
     switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 
-  void switch_workspace(int direction)
+  void switch_workspace(int direction, void *data)
   {
     Server &server = Server::getInstance();
+    std::string binding;
+    std::string key = "";
+
+    if (data) {
+      std::string *s = static_cast<std::string*>(data);
+      binding = *s;
+
+      delete s;
+      key = binding.substr(binding.find_last_of("+") + 1);
+      //std::cout << Commands::concordances[key] << std::endl;
+    }
 
     for (auto const &output : server.outputManager.getOutputs())
     {
@@ -354,8 +365,17 @@ namespace Commands
 
       if (direction == Workspace::RIGHT ?
           it == output->getWorkspaces().end() - 1 :
-          it == output->getWorkspaces().begin())
+          it == output->getWorkspaces().begin()) {
+            std::cout << "BITE" << std::endl;
         return ;
+          }
+
+      if (data) {
+        if (Commands::concordances.find(key) != Commands::concordances.end() && Commands::concordances[key] < output->getWorkspaces().size()) {
+          server.outputManager.setActiveWorkspace(output->getWorkspaces().at(Commands::concordances[key]).get());
+          return ;
+        }
+      }
       auto newActiveWorkspace = it + direction;
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
       if (server.getViews().size() > 0)
@@ -418,7 +438,7 @@ namespace Commands
       output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
     }
     server.outputManager.workspaceCount++;
-    switch_workspace(Workspace::RIGHT);
+    switch_workspace(Workspace::RIGHT, nullptr);
   }
 
   void close_workspace()
