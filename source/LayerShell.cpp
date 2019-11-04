@@ -10,13 +10,12 @@ LayerShell::LayerShell()
   wl_signal_add(&layer_shell->events.new_surface, &new_shell_surface);
 }
 
-/// Desgtrucor is here so that LayerSurface.hpp doesn't need to be included in LayerShell.hpp
+/// Destructor is here so that LayerSurface.hpp doesn't need to be included in LayerShell.hpp
 LayerShell::~LayerShell() noexcept = default;
 
 void LayerShell::shell_surface_destroy(wl_listener *listener, void *data)
 {
-  View *view = wl_container_of(listener, view, destroy);
-
+  // TODO
 }
 
 void LayerShell::newSurface(wl_listener *listener, void *data)

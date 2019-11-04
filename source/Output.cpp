@@ -14,6 +14,7 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
+#include "XdgView.hpp"
 #include "LayerSurface.hpp"
 
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
@@ -82,12 +83,12 @@ void Output::output_frame(wl_listener *listener, void *data)
   // float color[4] = {0.5, 0.5, 0.5, 1.0};
   // wlr_renderer_clear(renderer, color);
 
-  if (View *view = getFullscreenView())
+  if (XdgView *view = getFullscreenView())
     {
       render_data rdata{
 			.output = wlr_output,
 			.renderer = renderer,
-			.view = view,
+			.view = static_cast<View *>(view),
 			.when = &now,
 			.fullscreen = true
       };
@@ -115,15 +116,15 @@ void Output::output_frame(wl_listener *listener, void *data)
       for (int i = ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND; i <= ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM; ++i)
 	for (auto &layerSurface : layers[i])
 	  {
-	    layer_render_data rdata{
-				    .output = wlr_output,
-				    .renderer = renderer,
-				    .layer_surface = layerSurface.get(),
-				    .when = &now,
-				    .fullscreen = false
+	    render_data rdata{
+			      .output = wlr_output,
+			      .renderer = renderer,
+			      .view = static_cast<View *>(layerSurface.get()),
+			      .when = &now,
+			      .fullscreen = false
 	    };
 	    if (wlr_surface_is_layer_surface(layerSurface->surface))
-	      wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_layer_surface, &rdata);
+	      wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_surface, &rdata);
 	  }
       for (auto it = server.getViews().rbegin(); it != server.getViews().rend(); ++it)
 	{
@@ -151,15 +152,15 @@ void Output::output_frame(wl_listener *listener, void *data)
   for (int i = ZWLR_LAYER_SHELL_V1_LAYER_TOP; i <= ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY; ++i)
     for (auto &layerSurface : layers[i])
       {
-	layer_render_data rdata{
-				.output = wlr_output,
-				.renderer = renderer,
-				.layer_surface = layerSurface.get(),
-				.when = &now,
-				.fullscreen = false
+	render_data rdata{
+			  .output = wlr_output,
+			  .renderer = renderer,
+			  .view = static_cast<View *>(layerSurface.get()),
+			  .when = &now,
+			  .fullscreen = false
 	};
 	if (wlr_surface_is_layer_surface(layerSurface->surface))
-	  wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_layer_surface, &rdata);
+	  wlr_layer_surface_v1_for_each_surface(wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface), OutputManager::render_surface, &rdata);
       }
 
   wlr_output_render_software_cursors(wlr_output, NULL);
@@ -184,7 +185,7 @@ void Output::setFrameListener()
     wl_signal_add(&wlr_output->events.frame, &frame);
 }
 
-void Output::setFullscreenView(View *view) noexcept
+void Output::setFullscreenView(XdgView *view) noexcept
 {
   this->fullscreenView = view;
 }

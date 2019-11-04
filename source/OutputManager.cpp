@@ -73,45 +73,6 @@ void OutputManager::render_surface(wlr_surface *surface, int sx, int sy, void *d
   wlr_surface_send_frame_done(surface, rdata->when);
 }
 
-void OutputManager::render_layer_surface(wlr_surface *surface, int sx, int sy, void *data)
-{
-  layer_render_data *rdata = static_cast<layer_render_data*>(data);
-  LayerSurface *view = rdata->layer_surface;
-  wlr_output *output = rdata->output;
-
-  wlr_texture *texture = wlr_surface_get_texture(surface);
-  if (!texture)
-    {
-      return;
-    }
-
-  double ox = 0, oy = 0;
-  wlr_output_layout_output_coords(Server::getInstance().outputManager.getLayout(), output, &ox, &oy);
-  ox += sx;
-  oy += sy;
-  if (!rdata->fullscreen)
-    {
-      ox += view->x.getDoubleValue();
-      oy += view->y.getDoubleValue();
-    }
-
-  wlr_box box = {
-			.x = int(ox * output->scale),
-			.y = int(oy * output->scale),
-			.width = int(float(surface->current.width) * output->scale),
-			.height = int(float(surface->current.height) * output->scale),
-  };
-
-  float matrix[9];
-  enum wl_output_transform transform = wlr_output_transform_invert(surface->current.transform);
-  wlr_matrix_project_box(matrix, &box, transform, 0,
-			 output->transform_matrix);
-
-  wlr_render_texture_with_matrix(rdata->renderer, texture, matrix, 1);
-
-  wlr_surface_send_frame_done(surface, rdata->when);
-}
-
 wlr_output_layout *OutputManager::getLayout() const noexcept
 {
   return output_layout;

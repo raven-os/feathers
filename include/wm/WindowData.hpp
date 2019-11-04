@@ -2,22 +2,21 @@
 
 #include <array>
 #include <variant>
+#include <memory>
 
-#include "wm/ClientData.hpp"
 #include "wm/Container.hpp"
-
-#include "View.hpp"
+#include "wm/ClientData.hpp"
 
 namespace wm
 {
   struct WindowData
   {
     // Rect rect;
-    std::variant<View*, std::unique_ptr<Container>> data;
+    std::variant<wm::ClientData, std::unique_ptr<Container>> data;
 
     WindowData() = default;
-    WindowData(Container &&container);
-    WindowData(View *);
+    WindowData(Container &&container) noexcept;
+    WindowData(XdgView *) noexcept;
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position);

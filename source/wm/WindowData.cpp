@@ -1,14 +1,15 @@
 #include "wm/WindowData.hpp"
 #include "Server.hpp"
+#include "XdgView.hpp"
 
 namespace wm
 {
-  WindowData::WindowData(Container &&container)
+  WindowData::WindowData(Container &&container) noexcept
     : data(std::in_place_type_t<std::unique_ptr<Container>>{}, new Container(std::move(container)))
   {
   }
 
-  WindowData::WindowData(View *view)
+  WindowData::WindowData(XdgView *view) noexcept
     : data{view}
   {
   }

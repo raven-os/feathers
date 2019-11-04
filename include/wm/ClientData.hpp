@@ -1,8 +1,8 @@
 #pragma once
 
-#include "View.hpp"
+class XdgView;
 
 namespace wm
 {
-  using ClientData = View *;
+  using ClientData = XdgView *;
 }

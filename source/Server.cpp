@@ -38,7 +38,7 @@ Server::~Server() noexcept = default;
 //   // wl_display_destroy_clients(display);
 // }
 
-std::vector<std::unique_ptr<View>> &Server::getViews()
+std::vector<std::unique_ptr<XdgView>> &Server::getViews()
 {
   return outputManager.getActiveWorkspace()->getViews();
 }
