@@ -1,5 +1,6 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
+#include "XdgView.hpp"
 
 #include <cassert>
 #include <stdio.h>
@@ -34,7 +35,7 @@ void ServerCursor::process_cursor_move(uint32_t time)
 void ServerCursor::process_cursor_resize(uint32_t time)
 {
   Server &server = Server::getInstance();
-  View *view = server.grabbed_view;
+  XdgView *view = server.grabbed_view;
 
   if (view->windowNode == wm::nullNode)
     {
@@ -168,9 +169,8 @@ void ServerCursor::process_cursor_motion(uint32_t time)
       {
 	double sx, sy;
 	wlr_seat *seat = Server::getInstance().seat.getSeat();
-	wlr_surface *surface = NULL;
-	View *view = View::desktop_view_at(cursor->x,
-						 cursor->y, &surface, &sx, &sy);
+	wlr_surface *surface = nullptr;
+	View *view = View::desktop_view_at(cursor->x, cursor->y, &surface, &sx, &sy);
 	if (!view)
 	  {
 	    wlr_xcursor_manager_set_cursor_image(cursor_mgr, "left_ptr", cursor);

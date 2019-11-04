@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "XdgShellV6.hpp"
+#include "XdgView.hpp"
 #include "Server.hpp"
 #include "wm/Container.hpp"
 
@@ -13,20 +14,20 @@ XdgShellV6::XdgShellV6() {
 void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
-  View *view = wl_container_of(listener, view, destroy);
+  XdgView *view = wl_container_of(listener, view, destroy);
 
   if (server.getViews().front().get() == view)
     {
       server.seat.getSeat()->keyboard_state.focused_surface = nullptr;
     }
   server.getViews().erase(std::find_if(server.getViews().begin(), server.getViews().end(),
-				   [view](auto const &ptr)
+				   [view](auto const &ptr) noexcept
 				   {
 				     return ptr.get() == view;
 				   }));
   if (!server.getViews().empty())
     {
-      std::unique_ptr<View> &currentView = server.getViews().front();
+      auto &currentView = server.getViews().front();
       currentView->focus_view();
     }
 };
@@ -36,5 +37,5 @@ void XdgShellV6::server_new_xdg_surface(wl_listener *listener, void *data)
   wlr_xdg_surface_v6 *xdg_surface = static_cast<wlr_xdg_surface_v6 *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
-    Server::getInstance().getViews().emplace_back(new View(xdg_surface->surface));
+    Server::getInstance().getViews().emplace_back(new XdgView(xdg_surface->surface));
 };

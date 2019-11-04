@@ -1,5 +1,6 @@
 #include "Workspace.hpp"
-# include "Server.hpp"
+#include "Server.hpp"
+#include "XdgView.hpp"
 
 Workspace::Workspace(Output &output) :
   output(output),

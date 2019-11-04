@@ -51,7 +51,7 @@ public:
   wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
 
-  std::vector<std::unique_ptr<View>> &getViews();
+  std::vector<std::unique_ptr<XdgView>> &getViews();
   wm::WindowTree &getActiveWindowTree();
 
   OutputManager outputManager;
@@ -62,7 +62,7 @@ public:
   InputManager inputManager;
   Seat seat;
 
-  View *grabbed_view;
+  XdgView *grabbed_view;
   double grab_x, grab_y;
   int grab_width, grab_height;
   uint32_t resize_edges;

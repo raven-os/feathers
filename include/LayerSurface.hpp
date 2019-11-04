@@ -9,6 +9,7 @@
 # include "Popup.hpp"
 # include "wm/WindowNodeIndex.hpp"
 # include "util/FixedPoint.hpp"
+# include "View.hpp"
 
 namespace wm
 {
@@ -26,7 +27,7 @@ struct LayerSurfaceListeners
   wl_listener new_popup;
 };
 
-class LayerSurface : public LayerSurfaceListeners
+class LayerSurface : public View, public LayerSurfaceListeners
 {
 public:
   LayerSurface(wlr_surface *surface) noexcept;
@@ -43,10 +44,6 @@ public:
 				       wlr_surface **surface, double *sx, double *sy);
 
   wlr_output *getWlrOutput();
-
-  wlr_surface *surface;
-  FixedPoint<-4, int> x, y;
-  std::unique_ptr<Popup> popup;
 
   void resize(wm::WindowNodeIndex, wm::WindowTree &, std::array<uint16_t, 2u> size);
   void resize(std::array<uint16_t, 2u> size);

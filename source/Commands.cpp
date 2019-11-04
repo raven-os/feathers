@@ -4,6 +4,7 @@
 
 # include "Commands.hpp"
 # include "Output.hpp"
+# include "XdgView.hpp"
 
 namespace
 {
@@ -35,7 +36,7 @@ namespace
     if (server.getViews().empty())
       return ;
 
-    std::unique_ptr<View> &view = server.getViews().front();
+    std::unique_ptr<XdgView> &view = server.getViews().front();
     auto viewNode(view->windowNode);
     auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
@@ -101,7 +102,7 @@ void switch_focus_up_or_left(bool parallelDirection)
   if (server.getViews().empty())
     return ;
 
-  std::unique_ptr<View> &view = server.getViews().front();
+  std::unique_ptr<XdgView> &view = server.getViews().front();
   auto viewNode(view->windowNode);
   auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
@@ -238,7 +239,7 @@ namespace Commands
 
     if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.getViews().front();
+    std::unique_ptr<XdgView> &view = server.getViews().front();
 
     view->requestFullscreen();
   }
@@ -257,7 +258,7 @@ namespace Commands
 			   });
 	  }
 
-	std::unique_ptr<View> &view = server.getViews()[1];
+	std::unique_ptr<XdgView> &view = server.getViews()[1];
 
 	view->focus_view();
 	// focus view put the newly focused view in front
@@ -272,7 +273,7 @@ namespace Commands
 
     if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.getViews().front();
+    std::unique_ptr<XdgView> &view = server.getViews().front();
 
     auto &windowTree(server.getActiveWindowTree());
     auto rootNode(windowTree.getRootIndex());
@@ -303,7 +304,7 @@ namespace Commands
 
     if (server.getViews().size() <= 0)
       return ;
-    std::unique_ptr<View> &view = server.getViews().front();
+    std::unique_ptr<XdgView> &view = server.getViews().front();
 
     if (view->windowNode == wm::nullNode)
       return ;
@@ -379,18 +380,16 @@ namespace Commands
           currentWorkspace == output->getWorkspaces().begin())
         return ;
       auto nextWorkspace = currentWorkspace + direction;
-      auto const &view = currentWorkspace->get()->getViews().front();
+      auto &view = currentWorkspace->get()->getViews().front();
 
-      View *newView = new View(view->surface);
-      newView->mapped = true;
-      newView->x = view->getPosition()[0];
-      newView->y = view->getPosition()[1];
+      std::unique_ptr<XdgView> newView;
     
       {
         auto &windowTree = currentWorkspace->get()->getWindowTree();
         auto rootNode(windowTree.getRootIndex());
         auto &rootNodeData(windowTree.getData(rootNode));
         rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
+	newView = std::move(view);
         currentWorkspace->get()->getViews().erase(std::find(currentWorkspace->get()->getViews().begin(), currentWorkspace->get()->getViews().end(), view));
       }
       {
@@ -398,11 +397,11 @@ namespace Commands
         auto rootNode(windowTree.getRootIndex());
         auto &rootNodeData(windowTree.getData(rootNode));
         
-        newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView});
+        newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
         view->set_tiled(~0u);
-        nextWorkspace->get()->getViews().emplace_back(newView);
+        nextWorkspace->get()->getViews().emplace_back(std::move(newView));
       }
-       server.outputManager.setActiveWorkspace(nextWorkspace->get());
+      server.outputManager.setActiveWorkspace(nextWorkspace->get());
     }
   }
 

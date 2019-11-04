@@ -4,9 +4,7 @@
 #include "Output.hpp"
 
 LayerSurface::LayerSurface(wlr_surface *surface) noexcept
-  : surface(surface)
-  , x(0)
-  , y(0)
+  : View(surface)
 {
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(surface);
   
