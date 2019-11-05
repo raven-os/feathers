@@ -22,44 +22,29 @@ Keyboard::Keyboard(wlr_input_device *device)
 
   //debug = true;
 
-  shortcuts["Alt+Return"] = {"Terminal", [](void *data){ Commands::open_terminal(); }};
-  shortcuts["Alt+F4"] = {"destroy", [](void *data){
-    Server &server = Server::getInstance();
-    for (auto &view : server.getViews())
-      {
-	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
-	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->toplevel->server_pending.activated) ||
-	    (wlr_surface_is_xdg_surface(view->surface) &&
-	     wlr_xdg_surface_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL &&
-	     wlr_xdg_surface_from_wlr_surface(view->surface)->toplevel->server_pending.activated))
-	  {
-	    view->close();
-	    break;
-	  }
-      }
-  }};
-  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void *data){ Commands::toggle_fullscreen(); }};
-  shortcuts["Alt+Tab"] = {"Switch window", [](void *data){ Commands::switch_window(); }};
-  shortcuts["Alt+Escape"] = {"Leave", [](void *data){ Commands::close_compositor(); }};
-  shortcuts["Alt+Space"] = {"Toggle float", [](void *data){ Commands::toggle_float_window(); }};
-  shortcuts["Alt+E"] = {"Switch position", [](void *data){ Commands::switch_container_direction(); }};
-  shortcuts["Alt+H"] = {"Open below", [](void *data){ Server::getInstance().openType = OpenType::below; }};
-  shortcuts["Alt+V"] = {"Open right", [](void *data){ Server::getInstance().openType = OpenType::right; }};
-  shortcuts["Alt+Up"] = {"Switch focus up", [](void *data){ Commands::switch_focus_up(); }};
-  shortcuts["Alt+Left"] = {"Switch focus left", [](void *data){ Commands::switch_focus_left(); }};
-  shortcuts["Alt+Down"] = {"Switch focus Down", [](void *data){ Commands::switch_focus_down(); }};
-  shortcuts["Alt+Right"] = {"Switch focus Right", [](void *data){ Commands::switch_focus_right(); }};
+  shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
+  shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
+  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
+  shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
+  shortcuts["Alt+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
+  shortcuts["Alt+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
+  shortcuts["Alt+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
+  shortcuts["Alt+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
+  shortcuts["Alt+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
+  shortcuts["Alt+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
+  shortcuts["Alt+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
+  shortcuts["Alt+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
   shortcuts["Ctrl+[Alt+Down,Alt+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
-  shortcuts["Ctrl+Alt+[Up,Left,a]"] = {"Switch workspace (right to left)", [](void *data){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
-  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void *data){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
-  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void *data){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
-  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void *data){ Commands::new_workspace(); }};
-  shortcuts["Ctrl+W"] = {"Close workspace", [](void *data){ Commands::close_workspace(); }};
+  shortcuts["Ctrl+Alt+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
+  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
+  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(); }};
+  shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
 
   //Allowing keyboard debug
-  shortcuts["Alt+D"] = {"Debug", [this](void *data){debug = !debug;}};
-  shortcuts["Alt+F1"] = {"Open config editore", [](void *data){ Commands::open_config_editor(); }};
+  shortcuts["Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
+  shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
+  shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
   parse_shortcuts();
 }
 

@@ -44,4 +44,5 @@ namespace Commands
   void switch_window_from_workspace(int direction);
   void new_workspace();
   void close_workspace();
+  void close_view();
 }
