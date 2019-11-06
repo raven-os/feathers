@@ -341,9 +341,20 @@ namespace Commands
     switch_focus_down_or_right(wm::Container::horizontalTiling);
   }
 
-  void switch_workspace(int direction)
+  void switch_workspace(int direction, void *data)
   {
     Server &server = Server::getInstance();
+    std::string binding;
+    std::string key = "";
+
+    // get specific worskpace number
+    if (data) {
+      std::string *s = static_cast<std::string*>(data);
+      binding = *s;
+
+      delete s;
+      key = binding.substr(binding.find_last_of("+") + 1);
+    }
 
     for (auto const &output : server.outputManager.getOutputs())
     {
@@ -351,13 +362,24 @@ namespace Commands
                             [](auto &w) noexcept {
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
+     //set next worskpace according to direction
+     auto newActiveWorkspace = (it + direction)->get();
 
       if (direction == Workspace::RIGHT ?
-          it == output->getWorkspaces().end() - 1 :
-          it == output->getWorkspaces().begin())
+          (Commands::concordances.find(key) == Commands::concordances.end() && it == output->getWorkspaces().end() - 1) :
+          it == output->getWorkspaces().begin()) {
         return ;
-      auto newActiveWorkspace = it + direction;
-      server.outputManager.setActiveWorkspace(newActiveWorkspace->get());
+      }
+
+      // Go to specific workspace if it's not unsing direction
+      if (Commands::concordances.find(key) != Commands::concordances.end()) {
+        if (Commands::concordances[key] < output->getWorkspaces().size())
+          newActiveWorkspace = output->getWorkspaces().at(Commands::concordances[key]).get();
+        else
+          return;
+      }
+     
+      server.outputManager.setActiveWorkspace(newActiveWorkspace);
       if (server.getViews().size() > 0)
         server.getViews().front()->focus_view();
     }
@@ -418,7 +440,7 @@ namespace Commands
       output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
     }
     server.outputManager.workspaceCount++;
-    switch_workspace(Workspace::RIGHT);
+    switch_workspace(Workspace::RIGHT, nullptr);
   }
 
   void close_workspace()
@@ -438,5 +460,22 @@ namespace Commands
       output->getWorkspaces().erase(it);
     }
     server.outputManager.workspaceCount--;
+  }
+
+  void close_view() {
+    Server &server = Server::getInstance();
+    for (auto &view : server.getViews())
+      {
+	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
+	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
+	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->toplevel->server_pending.activated) ||
+	    (wlr_surface_is_xdg_surface(view->surface) &&
+	     wlr_xdg_surface_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL &&
+	     wlr_xdg_surface_from_wlr_surface(view->surface)->toplevel->server_pending.activated))
+	  {
+	    view->close();
+	    break;
+	  }
+      }
   }
 }

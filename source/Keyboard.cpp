@@ -22,46 +22,30 @@ Keyboard::Keyboard(wlr_input_device *device)
 
   //debug = true;
 
-  shortcuts["Alt+Return"] = {"Terminal", [](){ Commands::open_terminal(); }};
-  shortcuts["Alt+F4"] = {"destroy", [](){
-    Server &server = Server::getInstance();
-    for (auto &view : server.getViews())
-      {
-	if ((wlr_surface_is_xdg_surface_v6(view->surface) &&
-	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL &&
-	     wlr_xdg_surface_v6_from_wlr_surface(view->surface)->toplevel->server_pending.activated) ||
-	    (wlr_surface_is_xdg_surface(view->surface) &&
-	     wlr_xdg_surface_from_wlr_surface(view->surface)->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL &&
-	     wlr_xdg_surface_from_wlr_surface(view->surface)->toplevel->server_pending.activated))
-	  {
-	    view->close();
-	    break;
-	  }
-      }
-  }};
-  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](){ Commands::toggle_fullscreen(); }};
-  shortcuts["Alt+Tab"] = {"Switch window", [](){ Commands::switch_window(); }};
-  shortcuts["Alt+Escape"] = {"Leave", [](){ Commands::close_compositor(); }};
-  shortcuts["Alt+Space"] = {"Toggle float", [](){ Commands::toggle_float_window(); }};
-  shortcuts["Alt+E"] = {"Switch position", [](){ Commands::switch_container_direction(); }};
-  shortcuts["Alt+H"] = {"Open below", [](){ Server::getInstance().openType = OpenType::below; }};
-  shortcuts["Alt+V"] = {"Open right", [](){ Server::getInstance().openType = OpenType::right; }};
-  shortcuts["Alt+Up"] = {"Switch focus up", [](){ Commands::switch_focus_up(); }};
-  shortcuts["Alt+Left"] = {"Switch focus left", [](){ Commands::switch_focus_left(); }};
-  shortcuts["Alt+Down"] = {"Switch focus Down", [](){ Commands::switch_focus_down(); }};
-  shortcuts["Alt+Right"] = {"Switch focus Right", [](){ Commands::switch_focus_right(); }};
-  shortcuts["Ctrl+Alt+Down"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
-  shortcuts["Ctrl+Alt+Right"] = {"Switch workspace (left to right)", [](){ Commands::switch_workspace(Workspace::RIGHT); }};
-  shortcuts["Ctrl+Alt+Up"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
-  shortcuts["Ctrl+Alt+Left"] = {"Switch workspace (right to left)", [](){ Commands::switch_workspace(Workspace::LEFT); }};
-  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
-  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
-  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](){ Commands::new_workspace(); }};
-  shortcuts["Ctrl+W"] = {"Close workspace", [](){ Commands::close_workspace(); }};
+  shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
+  shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
+  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
+  shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
+  shortcuts["Alt+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
+  shortcuts["Alt+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
+  shortcuts["Alt+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
+  shortcuts["Alt+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
+  shortcuts["Alt+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
+  shortcuts["Alt+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
+  shortcuts["Alt+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
+  shortcuts["Alt+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
+  shortcuts["Ctrl+[Alt+Down,Alt+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
+  shortcuts["Ctrl+Alt+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
+  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
+  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
+  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(); }};
+  shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
 
   //Allowing keyboard debug
-  shortcuts["Alt+D"] = {"Debug", [this](){debug = !debug;}};
-  shortcuts["Alt+F1"] = {"Open config editore", [](){ Commands::open_config_editor(); }};
+  shortcuts["Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
+  shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
+  shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
+  parse_shortcuts();
 }
 
 Keyboard::~Keyboard() {
@@ -71,6 +55,31 @@ Keyboard::~Keyboard() {
   wl_list_remove(&key.link);
   wl_list_remove(&modifiers.link);
   wl_event_source_remove(key_repeat_source);
+}
+
+void Keyboard::parse_shortcuts()
+{
+  for (auto it = shortcuts.begin(); it != shortcuts.end();) 
+  {
+    std::string mod = it->first;
+    size_t i = mod.find("[");
+    std::string keys = "";
+
+    if (i != std::string::npos) {
+      mod[i] = 0;
+      keys = mod.substr(i + 1, mod.find("]") - (i + 1));
+
+      std::replace(keys.begin(), keys.end(), ',', ' ');
+      std::stringstream ss(keys);
+      std::string tmp;
+      while (ss >> tmp) {
+        shortcuts.insert(std::pair<std::string, binding>(mod.data() + tmp, {it->second.name, it->second.action}));
+      }
+      it = shortcuts.erase(it);
+    }
+    else
+      ++it;
+  }
 }
 
 std::string Keyboard::get_active_binding()
@@ -154,7 +163,7 @@ void Keyboard::keyboard_handle_key(wl_listener *listener, void *data)
   }
 
   if (binding.size() > 0) {
-    shortcuts[binding].action();
+    shortcuts[binding].action(new std::string(binding));
     handled = true;
   }
 
@@ -239,7 +248,7 @@ int Keyboard::keyboard_handle_repeat(void *data)
       std::cerr << "failed to update key repeat timer" << std::endl;
     }
     std::cout << k->repeatBinding << std::endl;
-    k->shortcuts[k->repeatBinding].action();
+    k->shortcuts[k->repeatBinding].action(nullptr);
   }
   return 0;
 }
