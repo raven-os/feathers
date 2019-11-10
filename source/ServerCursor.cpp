@@ -1,6 +1,7 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
 #include "XdgView.hpp"
+#include "Output.hpp"
 
 #include <cassert>
 #include <stdio.h>
@@ -170,7 +171,7 @@ void ServerCursor::process_cursor_motion(uint32_t time)
 	double sx, sy;
 	wlr_seat *seat = Server::getInstance().seat.getSeat();
 	wlr_surface *surface = nullptr;
-	View *view = View::desktop_view_at(cursor->x, cursor->y, &surface, &sx, &sy);
+	View *view = View::view_at(cursor->x, cursor->y, &surface, &sx, &sy);
 	if (!view)
 	  {
 	    wlr_xcursor_manager_set_cursor_image(cursor_mgr, "left_ptr", cursor);
@@ -223,7 +224,7 @@ void ServerCursor::server_cursor_button(wl_listener *listener, void *data)
 	double sx, sy;
 	wlr_surface *surface;
 
-	if (View *view = View::desktop_view_at(cursor->x, cursor->y, &surface, &sx, &sy))
+	if (View *view = View::view_at(cursor->x, cursor->y, &surface, &sx, &sy))
 	  view->focus_view();
       }
       break;

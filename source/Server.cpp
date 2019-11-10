@@ -39,9 +39,7 @@ Server::~Server() noexcept = default;
 
 wlr_surface *Server::getFocusedSurface() const noexcept
 {
-  Output const &output = outputManager.getActiveWorkspace()->getOutput();
-
-  if (LayerSurface *layerSurface = output.getFocusedLayerSurface())
+  if (LayerSurface *layerSurface = getFocusedLayerSurface())
     return layerSurface->surface;
   if (XdgView *view = getFocusedView())
     return view->surface;

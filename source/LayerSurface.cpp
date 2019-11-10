@@ -53,19 +53,18 @@ void LayerSurface::shell_surface_map(wl_listener *listener, void *data)
 
       if (wlr_surface *surface = server.getFocusedSurface();
 	  !surface ||
-	  (wlr_surface_is_layer_surface(surface) &&
-	   wlr_layer_surface_v1_from_wlr_surface(surface)->current.layer <= shell_surface->current.layer))
+	  !wlr_surface_is_layer_surface(surface) ||
+	  wlr_layer_surface_v1_from_wlr_surface(surface)->current.layer <= shell_surface->current.layer)
 	{
-	  wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes,
+	  wlr_seat_keyboard_notify_enter(seat, this->surface, keyboard->keycodes,
 					 keyboard->num_keycodes, &keyboard->modifiers);
-	  server.outputManager.getOutput(shell_surface->output).setFocusedLayerSurface(this);
+	  server.setFocusedLayerSurface(this);
 	}
     }
 }
 
 void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 {
-  std::cout << "unmapping layer surface!" << std::endl;
   Server &server(Server::getInstance());
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(surface);
 
@@ -84,10 +83,11 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 		  wlr_layer_surface_v1_from_wlr_surface(layerSurfacePtr->surface)->current.keyboard_interactive)
 		{
 		  wlr_seat_keyboard_notify_enter(seat, layerSurfacePtr->surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
-		  output.setFocusedLayerSurface(layerSurfacePtr.get());
+		  server.setFocusedLayerSurface(layerSurfacePtr.get());
 		  goto done;
 		}
 	    }
+	server.setFocusedLayerSurface(nullptr); // if we found no other layer surface to focus, unfocus this one
       }
       if (XdgView *view = server.getFocusedView())
 	{
@@ -101,8 +101,7 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 	}
     }
  done:
-  server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this);
-
+  server.outputManager.getOutput(shell_surface->output).removeLayerSurface(this); // nb: invalidates 'this' pointer
 }
 
 void LayerSurface::close()

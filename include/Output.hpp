@@ -43,22 +43,11 @@ public:
     return layers;
   }
 
-  LayerSurface *getFocusedLayerSurface() const noexcept
-  {
-    return layerSurface;
-  }
-
-  void setFocusedLayerSurface(LayerSurface *layerSurface)
-  {
-    this->layerSurface = layerSurface;
-  }
-
 private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
   XdgView *fullscreenView;
   wlr_texture *wallpaperTexture;
-  LayerSurface *layerSurface;
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 
 private:

@@ -27,7 +27,7 @@ void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
 			   {
 			     return ptr.get() == view;
 			   }));
-  if (View *view = server.getFocusedView())
+  if (XdgView *view = server.getFocusedView())
     view->focus_view();
 };
 
@@ -36,5 +36,9 @@ void XdgShellV6::server_new_xdg_surface(wl_listener *listener, void *data)
   wlr_xdg_surface_v6 *xdg_surface = static_cast<wlr_xdg_surface_v6 *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_V6_ROLE_TOPLEVEL)
-    Server::getInstance().getViews().emplace_back(new XdgView(xdg_surface->surface));
+    {
+      Workspace *workspace = Server::getInstance().outputManager.getActiveWorkspace();
+
+      workspace->getViews().emplace_back(new XdgView(xdg_surface->surface, workspace));
+    }
 };

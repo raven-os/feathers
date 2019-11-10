@@ -82,7 +82,20 @@ public:
     return display.get();
   }
 
+  LayerSurface *getFocusedLayerSurface() const noexcept
+  {
+    return layerSurface;
+  }
+
+  void setFocusedLayerSurface(LayerSurface *layerSurface) noexcept
+  {
+    this->layerSurface = layerSurface;
+  }
+
+
 private:
+  LayerSurface *layerSurface = nullptr;
+
   Server();
 
   void startupCommands() const;
