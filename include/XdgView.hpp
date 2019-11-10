@@ -16,7 +16,7 @@ struct ViewListeners
 class XdgView : public View, public ViewListeners
 {
 public:
-  XdgView(wlr_surface *surface) noexcept;
+  XdgView(wlr_surface *surface, Workspace *workspace) noexcept;
   XdgView(XdgView const &) = delete;
   XdgView(XdgView &&) = delete;
   ~XdgView();
@@ -61,4 +61,7 @@ public:
   Workspace *workspace{nullptr};
   bool fullscreen{false};
   std::array<int, 2u> previous_size;
+
+  static XdgView *desktop_view_at(double lx, double ly,
+				  wlr_surface **surface, double *sx, double *sy);
 };

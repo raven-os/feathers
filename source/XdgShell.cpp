@@ -36,5 +36,9 @@ void XdgShell::server_new_xdg_surface(wl_listener *listener, void *data)
   wlr_xdg_surface *xdg_surface = static_cast<wlr_xdg_surface *>(data);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
-    Server::getInstance().getViews().emplace_back(new XdgView(xdg_surface->surface));
+    {
+      Workspace *workspace = Server::getInstance().outputManager.getActiveWorkspace();
+
+      workspace->getViews().emplace_back(new XdgView(xdg_surface->surface, workspace));
+    }
 };

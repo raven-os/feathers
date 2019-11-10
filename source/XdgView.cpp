@@ -4,8 +4,9 @@
 
 #include <cassert>
 
-XdgView::XdgView(wlr_surface *surface) noexcept
+XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
   : View(surface)
+  , workspace(workspace)
 {
   if (wlr_surface_is_xdg_surface_v6(surface))
     {
@@ -244,7 +245,7 @@ void XdgView::xdg_toplevel_request_resize(wl_listener *listener, void *data)
 {
   wlr_xdg_toplevel_v6_resize_event *event = static_cast<wlr_xdg_toplevel_v6_resize_event *>(data);
   begin_interactive(CursorMode::CURSOR_RESIZE, event->edges);
-};
+}
 
 void XdgView::requestFullscreen()
 {
@@ -404,4 +405,20 @@ std::array<FixedPoint<-4, int32_t>, 2u> XdgView::getMinSize() const noexcept
 std::array<FixedPoint<-4, int32_t>, 2u> XdgView::getMinSize(wm::WindowNodeIndex, wm::WindowTree &) const noexcept
 {
   return getMinSize();
+}
+
+// Note: bases itself on the active workspace, which is actually not a good idea
+XdgView *XdgView::desktop_view_at(double lx, double ly,
+				  wlr_surface **surface, double *sx, double *sy)
+{
+  Server &server = Server::getInstance();
+
+  for (auto &view : server.outputManager.getActiveWorkspace()->getViews())
+    {
+      if (view->at(lx, ly, surface, sx, sy))
+	{
+	  return view.get();
+	}
+    }
+  return nullptr;
 }

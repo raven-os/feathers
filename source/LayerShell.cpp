@@ -15,12 +15,12 @@ LayerShell::~LayerShell() noexcept = default;
 
 void LayerShell::shell_surface_destroy(wl_listener *listener, void *data)
 {
-  // TODO
+  // already deallocated, nothing to do
 }
 
 void LayerShell::newSurface(wl_listener *listener, void *data)
 {
   wlr_layer_surface_v1 *shell_surface = static_cast<wlr_layer_surface_v1 *>(data);
 
-  pending_surfaces.emplace_back(new LayerSurface(shell_surface->surface));
+  pending_surfaces.emplace_back(std::make_unique<LayerSurface>(shell_surface->surface));
 }

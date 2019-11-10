@@ -33,9 +33,6 @@ public:
   View(View &&) = delete;
   ~View();
 
-  static View *desktop_view_at(double lx, double ly,
-			       wlr_surface **surface, double *sx, double *sy);
-
   wlr_surface *surface;
   bool mapped;
   FixedPoint<-4, int> x, y;
@@ -45,6 +42,10 @@ public:
   void xdg_handle_new_popup(wl_listener *listener, void *data);
   void focus_view();
 
-private:
+  // Also takes into account layer shell views
+  static View *view_at(double lx, double ly, wlr_surface **surface, double *sx, double *sy);
+
+
+protected:
   bool at(double lx, double ly, wlr_surface **surface, double *sx, double *sy);
 };
