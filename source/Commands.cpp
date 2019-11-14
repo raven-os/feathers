@@ -102,12 +102,10 @@ namespace Commands
     if (XdgView *view = server.getFocusedView())
       {
 	auto &windowTree(server.getActiveWindowTree());
-	auto rootNode(windowTree.getRootIndex());
-	auto &rootNodeData(windowTree.getData(rootNode));
 
 	if (view->windowNode != wm::nullNode)
 	  {
-	    rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
+	    wm::Container::removeFromParent(windowTree, view->windowNode);
 	    view->x = 10_FP;
 	    view->y = 10_FP;
 	    if (wlr_surface_is_xdg_surface_v6(view->surface))
@@ -120,6 +118,9 @@ namespace Commands
 	  }
 	else
 	  {
+	    auto rootNode(windowTree.getRootIndex());
+	    auto &rootNodeData(windowTree.getData(rootNode));
+
 	    view->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{view});
 	    view->set_tiled(~0u);
 	  }
@@ -253,10 +254,9 @@ namespace Commands
       std::unique_ptr<XdgView> newView;
     
       {
-        auto &windowTree = currentWorkspace->get()->getWindowTree();
-        auto rootNode(windowTree.getRootIndex());
-        auto &rootNodeData(windowTree.getData(rootNode));
-        rootNodeData.getContainer().removeChild(rootNode, windowTree, view->windowNode);
+	auto &windowTree = currentWorkspace->get()->getWindowTree();
+
+	wm::Container::removeFromParent(windowTree, view->windowNode);
 	newView = std::move(view);
         currentWorkspace->get()->getViews().erase(std::find(currentWorkspace->get()->getViews().begin(), currentWorkspace->get()->getViews().end(), view));
       }
@@ -266,7 +266,7 @@ namespace Commands
         auto &rootNodeData(windowTree.getData(rootNode));
         
         newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
-        view->set_tiled(~0u);
+        newView->set_tiled(~0u);
         nextWorkspace->get()->getViews().emplace_back(std::move(newView));
       }
       server.outputManager.setActiveWorkspace(nextWorkspace->get());

@@ -172,11 +172,7 @@ void XdgView::xdg_surface_unmap(wl_listener *listener, void *data)
   if (windowNode == wm::nullNode)
     return;
 
-  auto &windowTree(Server::getInstance().outputManager.getActiveWorkspace()->getWindowTree());
-  auto parentNode(windowTree.getParent(windowNode));
-  auto &parentNodeData(windowTree.getData(parentNode));
-
-  parentNodeData.getContainer().removeChild(parentNode, windowTree, windowNode);
+  wm::Container::removeFromParent(workspace->getWindowTree(), windowNode);
 };
 
 template<SurfaceType surfaceType>

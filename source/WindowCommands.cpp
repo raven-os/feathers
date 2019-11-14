@@ -190,7 +190,6 @@ namespace Commands
 	  auto *container(&windowTree.getData(containerNode).getContainer());
 	  wm::WindowNodeIndex newViewNode;
 
-	  windowTree.dump();
 	  if (container->direction ^ moveVertical)
 	    {
 	      if (containerNode == windowTree.getRootIndex())
@@ -260,7 +259,6 @@ namespace Commands
 	      std::get<wm::ClientData>(windowTree.getData(viewNode).data)->windowNode = viewNode;
 	    } catch (...) {}
 	  windowTree.exchangeChildren(viewNode, newViewNode);
-	  windowTree.dump();
 	}
     }
   }

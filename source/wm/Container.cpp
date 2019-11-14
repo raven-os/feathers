@@ -1,6 +1,8 @@
 #include "wm/Container.hpp"
 #include "wm/WindowTree.hpp"
 
+#include <cassert>
+
 /*
 ** ::: ::: :::       :::     :::     :::::::::  ::::    ::: ::::::::::: ::::    :::  ::::::::  ::: :::
 ** :+: :+: :+:       :+:   :+: :+:   :+:    :+: :+:+:   :+:     :+:     :+:+:   :+: :+:    :+: :+: :+:
@@ -180,6 +182,9 @@ namespace wm
 
   void Container::removeChild(WindowNodeIndex index, WindowTree &windowTree, WindowNodeIndex childIndex)
   {
+    assert(&windowTree.getData(index).getContainer() == this || !"index must point to this container");
+    assert(windowTree.getParent(childIndex) == index || !"childIndex must be a child of the current Container");
+
     auto removedWidth(getChildWidth(index, windowTree, childIndex));
     auto childIndex2{windowTree.getSibling(childIndex)};
 
@@ -254,5 +259,13 @@ namespace wm
     return result;
   }
 
+  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex index, WindowNodeIndex parent)
+  {
+    windowTree.getData(parent).getContainer().removeChild(parent, windowTree, index);
+  }
 
+  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex index)
+  {
+    removeFromParent(windowTree, index, windowTree.getParent(index));
+  }
 }
