@@ -53,5 +53,5 @@ private:
 private:
   void output_frame(wl_listener *listener, void *data);
   void refreshImage();
-  
+  void calculateMargins(std::array<FixedPoint<-4, int>, 2> &offset, std::array<uint16_t, 2> &size);  
 };
