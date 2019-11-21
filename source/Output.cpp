@@ -64,9 +64,99 @@ void Output::refreshImage()
     }
 }
 
+namespace
+{
+  template<uint32_t anchorDir, uint32_t oppositeDir, bool direction, bool positive>
+  void tryDir(uint32_t anchor, uint32_t exclusive_zone, std::array<FixedPoint<-4, int>, 2> &offset, std::array<uint16_t, 2> &size, LayerSurface &layerSurface)
+  {
+    if ((anchor & anchorDir) && !(anchor & oppositeDir))
+      {
+	if constexpr (positive)
+	  {
+	    (direction ? layerSurface.y : layerSurface.x) = offset[direction];
+	    (!direction ? layerSurface.y : layerSurface.x) = offset[!direction];
+	    offset[direction] += FixedPoint<0, int>(exclusive_zone);
+	  }
+	else
+	  {
+	    (!direction ? layerSurface.y : layerSurface.x) = offset[!direction];
+	    (direction ? layerSurface.y : layerSurface.x) = offset[direction] + FixedPoint<-4, int>(FixedPoint<0, int>(size[direction] - (direction ? wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height : wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width)));
+	  }
+	size[direction] -= exclusive_zone;
+      }
+  }
+}
+
+void Output::calculateMargins(std::array<FixedPoint<-4, int>, 2> &offset, std::array<uint16_t, 2> &size)
+{
+  for (auto &layer : layers)
+    for (auto &layerSurfacePtr : layer)
+      {
+	auto &layerSurface(*layerSurfacePtr);
+	auto exclusive_zone(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.exclusive_zone);
+	auto anchor(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.anchor);
+
+	if (exclusive_zone > 0 &&
+	    (!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) +
+	     !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) & 1))
+	  {
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, 1, 1>(anchor, exclusive_zone, offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, 0, 1>(anchor, exclusive_zone, offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, 1, 0>(anchor, exclusive_zone, offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, 0, 0>(anchor, exclusive_zone, offset, size, layerSurface);
+	  }
+      }
+  for (auto &layer : layers)
+    for (auto &layerSurfacePtr : layer)
+      {
+	auto &layerSurface(*layerSurfacePtr);
+	auto exclusive_zone(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.exclusive_zone);
+	auto anchor(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.anchor);
+
+	if (exclusive_zone == 0 ||
+	    (exclusive_zone > 1 &&
+	     !((!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) +
+		!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT)) & 1)))
+	  {
+	    if (layerSurface.x < offset[0] || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
+	      layerSurface.x = offset[0];
+	    if (layerSurface.y < offset[1] || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
+	      layerSurface.y = offset[1];
+	    if (offset[0] + FixedPoint<-4, int>(FixedPoint<0, int>(size[0] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width)) < layerSurface.x || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
+	      {
+		layerSurface.x = offset[0];
+		layerSurface.x += FixedPoint<0, int>(size[0] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width);
+	      }
+	    if (offset[1] + FixedPoint<-4, int>(FixedPoint<0, int>(size[1] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height)) < layerSurface.y || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
+	      {
+		layerSurface.y = offset[1];
+		layerSurface.y += FixedPoint<0, int>(size[1] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height);
+	      }
+	  }
+      }
+}
+
+
+
 void Output::output_frame(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
+
+  auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
+  {
+    wm::WindowTree &windowTree = getWindowTree();
+
+    std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
+    std::array<uint16_t, 2> size({uint16_t(box->width), uint16_t(box->height)});
+
+    calculateMargins(pos, size);
+    
+    if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
+      windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
+    if (windowTree.getData(windowTree.getRootIndex()).getSize() != size)
+      windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, size);
+  }
+
   wlr_renderer *renderer = server.renderer;
 
   timespec now;
@@ -167,16 +257,6 @@ void Output::output_frame(wl_listener *listener, void *data)
   wlr_renderer_end(renderer);
   wlr_output_commit(wlr_output);
   refreshImage();
-  auto *box = wlr_output_layout_get_box(server.outputManager.getLayout(), wlr_output);
-  {
-    wm::WindowTree &windowTree = getWindowTree();
-
-    std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
-    if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
-      windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
-    if (windowTree.getData(windowTree.getRootIndex()).getSize() != std::array<uint16_t, 2u>{uint16_t(box->width), uint16_t(box->height)})
-      windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, {uint16_t(box->width), uint16_t(box->height)});
-  }
 }
 
 void Output::setFrameListener()
@@ -220,8 +300,8 @@ void Output::removeLayerSurface(LayerSurface *layerSurface)
   wlr_layer_surface_v1 *shell_surface = wlr_layer_surface_v1_from_wlr_surface(layerSurface->surface);
 
   auto it(std::find_if(layers[shell_surface->current.layer].begin(),layers[shell_surface->current.layer].end(), [layerSurface](auto &a) noexcept
-												{
-												  return a.get() == layerSurface;
-												}));
+														{
+														  return a.get() == layerSurface;
+														}));
   layers[shell_surface->current.layer].erase(it);
 }
