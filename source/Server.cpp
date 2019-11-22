@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include "XdgShell.hpp"
 #include "ServerCursor.hpp"
 #include "OutputManager.hpp"
 #include "InputManager.hpp"
@@ -27,6 +26,7 @@ Server::Server()
   , outputManager()
   , xdgShell(new XdgShell())
   , xdgShellV6(new XdgShellV6())
+  , xWayland(new XWayland())
   , cursor()
   , inputManager()
   , seat()

@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "XdgShell.hpp"
+#include "protocols/XdgShell.hpp"
 #include "XdgView.hpp"
 #include "Server.hpp"
 #include "wm/Container.hpp"

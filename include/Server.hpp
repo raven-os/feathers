@@ -1,8 +1,9 @@
 #pragma once
 
 # include "Wlroots.hpp"
-# include "XdgShell.hpp"
-# include "XdgShellV6.hpp"
+# include "protocols/XdgShell.hpp"
+# include "protocols/XdgShellV6.hpp"
+# include "protocols/XWayland.hpp"
 # include "LayerShell.hpp"
 # include "ServerCursor.hpp"
 # include "InputManager.hpp"
@@ -65,8 +66,11 @@ public:
   wlr_surface *getFocusedSurface() const noexcept;
 
   OutputManager outputManager;
+
   XdgShell *xdgShell;
   XdgShellV6 *xdgShellV6;
+  XWayland *xWayland;
+
   LayerShell layerShell;
   ServerCursor cursor;
   InputManager inputManager;
