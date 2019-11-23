@@ -30,6 +30,7 @@ Server::Server()
   , cursor()
   , inputManager()
   , seat()
+  , ipcServer("/tmp/featherssocket", this)
   , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
