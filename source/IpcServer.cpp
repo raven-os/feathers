@@ -4,39 +4,66 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <signal.h>
 
 IpcServer::IpcServer(std::string const& socket, Server *server)
-  : ipcServer(socket), socket(socket), server(server), thread(&IpcServer::accept, this)
+  : ipcServer(socket)
+  , socket(socket)
+  , server(server)
+  , clients()
+  , acceptThread(&IpcServer::acceptClients, this)
+  , processThread(&IpcServer::processClients, this)
 {
+  // Ignore broken pipe
+  signal(SIGPIPE, SIG_IGN);
 }
 
-void IpcServer::accept()
+void IpcServer::acceptClients()
 {
-  try {
-    while (1)
-      {
+  while (1)
+    {
+      try {
         std::unique_ptr<libsocket::unix_stream_client> client = ipcServer.accept2();
+        std::cout << "New ipc client" << std::endl;
+        clients.emplace_back(std::move(client));
 
-        int size = server->outputManager.workspaceCount;
-        int activeWorkspaceId = findActiveWorkspaceId();
-        sendData(client.get(), size, activeWorkspaceId);
-
-        while (1)
-          {
-            usleep(100);
-            int newSize = server->outputManager.workspaceCount;
-            int newActiveWorkspaceId = findActiveWorkspaceId();
-            if (newSize != size || activeWorkspaceId != newActiveWorkspaceId)
-              {
-                size = newSize;
-                activeWorkspaceId = newActiveWorkspaceId;
-                sendData(client.get(), size, activeWorkspaceId);
-              }
-          }
+      } catch (const libsocket::socket_exception& e) {
+        std::cerr << e.mesg;
       }
-  } catch (const libsocket::socket_exception& e) {
-    std::cerr << e.mesg;
-  }
+    }
+}
+
+void IpcServer::processClients()
+{
+  int size = -1;
+  int activeWorkspaceId = -1;
+  unsigned int clientSize = -1;
+  while (1)
+    {
+      usleep(100);
+      if (clients.size() < 1)
+        continue;
+      int newSize = server->outputManager.workspaceCount;
+      int newActiveWorkspaceId = findActiveWorkspaceId();
+      unsigned int newClientSize = clients.size();
+      if (newSize != size || activeWorkspaceId != newActiveWorkspaceId || clientSize != newClientSize)
+        {
+          size = newSize;
+          activeWorkspaceId = newActiveWorkspaceId;
+          clientSize = newClientSize;
+          for (auto it = clients.begin(); it != clients.end();)
+            {
+              try {
+                sendData((*it).get(), size, activeWorkspaceId);
+                ++it;
+              } catch (const libsocket::socket_exception& e) {
+                // remove closed client
+                std::cerr << e.mesg;
+                it = clients.erase(it);
+              }
+            }
+        }
+    }
 }
 
 void IpcServer::sendData(libsocket::unix_stream_client *client, int size, int activeWorkspaceId)
@@ -66,9 +93,9 @@ int IpcServer::findActiveWorkspaceId() const
     {
       if (w.get() == server->outputManager.getActiveWorkspace())
         {
-          break;
+          return i + 1; // from index to actual number of the workspace
         }
       ++i;
     }
-  return i + 1; // from index to actual number of the workspace
+  return -1;
 }
