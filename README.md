@@ -4,6 +4,8 @@ Feathers is a compositor for raven-os.
 
 ## Build instructions
 
+Feathers requires Libsocket to work. Please refer to https://github.com/dermesser/libsocket#building-libsocket
+
 ```bash
 mkdir -p build/<build_type>
 cd build/<build_type>

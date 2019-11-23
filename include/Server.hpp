@@ -8,6 +8,7 @@
 # include "InputManager.hpp"
 # include "OutputManager.hpp"
 # include "Seat.hpp"
+# include "IpcServer.hpp"
 # include "conf/Configuration.hpp"
 
 enum class OpenType : uint8_t
@@ -60,7 +61,7 @@ public:
       return nullptr;
     return outputManager.getActiveWorkspace()->getViews().front().get();
   }
-    
+
   wlr_surface *getFocusedSurface() const noexcept;
 
   OutputManager outputManager;
@@ -70,6 +71,7 @@ public:
   ServerCursor cursor;
   InputManager inputManager;
   Seat seat;
+  IpcServer ipcServer;
 
   XdgView *grabbed_view;
   double grab_x, grab_y;
