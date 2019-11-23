@@ -80,6 +80,6 @@
         "format": "{}",
         //"max-length": 15,
         "interval": 0.5,
-        "exec": "nc -U /tmp/featherssocket"
+        "exec": "nc -U $FEATHERS_SOCKET"
     }
 }

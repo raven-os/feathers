@@ -30,7 +30,14 @@ Server::Server()
   , cursor()
   , inputManager()
   , seat()
-  , ipcServer("/tmp/featherssocket", this)
+  , ipcServer([this]()
+              {
+                std::string feathersSocket = configuration.getOnce("feathers_socket");
+                if (feathersSocket.empty())
+                  feathersSocket = "/tmp/featherssocket";
+                setenv("FEATHERS_SOCKET", feathersSocket.c_str(), true);
+                return feathersSocket;
+              }(), this)
   , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
