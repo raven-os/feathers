@@ -277,16 +277,19 @@ namespace Commands
   {
     Server &server = Server::getInstance();
 
-    for (auto const &output : server.outputManager.getOutputs())
-    {
-      auto it = std::find_if(output->getWorkspaces().begin(), output->getWorkspaces().end(),
-                            [](auto &w) noexcept {
-                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
-                            });
-      output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
-    }
-    server.outputManager.workspaceCount++;
-    switch_workspace(Workspace::RIGHT, nullptr);
+    if (server.outputManager.workspaceCount < server.outputManager.maxWorkspaceCount)
+      {
+        for (auto const &output : server.outputManager.getOutputs())
+          {
+            auto it = std::find_if(output->getWorkspaces().begin(), output->getWorkspaces().end(),
+                                   [](auto &w) noexcept {
+                                     return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                                   });
+            output->getWorkspaces().insert(it + 1, std::make_unique<Workspace>(*(output)));
+          }
+        server.outputManager.workspaceCount++;
+        switch_workspace(Workspace::RIGHT, nullptr);
+      }
   }
 
   void close_workspace()
