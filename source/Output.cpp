@@ -66,28 +66,72 @@ void Output::refreshImage()
 
 namespace
 {
-  template<uint32_t anchorDir, uint32_t oppositeDir, bool direction, bool positive>
-  void tryDir(uint32_t anchor, uint32_t exclusive_zone, std::array<FixedPoint<-4, int>, 2> &offset, std::array<uint16_t, 2> &size, LayerSurface &layerSurface)
+  template<uint32_t anchorDir, uint32_t oppositeDir, bool direction>
+  void setLayerShellShape(std::array<uint16_t, 2> offset, std::array<uint16_t, 2> size, LayerSurface &layerSurface, int &outSize)
   {
+    auto &current(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current);
+    auto anchor(current.anchor);
+    auto &margin(current.margin);
+
+    if ((direction ?
+	 margin.top + margin.bottom :
+	 margin.right + margin.left) + outSize
+	> size[direction]) // takes full screen length
+      anchor |= anchorDir | oppositeDir; // effectivly behaves as if it were anchored both sides
+
+    if (FixedPoint<0, int> minPos(offset[direction] + (direction ? margin.top : margin.left));
+	(anchor & anchorDir) || (direction ? layerSurface.y : layerSurface.x) < minPos)
+      {
+	(direction ? layerSurface.y : layerSurface.x) = minPos;
+	if (anchor & oppositeDir)
+	  {
+	    outSize = size[direction] - (direction ? margin.top + margin.bottom : margin.right + margin.left);
+	  }
+      }
+    else if (FixedPoint<0, int> maxPos(offset[direction] + size[direction] - (outSize + (direction ? margin.bottom : margin.right)));
+	     (anchor & oppositeDir) || (direction ? layerSurface.y : layerSurface.x) > maxPos)
+      {
+	(direction ? layerSurface.y : layerSurface.x) = maxPos;
+      }
+  }
+
+  void setLayerShellShape(std::array<uint16_t, 2> offset, std::array<uint16_t, 2> size, LayerSurface &layerSurface)
+  {
+    auto &current(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current);
+
+    int width = current.desired_width;
+    int height = current.desired_height;
+    setLayerShellShape<ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, 0>(offset, size, layerSurface, width);
+    setLayerShellShape<ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, 1>(offset, size, layerSurface, height);
+    if (width != current.actual_width || height != current.actual_height)
+      wlr_layer_surface_v1_configure(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface), width, height);
+  }
+  
+  template<uint32_t anchorDir, uint32_t oppositeDir, bool direction, bool positive>
+  void tryDir(std::array<uint16_t, 2> &offset, std::array<uint16_t, 2> &size, LayerSurface &layerSurface)
+  {
+    auto exclusive_zone(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.exclusive_zone);
+    auto anchor(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.anchor);
+    auto *wlrLayerSurface(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface));
     if ((anchor & anchorDir) && !(anchor & oppositeDir))
       {
+	auto &margin(wlrLayerSurface->current.margin);
 	if constexpr (positive)
 	  {
-	    (direction ? layerSurface.y : layerSurface.x) = offset[direction];
-	    (!direction ? layerSurface.y : layerSurface.x) = offset[!direction];
-	    offset[direction] += FixedPoint<0, int>(exclusive_zone);
+	    exclusive_zone += (direction ? margin.top : margin.left);
+	    offset[direction] += exclusive_zone;
+	    size[direction] -= exclusive_zone;
 	  }
 	else
 	  {
-	    (!direction ? layerSurface.y : layerSurface.x) = offset[!direction];
-	    (direction ? layerSurface.y : layerSurface.x) = offset[direction] + FixedPoint<-4, int>(FixedPoint<0, int>(size[direction] - (direction ? wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height : wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width)));
+	    exclusive_zone += (direction ? margin.bottom : margin.right);
+	    size[direction] -= exclusive_zone;
 	  }
-	size[direction] -= exclusive_zone;
       }
   }
 }
 
-void Output::calculateMargins(std::array<FixedPoint<-4, int>, 2> &offset, std::array<uint16_t, 2> &size)
+void Output::calculateMargins(std::array<uint16_t, 2> &offset, std::array<uint16_t, 2> &size)
 {
   for (auto &layer : layers)
     for (auto &layerSurfacePtr : layer)
@@ -100,16 +144,17 @@ void Output::calculateMargins(std::array<FixedPoint<-4, int>, 2> &offset, std::a
 	    (!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) +
 	     !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) & 1))
 	  {
-	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, 1, 1>(anchor, exclusive_zone, offset, size, layerSurface);
-	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, 0, 1>(anchor, exclusive_zone, offset, size, layerSurface);
-	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, 1, 0>(anchor, exclusive_zone, offset, size, layerSurface);
-	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, 0, 0>(anchor, exclusive_zone, offset, size, layerSurface);
+	    setLayerShellShape(offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, 1, 1>(offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, 0, 1>(offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP, 1, 0>(offset, size, layerSurface);
+	    tryDir<ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT, ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT, 0, 0>(offset, size, layerSurface);
 	  }
       }
   for (auto &layer : layers)
     for (auto &layerSurfacePtr : layer)
       {
-	auto &layerSurface(*layerSurfacePtr);
+    	auto &layerSurface(*layerSurfacePtr);
 	auto exclusive_zone(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.exclusive_zone);
 	auto anchor(wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.anchor);
 
@@ -118,20 +163,7 @@ void Output::calculateMargins(std::array<FixedPoint<-4, int>, 2> &offset, std::a
 	     !((!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM) +
 		!!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT) + !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT)) & 1)))
 	  {
-	    if (layerSurface.x < offset[0] || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP))
-	      layerSurface.x = offset[0];
-	    if (layerSurface.y < offset[1] || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT))
-	      layerSurface.y = offset[1];
-	    if (offset[0] + FixedPoint<-4, int>(FixedPoint<0, int>(size[0] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width)) < layerSurface.x || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
-	      {
-		layerSurface.x = offset[0];
-		layerSurface.x += FixedPoint<0, int>(size[0] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_width);
-	      }
-	    if (offset[1] + FixedPoint<-4, int>(FixedPoint<0, int>(size[1] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height)) < layerSurface.y || (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
-	      {
-		layerSurface.y = offset[1];
-		layerSurface.y += FixedPoint<0, int>(size[1] - wlr_layer_surface_v1_from_wlr_surface(layerSurface.surface)->current.actual_height);
-	      }
+	    setLayerShellShape(offset, size, layerSurface);
 	  }
       }
 }
@@ -146,13 +178,16 @@ void Output::output_frame(wl_listener *listener, void *data)
   {
     wm::WindowTree &windowTree = getWindowTree();
 
-    std::array<FixedPoint<-4, int>, 2> pos{{FixedPoint<0, int>(box->x), FixedPoint<0, int>(box->y)}};
+    std::array<uint16_t, 2> pos({box->x, box->y});
     std::array<uint16_t, 2> size({uint16_t(box->width), uint16_t(box->height)});
 
     calculateMargins(pos, size);
-    
-    if (windowTree.getData(windowTree.getRootIndex()).getPosition() != pos)
-      windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, pos);
+    std::array<FixedPoint<-4, int>, 2> posFp;
+
+    for (int i = 0; i < 2; ++i)
+      posFp[i] = FixedPoint<0, int>(pos[i]);
+    if (windowTree.getData(windowTree.getRootIndex()).getPosition() != posFp)
+      windowTree.getData(windowTree.getRootIndex()).move(windowTree.getRootIndex(), windowTree, posFp);
     if (windowTree.getData(windowTree.getRootIndex()).getSize() != size)
       windowTree.getData(windowTree.getRootIndex()).resize(windowTree.getRootIndex(), windowTree, size);
   }
