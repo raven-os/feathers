@@ -57,10 +57,10 @@ void OutputManager::render_surface(wlr_surface *surface, int sx, int sy, void *d
     }
 
   wlr_box box = {
-			.x = int(ox * output->scale),
-			.y = int(oy * output->scale),
-			.width = int(float(surface->current.width) * output->scale),
-			.height = int(float(surface->current.height) * output->scale),
+		 .x = int(ox * output->scale),
+		 .y = int(oy * output->scale),
+		 .width = int(float(surface->current.width) * output->scale),
+		 .height = int(float(surface->current.height) * output->scale),
   };
 
   float matrix[9];

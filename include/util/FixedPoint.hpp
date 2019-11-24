@@ -153,10 +153,24 @@ public:
   }
 
 #define FIXEDPOINT_RELTATIVE_OP(OP)					\
-  template<class OtherType>						\
-  constexpr bool operator OP (FixedPoint<exponent, OtherType> const &other) const noexcept \
+  template<int otherExponent, class OtherType>				\
+  constexpr bool operator OP (FixedPoint<otherExponent, OtherType> const &other) const noexcept \
   {									\
-    return value OP other.value;					\
+    if constexpr (otherExponent == exponent)				\
+      return value OP other.value;					\
+    else if constexpr (exponent > otherExponent)			\
+      {									\
+	if (value != (other.value >> (exponent - otherExponent)))	\
+	  return value OP (other.value >> (exponent - otherExponent));	\
+	return (value << (exponent - otherExponent)) OP other.value;	\
+      }									\
+    else								\
+      {									\
+	static_assert(otherExponent > exponent);			\
+	if ((value >> (otherExponent - exponent)) != other.value)	\
+	  return (value >> (otherExponent - exponent)) OP other.value;	\
+	return value OP (other.value << (otherExponent - exponent));	\
+}									\
   }
 
   FIXEDPOINT_RELTATIVE_OP(==);
