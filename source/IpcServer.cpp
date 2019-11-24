@@ -86,7 +86,7 @@ void IpcServer::sendData(libsocket::unix_stream_client *client, int size, int ac
   *client << "\n";
 }
 
-int IpcServer::findActiveWorkspaceId() const
+int IpcServer::findActiveWorkspaceId() const noexcept
 {
   int i = 0;
   for (auto const& w : server->outputManager.getOutputs().at(0)->getWorkspaces())
@@ -97,5 +97,6 @@ int IpcServer::findActiveWorkspaceId() const
         }
       ++i;
     }
+  std::cerr << "No active workspace found" << std::endl;
   return -1;
 }
