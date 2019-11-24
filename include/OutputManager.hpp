@@ -56,6 +56,7 @@ public:
   Output const &getOutput(wlr_output *wlr_output) const noexcept;
 
   uint16_t workspaceCount = 2;
+  uint16_t maxWorkspaceCount = 9;
 private:
   Workspace *activeWorkspace = nullptr;
 
