@@ -13,6 +13,7 @@ IpcServer::IpcServer(std::string const& socket, Server *server)
   , clients()
   , acceptThread(&IpcServer::acceptClients, this)
   , processThread(&IpcServer::processClients, this)
+  , mutex()
 {
   // Ignore broken pipe
   signal(SIGPIPE, SIG_IGN);
@@ -25,7 +26,9 @@ void IpcServer::acceptClients()
       try {
         std::unique_ptr<libsocket::unix_stream_client> client = ipcServer.accept2();
         std::cout << "New ipc client" << std::endl;
+        mutex.lock();
         clients.emplace_back(std::move(client));
+        mutex.unlock();
 
       } catch (const libsocket::socket_exception& e) {
         std::cerr << e.mesg;
@@ -41,7 +44,7 @@ void IpcServer::processClients()
   while (1)
     {
       usleep(100);
-      if (clients.size() < 1)
+      if (clients.empty())
         continue;
       int newSize = server->outputManager.workspaceCount;
       int newActiveWorkspaceId = findActiveWorkspaceId();
@@ -51,6 +54,7 @@ void IpcServer::processClients()
           size = newSize;
           activeWorkspaceId = newActiveWorkspaceId;
           clientSize = newClientSize;
+          mutex.lock();
           for (auto it = clients.begin(); it != clients.end();)
             {
               try {
@@ -62,6 +66,7 @@ void IpcServer::processClients()
                 it = clients.erase(it);
               }
             }
+          mutex.unlock();
         }
     }
 }
