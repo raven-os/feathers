@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <mutex>
 #include <libsocket/unixserverstream.hpp>
 #include <libsocket/unixclientstream.hpp>
 #include <libsocket/exception.hpp>
@@ -29,4 +30,5 @@ private:
   std::vector<std::unique_ptr<libsocket::unix_stream_client>> clients;
   std::thread acceptThread;
   std::thread processThread;
+  std::mutex mutex;
 };
