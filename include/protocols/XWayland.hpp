@@ -14,8 +14,11 @@ struct XWaylandListeners {
 
 class XWayland : XWaylandListeners
 {
-    public:
-        XWayland();
-        ~XWayland() = default;
+public:
+    XWayland();
+    ~XWayland() = default;
+
+private:
+    wlr_xwayland *xwayland;
 
 };

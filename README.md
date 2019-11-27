@@ -5,7 +5,10 @@ Feathers is a compositor for raven-os.
 ## Build instructions
 
 Feathers requires Libsocket to work. Please refer to https://github.com/dermesser/libsocket#building-libsocket
+Copy waybar folder at the root of feather's repository into ~/.config/.
 
+>>>>>>> Stashed changes
+>>>>>>> Added compositor variable in server to go further in XWayland support implementation
 ```bash
 mkdir -p build/<build_type>
 cd build/<build_type>

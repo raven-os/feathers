@@ -18,7 +18,7 @@ Server::Server()
 	       auto *renderer = wlr_backend_get_renderer(backend);
 
 	       wlr_renderer_init_wl_display(renderer, getWlDisplay());
-	       wlr_compositor_create(getWlDisplay(), renderer);
+	       compositor = wlr_compositor_create(getWlDisplay(), renderer);
 
 	       return renderer;
 	     }())

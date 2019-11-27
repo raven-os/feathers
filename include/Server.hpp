@@ -49,6 +49,7 @@ public:
   };
 
   std::unique_ptr<wl_display, DisplayDeleter> display;
+  wlr_compositor *compositor;
   wlr_backend *backend;
   wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
