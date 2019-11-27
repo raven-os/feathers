@@ -1,6 +1,6 @@
 #include "wm/WindowData.hpp"
 #include "Server.hpp"
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 
 namespace wm
 {
@@ -9,7 +9,7 @@ namespace wm
   {
   }
 
-  WindowData::WindowData(XdgView *view) noexcept
+  WindowData::WindowData(WindowView *view) noexcept
     : data{view}
   {
   }

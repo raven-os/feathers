@@ -5,7 +5,7 @@
 #include "Seat.hpp"
 #include "LayerSurface.hpp"
 #include "Output.hpp"
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 #include <unistd.h>
 
 Server Server::_instance = Server();
@@ -26,7 +26,6 @@ Server::Server()
   , outputManager()
   , xdgShell(new XdgShell())
   , xdgShellV6(new XdgShellV6())
-  , xWayland(new XWayland())
   , cursor()
   , inputManager()
   , seat()
@@ -49,13 +48,13 @@ wlr_surface *Server::getFocusedSurface() const noexcept
 {
   if (LayerSurface *layerSurface = getFocusedLayerSurface())
     return layerSurface->surface;
-  if (XdgView *view = getFocusedView())
+  if (WindowView *view = getFocusedView())
     return view->surface;
   return nullptr;
 }
 
 
-std::vector<std::unique_ptr<XdgView>> &Server::getViews()
+std::vector<std::unique_ptr<WindowView>> &Server::getViews()
 {
   return outputManager.getActiveWorkspace()->getViews();
 }
@@ -97,5 +96,6 @@ void Server::run()
 
   startupCommands();
 
+  wlr_xwayland_create(getWlDisplay(), compositor, true);
   wl_display_run(getWlDisplay());
 }

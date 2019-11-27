@@ -54,10 +54,10 @@ public:
   wlr_renderer *renderer;
   struct wl_event_loop *wl_event_loop;
 
-  std::vector<std::unique_ptr<XdgView>> &getViews();
+  std::vector<std::unique_ptr<WindowView>> &getViews();
   wm::WindowTree &getActiveWindowTree();
 
-  XdgView *getFocusedView() const noexcept
+  WindowView *getFocusedView() const noexcept
   {
     if (outputManager.getActiveWorkspace()->getViews().empty())
       return nullptr;
@@ -70,7 +70,7 @@ public:
 
   XdgShell *xdgShell;
   XdgShellV6 *xdgShellV6;
-  XWayland *xWayland;
+//  XWayland *xWayland;
 
   LayerShell layerShell;
   ServerCursor cursor;
@@ -78,7 +78,7 @@ public:
   Seat seat;
   IpcServer ipcServer;
 
-  XdgView *grabbed_view;
+  WindowView *grabbed_view;
   double grab_x, grab_y;
   int grab_width, grab_height;
   uint32_t resize_edges;

@@ -3,7 +3,7 @@
 #include "View.hpp"
 #include "Server.hpp"
 #include "Output.hpp"
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 #include "LayerSurface.hpp"
 
 View::View(wlr_surface *surface) noexcept :
@@ -27,6 +27,8 @@ bool View::at(double lx, double ly, wlr_surface **out_surface, double *sx, doubl
     _surface = wlr_xdg_surface_v6_surface_at(wlr_xdg_surface_v6_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
   else if (wlr_surface_is_xdg_surface(surface))
     _surface = wlr_xdg_surface_surface_at(wlr_xdg_surface_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
+  // else if (wlr_surface_is_xwayland_surface(surface))
+  //   _surface = wlr_xwayland_surface_a
   else if (wlr_surface_is_layer_surface(surface))
     _surface = wlr_layer_surface_v1_surface_at(wlr_layer_surface_v1_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
   if (_surface )
@@ -62,7 +64,7 @@ View *View::view_at(double lx, double ly, wlr_surface **surface, double *sx, dou
 	  return view.get();
 	}
 
-  if (auto result = XdgView::desktop_view_at(lx, ly, surface, sx, sy))
+  if (auto result = WindowView::desktop_view_at(lx, ly, surface, sx, sy))
     return result;
   for (int i = ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM; i >= ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND; --i)
     for (auto &view : output.getLayers()[i])
@@ -100,13 +102,13 @@ void View::focus_view()
   server.seat.unfocusPrevious();
   if (wlr_surface_is_xdg_surface_v6(surface) || wlr_surface_is_xdg_surface(surface))
     {
-      auto &workspace(static_cast<XdgView *>(this)->workspace);
+      auto &workspace(static_cast<WindowView *>(this)->workspace);
       auto it(std::find_if(workspace->getViews().begin(), workspace->getViews().end(),
 			   [this](auto const &ptr) noexcept
 			   {
 			     return ptr.get() == this;
 			   }));
-      std::unique_ptr<XdgView> ptr(std::move(*it));
+      std::unique_ptr<WindowView> ptr(std::move(*it));
 
       std::move_backward(workspace->getViews().begin(), it, it + 1);
       workspace->getViews().front() = std::move(ptr);

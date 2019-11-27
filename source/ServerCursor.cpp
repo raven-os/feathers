@@ -1,6 +1,6 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 #include "Output.hpp"
 
 #include <cassert>
@@ -36,7 +36,7 @@ void ServerCursor::process_cursor_move(uint32_t time)
 void ServerCursor::process_cursor_resize(uint32_t time)
 {
   Server &server = Server::getInstance();
-  XdgView *view = server.grabbed_view;
+  WindowView *view = server.grabbed_view;
 
   if (view->windowNode == wm::nullNode)
     {

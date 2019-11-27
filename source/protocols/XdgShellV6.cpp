@@ -1,7 +1,7 @@
 #include <cassert>
 
 #include "protocols/XdgShellV6.hpp"
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 #include "Server.hpp"
 #include "wm/Container.hpp"
 
@@ -14,7 +14,7 @@ XdgShellV6::XdgShellV6() {
 void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
 {
   Server &server = Server::getInstance();
-  XdgView *view = wl_container_of(listener, view, destroy);
+  WindowView *view = wl_container_of(listener, view, destroy);
 
   if (server.getFocusedView() == view)
     {
@@ -27,7 +27,7 @@ void XdgShellV6::xdg_surface_destroy(wl_listener *listener, void *data)
 			   {
 			     return ptr.get() == view;
 			   }));
-  if (XdgView *view = server.getFocusedView())
+  if (WindowView *view = server.getFocusedView())
     view->focus_view();
 };
 
@@ -39,6 +39,6 @@ void XdgShellV6::server_new_xdg_surface(wl_listener *listener, void *data)
     {
       Workspace *workspace = Server::getInstance().outputManager.getActiveWorkspace();
 
-      workspace->getViews().emplace_back(new XdgView(xdg_surface->surface, workspace));
+      workspace->getViews().emplace_back(new WindowView(xdg_surface->surface, workspace));
     }
 };

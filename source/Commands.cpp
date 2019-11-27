@@ -4,7 +4,7 @@
 
 # include "Commands.hpp"
 # include "Output.hpp"
-# include "XdgView.hpp"
+# include "WindowView.hpp"
 
 namespace Commands
 {
@@ -67,7 +67,7 @@ namespace Commands
 
     if (server.getViews().size() <= 0)
       return ;
-    XdgView *view = server.getFocusedView();
+    WindowView *view = server.getFocusedView();
 
     view->requestFullscreen();
   }
@@ -86,7 +86,7 @@ namespace Commands
 			   });
 	  }
 
-	std::unique_ptr<XdgView> &view = server.getViews()[1];
+	std::unique_ptr<WindowView> &view = server.getViews()[1];
 
 	view->focus_view();
 	// focus view put the newly focused view in front
@@ -99,7 +99,7 @@ namespace Commands
   void toggle_float_window() {
     Server &server = Server::getInstance();
 
-    if (XdgView *view = server.getFocusedView())
+    if (WindowView *view = server.getFocusedView())
       {
 	auto &windowTree(server.getActiveWindowTree());
 
@@ -130,7 +130,7 @@ namespace Commands
   void switch_container_direction() {
     Server &server = Server::getInstance();
 
-    if (XdgView *view = server.getFocusedView())
+    if (WindowView *view = server.getFocusedView())
       {
 	if (view->windowNode == wm::nullNode)
 	  return ;
@@ -227,7 +227,7 @@ namespace Commands
       }
      
       server.outputManager.setActiveWorkspace(newActiveWorkspace);
-      if (XdgView *view = server.getFocusedView())
+      if (WindowView *view = server.getFocusedView())
         view->focus_view();
     }
   }
@@ -251,7 +251,7 @@ namespace Commands
       auto nextWorkspace = currentWorkspace + direction;
       auto &view = currentWorkspace->get()->getViews().front();
 
-      std::unique_ptr<XdgView> newView;
+      std::unique_ptr<WindowView> newView;
     
       {
 	auto &windowTree = currentWorkspace->get()->getWindowTree();

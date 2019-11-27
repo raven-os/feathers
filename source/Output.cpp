@@ -14,7 +14,7 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-#include "XdgView.hpp"
+#include "WindowView.hpp"
 #include "LayerSurface.hpp"
 
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
@@ -208,7 +208,7 @@ void Output::output_frame(wl_listener *listener, void *data)
   // float color[4] = {0.5, 0.5, 0.5, 1.0};
   // wlr_renderer_clear(renderer, color);
 
-  if (XdgView *view = getFullscreenView())
+  if (WindowView *view = getFullscreenView())
     {
       render_data rdata{
 			.output = wlr_output,
@@ -300,7 +300,7 @@ void Output::setFrameListener()
     wl_signal_add(&wlr_output->events.frame, &frame);
 }
 
-void Output::setFullscreenView(XdgView *view) noexcept
+void Output::setFullscreenView(WindowView *view) noexcept
 {
   this->fullscreenView = view;
 }

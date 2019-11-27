@@ -16,7 +16,7 @@ namespace wm
 
     WindowData() = default;
     WindowData(Container &&container) noexcept;
-    WindowData(XdgView *) noexcept;
+    WindowData(WindowView *) noexcept;
 
     void resize(WindowNodeIndex index, WindowTree &windowTree, std::array<uint16_t, 2u> size);
     void move(WindowNodeIndex index, WindowTree &windowTree, std::array<FixedPoint<-4, int32_t>, 2u> position);
