@@ -6,7 +6,7 @@
 #include "Keyboard.hpp"
 #include "Commands.hpp"
 #include "Server.hpp"
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 
 std::map<std::string, uint32_t> modifiersLst = {
   {"Alt", WLR_MODIFIER_ALT},

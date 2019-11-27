@@ -1,6 +1,6 @@
 #include "ServerCursor.hpp"
 #include "Server.hpp"
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 #include "Output.hpp"
 
 #include <cassert>
@@ -36,7 +36,7 @@ void ServerCursor::process_cursor_move(uint32_t time)
 void ServerCursor::process_cursor_resize(uint32_t time)
 {
   Server &server = Server::getInstance();
-  WindowView *view = server.grabbed_view;
+  XdgView *view = server.grabbed_view;
 
   if (view->windowNode == wm::nullNode)
     {
@@ -45,6 +45,14 @@ void ServerCursor::process_cursor_resize(uint32_t time)
 	wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(view->surface), box);
       else if (wlr_surface_is_xdg_surface(view->surface))
 	wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(view->surface), box);
+	  else if (wlr_surface_is_xwayland_surface(view->surface))
+	  {
+		  wlr_xwayland_surface *surface = wlr_xwayland_surface_from_wlr_surface(view->surface);
+		  box->x = surface->x;
+		  box->y = surface->y;
+		  box->width = surface->width;
+		  box->height = surface->height;
+	  }
 
       double dx = cursor->x - server.grab_x + box->x;
       double dy = cursor->y - server.grab_y + box->y;
@@ -85,6 +93,12 @@ void ServerCursor::process_cursor_resize(uint32_t time)
 	wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), width, height);
       else if (wlr_surface_is_xdg_surface_v6(view->surface))
 	wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), width, height);
+	  else if (wlr_surface_is_xwayland_surface(view->surface))
+	  {
+		  wlr_xwayland_surface *surface = wlr_xwayland_surface_from_wlr_surface(view->surface);
+		  surface->width = width;
+		  surface->height = height;
+	  }
     }
   else
     {

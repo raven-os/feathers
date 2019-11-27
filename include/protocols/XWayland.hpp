@@ -9,7 +9,7 @@ extern "C" {
 }
 
 struct XWaylandListeners {
-
+    wl_listener new_xwayland_surface;
 };
 
 class XWayland : XWaylandListeners

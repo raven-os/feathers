@@ -21,9 +21,9 @@ public:
   ~Output() noexcept;
 
   void setFrameListener();
-  void setFullscreenView(WindowView *view) noexcept;
+  void setFullscreenView(XdgView *view) noexcept;
 
-  WindowView *getFullscreenView() const noexcept
+  XdgView *getFullscreenView() const noexcept
   {
     return fullscreenView;
   }
@@ -46,7 +46,7 @@ public:
 private:
   std::vector<std::unique_ptr<Workspace>> workspaces;
   struct wlr_output *wlr_output;
-  WindowView *fullscreenView;
+  XdgView *fullscreenView;
   wlr_texture *wallpaperTexture;
   std::array<std::vector<std::unique_ptr<LayerSurface>>, 4> layers;
 

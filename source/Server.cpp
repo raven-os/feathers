@@ -5,7 +5,7 @@
 #include "Seat.hpp"
 #include "LayerSurface.hpp"
 #include "Output.hpp"
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 #include <unistd.h>
 
 Server Server::_instance = Server();
@@ -48,13 +48,13 @@ wlr_surface *Server::getFocusedSurface() const noexcept
 {
   if (LayerSurface *layerSurface = getFocusedLayerSurface())
     return layerSurface->surface;
-  if (WindowView *view = getFocusedView())
+  if (XdgView *view = getFocusedView())
     return view->surface;
   return nullptr;
 }
 
 
-std::vector<std::unique_ptr<WindowView>> &Server::getViews()
+std::vector<std::unique_ptr<XdgView>> &Server::getViews()
 {
   return outputManager.getActiveWorkspace()->getViews();
 }

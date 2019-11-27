@@ -20,7 +20,7 @@ public:
     return windowTree;
   }
 
-  std::vector<std::unique_ptr<WindowView>> &getViews()
+  std::vector<std::unique_ptr<XdgView>> &getViews()
   {
     return views;
   };
@@ -41,6 +41,6 @@ public:
 private:
   Output &output;
 
-  std::vector<std::unique_ptr<WindowView>> views;
+  std::vector<std::unique_ptr<XdgView>> views;
   wm::WindowTree windowTree;
 };

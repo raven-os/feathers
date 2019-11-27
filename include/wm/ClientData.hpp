@@ -1,8 +1,8 @@
 #pragma once
 
-class WindowView;
+class XdgView;
 
 namespace wm
 {
-  using ClientData = WindowView *;
+  using ClientData = XdgView *;
 }

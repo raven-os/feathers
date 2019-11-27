@@ -14,7 +14,7 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 #include "LayerSurface.hpp"
 
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
@@ -208,7 +208,7 @@ void Output::output_frame(wl_listener *listener, void *data)
   // float color[4] = {0.5, 0.5, 0.5, 1.0};
   // wlr_renderer_clear(renderer, color);
 
-  if (WindowView *view = getFullscreenView())
+  if (XdgView *view = getFullscreenView())
     {
       render_data rdata{
 			.output = wlr_output,
@@ -222,6 +222,8 @@ void Output::output_frame(wl_listener *listener, void *data)
 	wlr_xdg_surface_for_each_surface(wlr_xdg_surface_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
       else if (wlr_surface_is_xdg_surface_v6(view->surface))
 	wlr_xdg_surface_v6_for_each_surface(wlr_xdg_surface_v6_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
+      else if (wlr_surface_is_xwayland_surface(view->surface))
+  wlr_surface_for_each_surface(view->surface, OutputManager::render_surface, &rdata);
     }
   else
     {
@@ -270,6 +272,8 @@ void Output::output_frame(wl_listener *listener, void *data)
 	    wlr_xdg_surface_for_each_surface(wlr_xdg_surface_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
 	  else if (wlr_surface_is_xdg_surface_v6(view->surface))
 	    wlr_xdg_surface_v6_for_each_surface(wlr_xdg_surface_v6_from_wlr_surface(view->surface), OutputManager::render_surface, &rdata);
+    else if (wlr_surface_is_xwayland_surface(view->surface))
+      wlr_surface_for_each_surface(view->surface, OutputManager::render_surface, &rdata);
 	}
     }
 
@@ -300,7 +304,7 @@ void Output::setFrameListener()
     wl_signal_add(&wlr_output->events.frame, &frame);
 }
 
-void Output::setFullscreenView(WindowView *view) noexcept
+void Output::setFullscreenView(XdgView *view) noexcept
 {
   this->fullscreenView = view;
 }

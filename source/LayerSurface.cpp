@@ -2,7 +2,7 @@
 #include "LayerSurface.hpp"
 #include "Server.hpp"
 #include "Output.hpp"
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 
 LayerSurface::LayerSurface(wlr_surface *surface) noexcept
   : View(surface)
@@ -89,12 +89,14 @@ void LayerSurface::shell_surface_unmap(wl_listener *listenr, void *data)
 	    }
 	server.setFocusedLayerSurface(nullptr); // if we found no other layer surface to focus, unfocus this one
       }
-      if (WindowView *view = server.getFocusedView())
+      if (XdgView *view = server.getFocusedView())
 	{
 	  if (wlr_surface_is_xdg_surface_v6(view->surface))
 	    wlr_xdg_toplevel_v6_set_activated(wlr_xdg_surface_v6_from_wlr_surface(view->surface), true);
 	  else if (wlr_surface_is_xdg_surface(view->surface))
 	    wlr_xdg_toplevel_set_activated(wlr_xdg_surface_from_wlr_surface(view->surface), true);
+    else if (wlr_surface_is_xwayland_surface(view->surface))
+      wlr_xwayland_surface_activate(wlr_xwayland_surface_from_wlr_surface(view->surface), true);
 	  wlr_seat_keyboard_notify_enter(seat, view->surface, keyboard->keycodes,
 					 keyboard->num_keycodes, &keyboard->modifiers);
       

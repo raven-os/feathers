@@ -4,7 +4,7 @@
 
 # include "Commands.hpp"
 # include "Output.hpp"
-# include "WindowView.hpp"
+# include "XdgView.hpp"
 
 namespace Commands
 {
@@ -67,7 +67,7 @@ namespace Commands
 
     if (server.getViews().size() <= 0)
       return ;
-    WindowView *view = server.getFocusedView();
+    XdgView *view = server.getFocusedView();
 
     view->requestFullscreen();
   }
@@ -86,7 +86,7 @@ namespace Commands
 			   });
 	  }
 
-	std::unique_ptr<WindowView> &view = server.getViews()[1];
+	std::unique_ptr<XdgView> &view = server.getViews()[1];
 
 	view->focus_view();
 	// focus view put the newly focused view in front
@@ -99,7 +99,7 @@ namespace Commands
   void toggle_float_window() {
     Server &server = Server::getInstance();
 
-    if (WindowView *view = server.getFocusedView())
+    if (XdgView *view = server.getFocusedView())
       {
 	auto &windowTree(server.getActiveWindowTree());
 
@@ -112,6 +112,13 @@ namespace Commands
 	      wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
 	    else if (wlr_surface_is_xdg_surface(view->surface))
 	      wlr_xdg_toplevel_set_size(wlr_xdg_surface_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
+      else if (wlr_surface_is_xwayland_surface(view->surface))
+	  {
+		  wlr_xwayland_surface *surface = wlr_xwayland_surface_from_wlr_surface(view->surface);
+		  surface->width = view->previous_size[0];
+		  surface->height = view->previous_size[1];
+	  }
+       
 
 	    view->windowNode = wm::nullNode;
 	    view->set_tiled(0);
@@ -130,7 +137,7 @@ namespace Commands
   void switch_container_direction() {
     Server &server = Server::getInstance();
 
-    if (WindowView *view = server.getFocusedView())
+    if (XdgView *view = server.getFocusedView())
       {
 	if (view->windowNode == wm::nullNode)
 	  return ;
@@ -227,7 +234,7 @@ namespace Commands
       }
      
       server.outputManager.setActiveWorkspace(newActiveWorkspace);
-      if (WindowView *view = server.getFocusedView())
+      if (XdgView *view = server.getFocusedView())
         view->focus_view();
     }
   }
@@ -251,7 +258,7 @@ namespace Commands
       auto nextWorkspace = currentWorkspace + direction;
       auto &view = currentWorkspace->get()->getViews().front();
 
-      std::unique_ptr<WindowView> newView;
+      std::unique_ptr<XdgView> newView;
     
       {
 	auto &windowTree = currentWorkspace->get()->getWindowTree();

@@ -1,6 +1,6 @@
 #include "Commands.hpp"
 #include "Output.hpp"
-#include "WindowView.hpp"
+#include "XdgView.hpp"
 
 namespace Commands
 {

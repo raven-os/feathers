@@ -58,6 +58,11 @@ void Seat::unfocusPrevious()
 	  wlr_xdg_surface *previous = wlr_xdg_surface_from_wlr_surface(prev_surface);
 	  wlr_xdg_toplevel_set_activated(previous, false);
 	}
+      else if (wlr_surface_is_xwayland_surface(prev_surface))
+  {
+    wlr_xwayland_surface *previous = wlr_xwayland_surface_from_wlr_surface(prev_surface);
+    wlr_xwayland_surface_activate(previous, false);
+  }
       else if (wlr_surface_is_layer_surface(prev_surface))
 	{
 	  wlr_layer_surface_v1 *previous = wlr_layer_surface_v1_from_wlr_surface(prev_surface);
