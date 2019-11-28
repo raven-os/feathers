@@ -184,6 +184,11 @@ void ServerCursor::process_cursor_motion(uint32_t time)
 	      {
 		wlr_seat_pointer_notify_motion(seat, time, sx, sy);
 	      }
+	    else if (Server::getInstance().configuration.getBool("enable enter on hover"))
+	      {
+		if (View *view = View::view_at(cursor->x, cursor->y, &surface, &sx, &sy))
+		  view->focus_view();
+	      }
 	  }
 	else
 	  {

@@ -99,12 +99,8 @@ void XdgView::xdg_surface_map(wl_listener *listener, void *data)
 
   auto &windowTree(server.getActiveWindowTree());
 
-  if (server.openType == OpenType::dontCare)
-    {
-      char const *tiling = server.configuration.get("tiling");
-      // tiling is either 'on' or 'off'
-      server.openType = (strcmp(tiling, "off") == 0) ? OpenType::floating : OpenType::dontCare;
-    }
+  if (server.openType == OpenType::dontCare && server.configuration.getBool("enable default floating"))
+    server.openType = OpenType::floating;
   if (server.openType != OpenType::floating &&
       (server.getViews().size() == 1 || server.getViews()[1]->windowNode == wm::nullNode)) // node: we are at least ourselves in the tree
     {
