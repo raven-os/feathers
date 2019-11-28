@@ -42,4 +42,5 @@ private:
   void keyboard_handle_key(wl_listener *listener, void *data);
   void parse_shortcuts();
   static int keyboard_handle_repeat(void *data);
+  void configureKeyRepeat();
 };

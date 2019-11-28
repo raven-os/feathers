@@ -130,6 +130,8 @@ void Keyboard::keyboard_handle_modifiers(wl_listener *listener, void *data)
 
 void Keyboard::keyboard_handle_key(wl_listener *listener, void *data)
 {
+  configureKeyRepeat();
+
   wlr_event_keyboard_key *event = static_cast<wlr_event_keyboard_key *>(data);
   wlr_seat *seat = Server::getInstance().seat.getSeat();
 
@@ -179,6 +181,19 @@ void Keyboard::keyboard_handle_key(wl_listener *listener, void *data)
     }
 }
 
+void Keyboard::configureKeyRepeat()
+{
+  Server &server(Server::getInstance());
+  if (server.configuration.consumeChanged("key repeat rate") | // no shortcircuiting to clear both flags
+      server.configuration.consumeChanged("key repeat delay"))
+    {
+      int repeat_rate = server.configuration.getTyped<unsigned int>("key repeat rate", 25u);
+      int repeat_delay = server.configuration.getTyped<unsigned int>("key repeat delay", 600u);
+
+      wlr_keyboard_set_repeat_info(device->keyboard, repeat_rate, repeat_delay);
+    }
+}
+
 void Keyboard::configure() {
   xkb_rule_names rules = { NULL, NULL, NULL, NULL, NULL };
   xkb_context *context;
@@ -216,13 +231,8 @@ void Keyboard::configure() {
   if (debug)
     std::cout << xkb_keymap_get_as_string(this->keymap, XKB_KEYMAP_USE_ORIGINAL_FORMAT) << std::endl;
   wlr_keyboard_set_keymap(device->keyboard, this->keymap);
-
-  //TODO get info from config
-  int repeat_rate = 25;
-  int repeat_delay = 600;
-
   xkb_context_unref(context);
-  wlr_keyboard_set_repeat_info(device->keyboard, repeat_rate, repeat_delay);
+  configureKeyRepeat();
 }
 
 void Keyboard::setModifiersListener()
