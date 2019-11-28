@@ -30,6 +30,9 @@ namespace conf
     /// get a setting, optimal called periodicly
     char const *get(char const *name);
 
+    /// wrapper over get to check a boolean setting
+    bool getBool(char const *name);
+
     /// get a setting only once, optimal when called rarely
     std::string getOnce(char const *name);
 

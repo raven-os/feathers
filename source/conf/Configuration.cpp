@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 namespace conf
 {
@@ -123,6 +124,15 @@ namespace conf
 	subscription.value = "";
       return subscription.value.c_str();
     }
+  }
+
+  bool Configuration::getBool(char const *name)
+  {
+    if (char const *value = get(name))
+      {
+	return (!std::strcmp(value, "yes") || !std::strcmp(value, "on") || !std::strcmp(value, "1") || !std::strcmp(value, "true"));
+      }
+    return false;
   }
 
   std::string Configuration::getOnce(char const *name)
