@@ -70,13 +70,14 @@ public:
 
   XdgShell *xdgShell;
   XdgShellV6 *xdgShellV6;
-  XWayland *xWayland;
 
   LayerShell layerShell;
   ServerCursor cursor;
   InputManager inputManager;
   Seat seat;
   IpcServer ipcServer;
+
+  XWayland *xWayland;
 
   XdgView *grabbed_view;
   double grab_x, grab_y;

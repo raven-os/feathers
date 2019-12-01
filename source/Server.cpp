@@ -37,6 +37,7 @@ Server::Server()
                 setenv("FEATHERS_SOCKET", feathersSocket.c_str(), true);
                 return feathersSocket;
               }(), this)
+  , xWayland(new XWayland())
   , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
