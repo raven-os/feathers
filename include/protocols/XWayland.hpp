@@ -19,6 +19,7 @@ public:
     ~XWayland() = default;
 
     void server_new_xwayland_surface(wl_listener *listener, void *data);
+    void xwayland_surface_destroy(wl_listener *listener, void *data);
 
 private:
     wlr_xwayland *xwayland;

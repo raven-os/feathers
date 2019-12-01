@@ -70,7 +70,7 @@ public:
 
   XdgShell *xdgShell;
   XdgShellV6 *xdgShellV6;
-//  XWayland *xWayland;
+  XWayland *xWayland;
 
   LayerShell layerShell;
   ServerCursor cursor;

@@ -25,6 +25,7 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xdg_v6>);
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
+      wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg_v6>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
@@ -45,12 +46,26 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xdg>);
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
+      wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
   else if (wlr_surface_is_xwayland_surface(surface))
     {
+      wlr_xwayland_surface *xwayland_surface = wlr_xwayland_surface_from_wlr_surface(surface);
 
+      SET_LISTENER(XdgView, ViewListeners, map, xdg_surface_map<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.map, &map);
+      SET_LISTENER(XdgView, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.unmap, &unmap);
+      destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xWayland->xwayland_surface_destroy(listener, data); };
+      wl_signal_add(&xwayland_surface->events.destroy, &destroy);
+      SET_LISTENER(XdgView, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_move, &request_move);
+      SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_resize, &request_resize);
+      SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_fullscreen, &request_fullscreen);
     }
   else
     {
