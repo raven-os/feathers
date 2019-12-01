@@ -38,6 +38,14 @@ void IpcServer::acceptClients()
 
 void IpcServer::processClients()
 {
+  { // ignore SIGUSR1 in this thread
+    sigset_t signal_mask;
+
+    sigemptyset(&signal_mask);
+    sigaddset(&signal_mask, SIGUSR1);
+    pthread_sigmask(SIG_BLOCK, &signal_mask, nullptr);
+  }
+
   int size = -1;
   int activeWorkspaceId = -1;
   unsigned int clientSize = -1;
