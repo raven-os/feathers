@@ -1,6 +1,9 @@
 #include "protocols/XWayland.hpp"
-#include "XdgView.hpp"
+//#include "XdgView.hpp"
+#include "XWaylandView.hpp"
 #include "Server.hpp"
+
+#include <iostream>
 
 XWayland::XWayland() {
     Server &server = Server::getInstance();
@@ -35,7 +38,24 @@ void XWayland::server_new_xwayland_surface(wl_listener *listener, void *data)
 {
     wlr_xwayland_surface *xwayland_surface = static_cast<wlr_xwayland_surface *>(data);
 
-    wlr_xwayland_surface_ping(xwayland_surface);
-    Workspace *workspace = Server::getInstance().outputManager.getActiveWorkspace();
-    workspace->getViews().emplace_back(new XdgView(xwayland_surface->surface, workspace));
+    if (!xwayland_surface)
+        return ;
+    //Workspace *workspace = Server::getInstance().outputManager.getActiveWorkspace();
+   // auto view = new XWaylandView(xwayland_surface->surface, workspace);
+    
+    // std::cout << "New xwayland cient: " << xwayland_surface->title << std::endl;
+    // wlr_xwayland_surface_ping(xwayland_surface);
+    // auto view = new XWaylandView(xwayland_surface, workspace);
+    // SET_LISTENER(XdgView, ViewListeners, map, xdg_surface_map<SurfaceType::xwayland>);
+    //view->map.notify = [](wl_listener *listener, void *data) { Server::getInstance().Wayland->xwayland_surface_map(listener, data); };
+   // wl_signal_add(&xwayland_surface->events.map, &map);
+    //workspace->getViews().emplace_back(view);
+}
+
+void XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface *surface, wlr_box *box)
+{
+  box->x = surface->x;
+  box->y = surface->y;
+  box->width = surface->width;
+  box->height = surface->height;
 }

@@ -8,7 +8,7 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
   : View(surface)
   , workspace(workspace)
 {
-  if (wlr_surface_is_xdg_surface_v6(surface))
+  if (surface && wlr_surface_is_xdg_surface_v6(surface))
     {
       wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
       wlr_xdg_toplevel_v6 *toplevel = xdg_surface->toplevel;
@@ -29,7 +29,7 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg_v6>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
-  else if (wlr_surface_is_xdg_surface(surface))
+  else if (surface && wlr_surface_is_xdg_surface(surface))
     {
       wlr_xdg_surface *xdg_surface = wlr_xdg_surface_from_wlr_surface(surface);
       wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
@@ -50,22 +50,12 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
-  else if (wlr_surface_is_xwayland_surface(surface))
+  else if (surface && wlr_surface_is_xwayland_surface(surface))
     {
       wlr_xwayland_surface *xwayland_surface = wlr_xwayland_surface_from_wlr_surface(surface);
 
       SET_LISTENER(XdgView, ViewListeners, map, xdg_surface_map<SurfaceType::xwayland>);
       wl_signal_add(&xwayland_surface->events.map, &map);
-      SET_LISTENER(XdgView, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xwayland>);
-      wl_signal_add(&xwayland_surface->events.unmap, &unmap);
-      destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xWayland->xwayland_surface_destroy(listener, data); };
-      wl_signal_add(&xwayland_surface->events.destroy, &destroy);
-      SET_LISTENER(XdgView, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xwayland>);
-      wl_signal_add(&xwayland_surface->events.request_move, &request_move);
-      SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xwayland>);
-      wl_signal_add(&xwayland_surface->events.request_resize, &request_resize);
-      SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
-      wl_signal_add(&xwayland_surface->events.request_fullscreen, &request_fullscreen);
     }
   else
     {
@@ -114,6 +104,23 @@ void XdgView::xdg_surface_map(wl_listener *listener, void *data)
     wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
   else if constexpr (surfaceType == SurfaceType::xdg)
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
+  else if constexpr (surfaceType == SurfaceType::xwayland)
+  {
+    wlr_xwayland_surface *xwayland_surface = wlr_xwayland_surface_from_wlr_surface(surface);
+
+    SET_LISTENER(XdgView, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xwayland>);
+    wl_signal_add(&xwayland_surface->events.unmap, &unmap);
+    destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xWayland->xwayland_surface_destroy(listener, data); };
+    wl_signal_add(&xwayland_surface->events.destroy, &destroy);
+    SET_LISTENER(XdgView, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xwayland>);
+    wl_signal_add(&xwayland_surface->events.request_move, &request_move);
+    SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xwayland>);
+    wl_signal_add(&xwayland_surface->events.request_resize, &request_resize);
+    SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
+    wl_signal_add(&xwayland_surface->events.request_fullscreen, &request_fullscreen);
+
+    XWayland::xwayland_surface_get_geometry(xwayland_surface, box);
+  }
   previous_size = {box->width, box->height};
 
   auto &windowTree(server.getActiveWindowTree());
@@ -229,6 +236,10 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	      wlr_xdg_toplevel_set_size(xdg_surface, outputBox->width, outputBox->height);
 	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, true);
 	    }
+    else if constexpr (surfaceType == SurfaceType::xwayland)
+    {
+      //TODO
+    }
 
 	  output.setFullscreenView(this);
 	  fullscreen = true;
@@ -249,6 +260,10 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, false);
 	      wlr_xdg_toplevel_set_size(xdg_surface, output.saved.width, output.saved.height);
 	    }
+    else if constexpr (surfaceType == SurfaceType::xwayland)
+    {
+      //TODO
+    }
 	  output.setFullscreenView(nullptr);
 	  fullscreen = false;
 	}
@@ -298,14 +313,7 @@ void XdgView::begin_interactive(CursorMode mode, uint32_t edges)
   else if (wlr_surface_is_xdg_surface(surface))
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), &geo_box);
   else if (wlr_surface_is_xwayland_surface(surface))
-	{
-	 wlr_xwayland_surface *xsurface = wlr_xwayland_surface_from_wlr_surface(surface);
-	
-   geo_box.x = xsurface->x;
-	 geo_box.y = xsurface->y;
-	 geo_box.width = xsurface->width;
-	 geo_box.height = xsurface->height;
-	}
+	 XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), &geo_box);
 
   if (mode == CursorMode::CURSOR_MOVE)
     {
@@ -333,13 +341,8 @@ wlr_output *XdgView::getWlrOutput()
     else if (wlr_surface_is_xdg_surface(surface))
       wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), &viewBox);
     else if (wlr_surface_is_xwayland_surface(surface))
-  	{
-	   wlr_xwayland_surface *xsurface = wlr_xwayland_surface_from_wlr_surface(surface);
-	   viewBox.x = xsurface->x;
-	   viewBox.y = xsurface->y;
-	   viewBox.width = xsurface->width;
-	   viewBox.height = xsurface->height;
-  	}
+  	 XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), &viewBox);
+
     // handle layer surface;
   }
 
@@ -395,13 +398,8 @@ void XdgView::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
   else if (wlr_surface_is_xdg_surface(surface))
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   else if (wlr_surface_is_xwayland_surface(surface))
-  	{
-	   wlr_xwayland_surface *xsurface = wlr_xwayland_surface_from_wlr_surface(surface);
-	   box->x = xsurface->x;
-	   box->y = xsurface->y;
-	   box->width = xsurface->width;
-	   box->height = xsurface->height;
-  	}
+  	XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
+
 
   (x = position[0]) -= FixedPoint<0, int32_t>(box->x);
   (y = position[1]) -= FixedPoint<0, int32_t>(box->y);
@@ -416,13 +414,8 @@ std::array<FixedPoint<-4, int32_t>, 2u> XdgView::getPosition() const noexcept
   else if (wlr_surface_is_xdg_surface(surface))
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   else if (wlr_surface_is_xwayland_surface(surface))
-  	{
-	   wlr_xwayland_surface *xsurface = wlr_xwayland_surface_from_wlr_surface(surface);
-	   box->x = xsurface->x;
-	   box->y = xsurface->y;
-	   box->width = xsurface->width;
-	   box->height = xsurface->height;
-  	}
+  	XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
+
 
   std::array<FixedPoint<-4, int32_t>, 2u> result{{x, y}};
 
@@ -440,13 +433,8 @@ std::array<uint16_t, 2u> XdgView::getSize() const noexcept
   else if (wlr_surface_is_xdg_surface(surface))
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   else if (wlr_surface_is_xwayland_surface(surface))
-  	{
-	   wlr_xwayland_surface *xsurface = wlr_xwayland_surface_from_wlr_surface(surface);
-	   box->x = xsurface->x;
-	   box->y = xsurface->y;
-	   box->width = xsurface->width;
-	   box->height = xsurface->height;
-  	}
+  	XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
+
 
   return {uint16_t(box->width), uint16_t(box->height)};
 }

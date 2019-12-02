@@ -23,13 +23,13 @@ bool View::at(double lx, double ly, wlr_surface **out_surface, double *sx, doubl
 
   double _sx, _sy;
   wlr_surface *_surface = nullptr;
-  if (wlr_surface_is_xdg_surface_v6(surface))
+  if (surface && wlr_surface_is_xdg_surface_v6(surface))
     _surface = wlr_xdg_surface_v6_surface_at(wlr_xdg_surface_v6_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
-  else if (wlr_surface_is_xdg_surface(surface))
+  else if (surface && wlr_surface_is_xdg_surface(surface))
     _surface = wlr_xdg_surface_surface_at(wlr_xdg_surface_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
-  else if (wlr_surface_is_xwayland_surface(surface))
+  else if (surface && wlr_surface_is_xwayland_surface(surface))
     _surface = wlr_surface_surface_at(surface, view_sx, view_sy, &_sx, &_sy);
-  else if (wlr_surface_is_layer_surface(surface))
+  else if (surface && wlr_surface_is_layer_surface(surface))
     _surface = wlr_layer_surface_v1_surface_at(wlr_layer_surface_v1_from_wlr_surface(surface), view_sx, view_sy, &_sx, &_sy);
   if (_surface )
     {
