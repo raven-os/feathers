@@ -48,3 +48,5 @@ target_link_libraries(${PROJECT_NAME}
   ${ALBINOS_LIBRARIES}
   ${LIBSOCKET_LIBRARIES}
   )
+
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
