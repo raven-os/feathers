@@ -23,6 +23,7 @@ Keyboard::Keyboard(wlr_input_device *device)
   //debug = true;
 
   shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
+  shortcuts["Alt+d"] = {"d-menu", [](void*){ Commands::open_dmenu(); }};
   shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
   shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
   shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
@@ -46,7 +47,7 @@ Keyboard::Keyboard(wlr_input_device *device)
   shortcuts["Alt+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
 
   //Allowing keyboard debug
-  shortcuts["Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
+  shortcuts["Ctrl+Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
   shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
   shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
   parse_shortcuts();
