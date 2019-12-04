@@ -38,6 +38,7 @@ namespace Commands
   }
 
   void open_terminal();
+  void open_dmenu();
   void open_config_editor();
   void toggle_fullscreen();
   void switch_window();

@@ -5,6 +5,7 @@
 # include "Commands.hpp"
 # include "Output.hpp"
 # include "XdgView.hpp"
+# include <signal.h>
 
 namespace Commands
 {
@@ -27,6 +28,13 @@ namespace Commands
 	    execl("/bin/sh", "/bin/sh", "-c", "weston-terminal", nullptr);
 	  }
       }
+  }
+
+  void open_dmenu() {
+    if (fork() == 0)
+    {
+        execl("/bin/sh", "/bin/sh", "-c", "dmenu-wl_run -i", nullptr);
+    }
   }
 
   void open_config_editor() {
