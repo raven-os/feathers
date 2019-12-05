@@ -57,6 +57,6 @@ namespace Commands
   void move_window_down();
   void switch_workspace(int direction);
   void new_workspace(bool create_fullscreen);
-  void close_workspace();
+  void close_workspace(Workspace *workspace);
   void close_view();
 }

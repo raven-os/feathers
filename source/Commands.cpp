@@ -305,17 +305,19 @@ namespace Commands
       }
   }
 
-  void close_workspace()
+  void close_workspace(Workspace *workspace)
   {
     Server &server = Server::getInstance();
 
     if (server.outputManager.workspaceCount == 2)
       return ;
+    if (!workspace)
+      workspace = Server::getInstance().outputManager.getActiveWorkspace();
     for (auto const &output : server.outputManager.getOutputs())
     {
       auto it = std::find_if(output->getWorkspaces().begin(), output->getWorkspaces().end(),
-                            [](auto &w) noexcept {
-                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            [workspace](auto &w) noexcept {
+                              return w.get() == workspace;
                             });
       auto newActiveWorkspace = it + (it ==  output->getWorkspaces().begin() ? 1 : -1);
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());

@@ -218,7 +218,7 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	}
       else
 	{
-	  if constexpr (surfaceType == SurfaceType::xdg_v6)
+    if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
 	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
 
@@ -234,6 +234,10 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	    }
 	  workspace->setFullscreenView(nullptr);
 	  fullscreen = false;
+   
+    Workspace *w = Server::getInstance().outputManager.getActiveWorkspace();
+    Commands::switch_window_from_workspace(Workspace::LEFT);
+    Commands::close_workspace(w);
 	}
     }
 }
