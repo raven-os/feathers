@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <iterator>
+#include <cassert>
 
 #include "wm/WindowNodeIndex.hpp"
 #include "wm/WindowData.hpp"
@@ -24,6 +25,7 @@ namespace wm
 
     WindowNode &getNode(WindowNodeIndex nodeIndex) noexcept
     {
+      assert(nodeIndex != nullNode);
       return nodes[nodeIndex.data];
     }
 
@@ -138,7 +140,8 @@ namespace wm
 
     WindowNodeIndex allocateIndex();
 
-    void removeIndex(WindowNodeIndex index) noexcept;
+    // sets index to null node so that you don't forget to :)
+    void removeIndex(WindowNodeIndex &index) noexcept;
 
     WindowNodeIndex addChild(WindowNodeIndex parent);
     WindowNodeIndex addChildAfter(WindowNodeIndex parent, WindowNodeIndex index);
