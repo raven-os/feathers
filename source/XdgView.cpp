@@ -1,6 +1,8 @@
 #include "XdgView.hpp"
 #include "Server.hpp"
 #include "Output.hpp"
+#include "Commands.hpp"
+#include <unistd.h>
 
 #include <cassert>
 
@@ -163,7 +165,7 @@ void XdgView::xdg_surface_unmap(wl_listener *listener, void *data)
 
   mapped = false;
 
-  if (output.getFullscreenView() == this)
+  if (workspace->getFullscreenView() == this)
     {
       xdg_toplevel_request_fullscreen<surfaceType>(nullptr, nullptr);
     }
@@ -188,10 +190,10 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
     {
       auto &output = server.outputManager.getOutput(getWlrOutput());
 
-      if (!output.getFullscreenView())
+      if (!workspace->getFullscreenView())
 	{
 	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
-
+  
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
 	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
@@ -209,7 +211,7 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, true);
 	    }
 
-	  output.setFullscreenView(this);
+	  workspace->setFullscreenView(this);
 	  fullscreen = true;
 	}
       else
@@ -228,7 +230,7 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	      wlr_xdg_toplevel_set_fullscreen(xdg_surface, false);
 	      wlr_xdg_toplevel_set_size(xdg_surface, output.saved.width, output.saved.height);
 	    }
-	  output.setFullscreenView(nullptr);
+	  workspace->setFullscreenView(nullptr);
 	  fullscreen = false;
 	}
     }

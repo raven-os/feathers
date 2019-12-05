@@ -35,6 +35,16 @@ public:
     return output;
   }
 
+  void setFullscreenView(XdgView *view) noexcept
+  {
+    fullscreenView = view;
+  };
+
+  XdgView *getFullscreenView() const noexcept
+  {
+    return fullscreenView;
+  }
+
   static constexpr int RIGHT = 1;
   static constexpr int LEFT = -1;
 
@@ -43,4 +53,6 @@ private:
 
   std::vector<std::unique_ptr<XdgView>> views;
   wm::WindowTree windowTree;
+
+  XdgView *fullscreenView{nullptr};
 };
