@@ -193,7 +193,9 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
       if (!workspace->getFullscreenView())
 	{
 	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
-  
+    Commands::new_workspace(true);
+    Commands::switch_window_from_workspace(Workspace::RIGHT);
+
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
 	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
