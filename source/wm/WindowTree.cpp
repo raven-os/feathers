@@ -27,7 +27,7 @@ namespace wm
       }
   }
 
-  void WindowTree::removeIndex(WindowNodeIndex index) noexcept
+  void WindowTree::removeIndex(WindowNodeIndex &index) noexcept
   {
     WindowNodeIndex child(getFirstChild(getParent(index)));
 
@@ -41,6 +41,7 @@ namespace wm
       }
     getNode(index).nextSibling = freeList;
     freeList = index;
+    index = nullNode;
   }
 
   WindowNodeIndex WindowTree::addChild(WindowNodeIndex parent)
