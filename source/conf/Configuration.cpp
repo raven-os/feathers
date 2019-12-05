@@ -20,7 +20,7 @@ namespace conf
     {
       void operator()(Albinos::Config *config) noexcept
       {
-	Albinos::destroyConfig(config);
+	Albinos::releaseConfig(config);
       }
     };
   }

@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <iterator>
+#include <cassert>
 
 #include "wm/WindowNodeIndex.hpp"
 #include "wm/WindowData.hpp"
@@ -24,6 +25,7 @@ namespace wm
 
     WindowNode &getNode(WindowNodeIndex nodeIndex) noexcept
     {
+      assert(nodeIndex != nullNode);
       return nodes[nodeIndex.data];
     }
 
