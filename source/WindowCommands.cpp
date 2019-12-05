@@ -36,7 +36,7 @@ namespace Commands
 	  auto viewNode(view->windowNode);
 	  auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
-	  if (view->windowNode == wm::nullNode || output.getFullscreenView())
+	  if (view->windowNode == wm::nullNode || server.outputManager.getActiveWorkspace()->getFullscreenView())
 	    return ;
 
 	  auto &windowTree(server.getActiveWindowTree());
@@ -101,7 +101,7 @@ namespace Commands
 	  auto viewNode(view->windowNode);
 	  auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
-	  if (view->windowNode == wm::nullNode || output.getFullscreenView())
+	  if (view->windowNode == wm::nullNode || server.outputManager.getActiveWorkspace()->getFullscreenView())
 	    return ;
 
 	  auto &windowTree(server.getActiveWindowTree());
@@ -182,7 +182,7 @@ namespace Commands
 	  auto viewNode(view->windowNode);
 	  auto &output(server.outputManager.getOutput(view->getWlrOutput()));
 
-	  if (view->windowNode == wm::nullNode || output.getFullscreenView())
+	  if (view->windowNode == wm::nullNode || server.outputManager.getActiveWorkspace()->getFullscreenView())
 	    return ;
 
 	  auto &windowTree(server.getActiveWindowTree());
