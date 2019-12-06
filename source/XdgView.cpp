@@ -193,7 +193,9 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
       if (!workspace->getFullscreenView())
 	{
 	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
-  
+	  Commands::new_workspace(true);
+	  Commands::switch_window_from_workspace(Workspace::RIGHT);
+
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
 	      wlr_xdg_surface_v6 *xdg_surface = wlr_xdg_surface_v6_from_wlr_surface(surface);
@@ -232,6 +234,11 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
 	    }
 	  workspace->setFullscreenView(nullptr);
 	  fullscreen = false;
+   
+	  set_tiled(~0u);
+	  Workspace *w = Server::getInstance().outputManager.getActiveWorkspace();
+	  Commands::switch_window_from_workspace(Workspace::LEFT);
+	  Commands::close_workspace(w);
 	}
     }
 }
@@ -343,30 +350,14 @@ void XdgView::move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<
 
 void XdgView::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
 {
-  wlr_box box[1];
-
-  if (wlr_surface_is_xdg_surface_v6(surface))
-    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xdg_surface(surface))
-    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
-
-  (x = position[0]) -= FixedPoint<0, int32_t>(box->x);
-  (y = position[1]) -= FixedPoint<0, int32_t>(box->y);
+  x = position[0];
+  y = position[1];
 }
 
 std::array<FixedPoint<-4, int32_t>, 2u> XdgView::getPosition() const noexcept
 {
-  wlr_box box[1];
-
-  if (wlr_surface_is_xdg_surface_v6(surface))
-    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xdg_surface(surface))
-    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
-
   std::array<FixedPoint<-4, int32_t>, 2u> result{{x, y}};
 
-  result[0] += FixedPoint<0, int32_t>(box->x);
-  result[1] += FixedPoint<0, int32_t>(box->y);
   return result;
 }
 
