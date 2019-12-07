@@ -11,6 +11,7 @@ struct ViewListeners
   wl_listener request_move;
   wl_listener request_resize;
   wl_listener request_fullscreen;
+  wl_listener request_maximize;
 };
 
 class XdgView : public View, public ViewListeners
