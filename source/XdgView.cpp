@@ -28,6 +28,8 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
       wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
+      SET_LISTENER(XdgView, ViewListeners, request_maximize, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
+      wl_signal_add(&toplevel->events.request_maximize, &request_maximize);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg_v6>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
@@ -49,6 +51,8 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
       wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
+      SET_LISTENER(XdgView, ViewListeners, request_maximize, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
+      wl_signal_add(&toplevel->events.request_maximize, &request_maximize);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
