@@ -50,3 +50,4 @@ target_link_libraries(${PROJECT_NAME}
   )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
+install(FILES wallpaper.jpg DESTINATION /usr/share/feathers/)
