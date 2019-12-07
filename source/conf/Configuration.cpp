@@ -90,8 +90,8 @@ namespace conf
       Albinos::subscribeToSetting(config.get(), name, this,
 				  [](Albinos::Subscription const *rawSubscription, Albinos::ModifType type)
 				  {
-				    auto *this_(static_cast<decltype(this)>(Albinos::getSupscriptionUserData(rawSubscription)));
-				    auto name(Albinos::getSupscriptionSettingName(rawSubscription));
+				    auto *this_(static_cast<decltype(this)>(Albinos::getSubscriptionUserData(rawSubscription)));
+				    auto name(Albinos::getSubscriptionSettingName(rawSubscription));
 				    auto &subscription(this_->subscriptions.at(name));
 
 				    subscription.hasChanged = true;
