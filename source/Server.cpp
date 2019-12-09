@@ -66,16 +66,20 @@ wm::WindowTree &Server::getActiveWindowTree()
 }
 
 // TODO REFACTO IN ANOTHER CLASS
-void Server::startupCommands() const
+void Server::startupCommands(char *command) const
 {
   // Launch waybar
   if (fork() == 0)
     {
       execl("/bin/sh", "/bin/sh", "-c", "waybar", nullptr);
     }
+  if (fork() == 0)
+  {
+    execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
+  }
 }
 
-void Server::run()
+void Server::run(char *command)
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());
   if (!socket)
@@ -95,7 +99,7 @@ void Server::run()
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
 	  socket);
 
-  startupCommands();
+  startupCommands(command);
 
   wl_display_run(getWlDisplay());
 }
