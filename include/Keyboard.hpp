@@ -33,6 +33,7 @@ private:
   wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;
   std::string repeatBinding = "";
+  std::map<std::string, binding> default_shortcuts;
   std::map<std::string, binding> shortcuts;
 
 private:

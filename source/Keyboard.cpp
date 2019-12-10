@@ -22,35 +22,38 @@ Keyboard::Keyboard(wlr_input_device *device)
 
   //debug = true;
 
-  shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
-  shortcuts["Alt+d"] = {"d-menu", [](void*){ Commands::open_dmenu(); }};
-  shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
-  shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
-  shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
-  shortcuts["Alt+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
-  shortcuts["Alt+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
-  shortcuts["Alt+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
-  shortcuts["Alt+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
-  shortcuts["Alt+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
-  shortcuts["Alt+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
-  shortcuts["Alt+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
-  shortcuts["Alt+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
-  shortcuts["Ctrl+[Alt+Down,Alt+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
-  shortcuts["Ctrl+Alt+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
-  shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
-  shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
-  shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(false); }};
-  shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
-  shortcuts["Alt+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
-  shortcuts["Alt+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
-  shortcuts["Alt+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};
-  shortcuts["Alt+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
-
+  default_shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
+  default_shortcuts["Alt+d"] = {"d-menu", [](void*){ Commands::open_dmenu(); }};
+  default_shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
+  default_shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
+  default_shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
+  default_shortcuts["Alt+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
+  default_shortcuts["Alt+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
+  default_shortcuts["Alt+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
+  default_shortcuts["Alt+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
+  default_shortcuts["Alt+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
+  default_shortcuts["Alt+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
+  default_shortcuts["Alt+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
+  default_shortcuts["Alt+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
+  default_shortcuts["Ctrl+[Alt+Down,Alt+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
+  default_shortcuts["Ctrl+Alt+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
+  default_shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
+  default_shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
+  default_shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(false); }};
+  default_shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
+  default_shortcuts["Alt+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
+  default_shortcuts["Alt+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
+  default_shortcuts["Alt+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};
+  default_shortcuts["Alt+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
   //Allowing keyboard debug
-  shortcuts["Ctrl+Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
-  shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
-  shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
+  default_shortcuts["Ctrl+Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
+  default_shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
+  default_shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
   parse_shortcuts();
+  for (auto const &default_shortcut : default_shortcuts)
+    {
+      shortcuts[default_shortcut.first] = default_shortcut.second;
+    }
 }
 
 Keyboard::~Keyboard() {
@@ -65,6 +68,7 @@ Keyboard::~Keyboard() {
 void Keyboard::update_shortcuts()
 {
   Server &server(Server::getInstance());
+  std::map<std::string, binding> shortcuts_tmp;
 
   for (auto it = shortcuts.begin(); it != shortcuts.end();)
     {
@@ -72,8 +76,9 @@ void Keyboard::update_shortcuts()
 	{
 	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
 	  std::vector<std::string> splitShortcut(this->split_shortcut(it->first));
-	  std::string shortcutKeyTmp;
+	  std::string shortcutKeyTmp("");
 
+	  std::cout << "Updating shortcut: " << it->second.name << std::endl;
 	  for (std::string tmp : splitShortcut) {
 	    if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
 	      shortcutKeyTmp += "+";
@@ -88,11 +93,27 @@ void Keyboard::update_shortcuts()
 	  }
 	  if (shortcutKeyTmp != "")
 	    {
-	      shortcuts[shortcutKeyTmp] = it->second;
+	      std::cout << "Shortcut update: " << shortcutKeyTmp << " -> " << it->second.name << std::endl;
+	      shortcuts_tmp[shortcutKeyTmp] = it->second;
 	    }
-	  it = shortcuts.erase(it);
+	  else
+	    {
+	      for (auto &default_shortcut : default_shortcuts)
+		{
+		  if (default_shortcut.second.name == it->second.name)
+		    {
+		      std::cout << "Shortcut update: " << default_shortcut.first << " -> " << default_shortcut.second.name << std::endl;
+		      shortcuts_tmp[default_shortcut.first] = default_shortcut.second;
+		      break;
+		    }
+		}
+	    }
 	}
+      else
+	shortcuts_tmp[it->first] = it->second;
+      it++;
     }
+  shortcuts.swap(shortcuts_tmp);
 }
 
 void Keyboard::parse_shortcuts()
@@ -140,6 +161,7 @@ std::vector<std::string> Keyboard::split_shortcut(std::string key)
 
 std::string Keyboard::get_active_binding()
 {
+  this->update_shortcuts();
   for (auto const & shortcut : shortcuts) {
     std::string key = shortcut.first;
     std::vector<std::string> splitStr;
@@ -166,6 +188,8 @@ std::string Keyboard::get_active_binding()
     if (debug)
       std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
 
+    std::cout << shortcut.first << std::endl;
+    std::cout << keycodes_states.last_raw_modifiers << " " << mod << " " << sum << " " << keycodes_states.sum << std::endl;
     if (keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum)
       return shortcut.first;
   }
