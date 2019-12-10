@@ -16,10 +16,10 @@
 
 #include "XdgView.hpp"
 #include "LayerSurface.hpp"
+#include <fstream>
 
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
-  wlr_output(wlr_output),
-  fullscreenView(nullptr)
+  wlr_output(wlr_output)
 {
   refreshImage();
 
@@ -50,7 +50,12 @@ void Output::refreshImage()
 				       STBI_rgb_alpha);
       if (!image)
 	{
-	  image = stbi_load("wallpaper.jpg",
+    std::string file = "./wallpaper.jpg";
+    std::ifstream f(file.c_str());
+    
+    if (!f.good())
+      file = "/usr/share/feathers/wallpaper.jpg";
+    image = stbi_load(file.c_str(),
 			    &width,
 			    &height,
 			    &channels,
@@ -207,8 +212,7 @@ void Output::output_frame(wl_listener *listener, void *data)
 
   // float color[4] = {0.5, 0.5, 0.5, 1.0};
   // wlr_renderer_clear(renderer, color);
-
-  if (XdgView *view = getFullscreenView())
+  if (XdgView *view = server.outputManager.getActiveWorkspace()->getFullscreenView())
     {
       render_data rdata{
 			.output = wlr_output,
@@ -302,11 +306,6 @@ void Output::setFrameListener()
 {
     SET_LISTENER(Output, OutputListeners, frame, output_frame);
     wl_signal_add(&wlr_output->events.frame, &frame);
-}
-
-void Output::setFullscreenView(XdgView *view) noexcept
-{
-  this->fullscreenView = view;
 }
 
 wm::WindowTree &Output::getWindowTree() noexcept

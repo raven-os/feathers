@@ -1,6 +1,8 @@
 #include "XdgView.hpp"
 #include "Server.hpp"
 #include "Output.hpp"
+#include "Commands.hpp"
+#include <unistd.h>
 
 #include <cassert>
 
@@ -26,6 +28,8 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
       wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
+      SET_LISTENER(XdgView, ViewListeners, request_maximize, xdg_toplevel_request_fullscreen<SurfaceType::xdg_v6>);
+      wl_signal_add(&toplevel->events.request_maximize, &request_maximize);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg_v6>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
@@ -47,15 +51,33 @@ XdgView::XdgView(wlr_surface *surface, Workspace *workspace) noexcept
       wl_signal_add(&toplevel->events.request_resize, &request_resize);
       SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
       wl_signal_add(&toplevel->events.request_fullscreen, &request_fullscreen);
+      SET_LISTENER(XdgView, ViewListeners, request_maximize, xdg_toplevel_request_fullscreen<SurfaceType::xdg>);
+      wl_signal_add(&toplevel->events.request_maximize, &request_maximize);
       SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
       wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
     }
-  else if (surface && wlr_surface_is_xwayland_surface(surface))
+  else if (wlr_surface_is_xwayland_surface(surface))
     {
       wlr_xwayland_surface *xwayland_surface = wlr_xwayland_surface_from_wlr_surface(surface);
 
       SET_LISTENER(XdgView, ViewListeners, map, xdg_surface_map<SurfaceType::xwayland>);
       wl_signal_add(&xwayland_surface->events.map, &map);
+      SET_LISTENER(XdgView, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.unmap, &unmap);
+      // external function (not class member) so manual assignement necessary
+      destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xdgShell->xdg_surface_destroy(listener, data); };
+      wl_signal_add(&xwayland_surface->events.destroy, &destroy);
+      SET_LISTENER(XdgView, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_move, &request_move);
+      SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_resize, &request_resize);
+      SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_fullscreen, &request_fullscreen);
+      SET_LISTENER(XdgView, ViewListeners, request_maximize, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
+      wl_signal_add(&xwayland_surface->events.request_maximize, &request_maximize);
+      // SET_LISTENER(XdgView, ViewListeners, new_popup, xdg_handle_new_popup<SurfaceType::xdg>);
+      // wl_signal_add(&xdg_surface->events.new_popup, &new_popup);
+      xwayland_surface->data = this;
     }
   else
     {
@@ -106,20 +128,7 @@ void XdgView::xdg_surface_map(wl_listener *listener, void *data)
     wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
   else if constexpr (surfaceType == SurfaceType::xwayland)
   {
-    wlr_xwayland_surface *xwayland_surface = wlr_xwayland_surface_from_wlr_surface(surface);
-
-    SET_LISTENER(XdgView, ViewListeners, unmap, xdg_surface_unmap<SurfaceType::xwayland>);
-    wl_signal_add(&xwayland_surface->events.unmap, &unmap);
-    destroy.notify = [](wl_listener *listener, void *data) { Server::getInstance().xWayland->xwayland_surface_destroy(listener, data); };
-    wl_signal_add(&xwayland_surface->events.destroy, &destroy);
-    SET_LISTENER(XdgView, ViewListeners, request_move, xdg_toplevel_request_move<SurfaceType::xwayland>);
-    wl_signal_add(&xwayland_surface->events.request_move, &request_move);
-    SET_LISTENER(XdgView, ViewListeners, request_resize, xdg_toplevel_request_resize<SurfaceType::xwayland>);
-    wl_signal_add(&xwayland_surface->events.request_resize, &request_resize);
-    SET_LISTENER(XdgView, ViewListeners, request_fullscreen, xdg_toplevel_request_fullscreen<SurfaceType::xwayland>);
-    wl_signal_add(&xwayland_surface->events.request_fullscreen, &request_fullscreen);
-
-    XWayland::xwayland_surface_get_geometry(xwayland_surface, box);
+    XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
   }
   previous_size = {box->width, box->height};
 
@@ -187,7 +196,7 @@ void XdgView::xdg_surface_unmap(wl_listener *listener, void *data)
 
   mapped = false;
 
-  if (output.getFullscreenView() == this)
+  if (workspace->getFullscreenView() == this)
     {
       xdg_toplevel_request_fullscreen<surfaceType>(nullptr, nullptr);
     }
@@ -212,9 +221,11 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
     {
       auto &output = server.outputManager.getOutput(getWlrOutput());
 
-      if (!output.getFullscreenView())
+      if (!workspace->getFullscreenView())
 	{
 	  wlr_box *outputBox = wlr_output_layout_get_box(server.outputManager.getLayout(), getWlrOutput());
+	  Commands::new_workspace(true);
+	  Commands::switch_window_from_workspace(Workspace::RIGHT);
 
 	  if constexpr (surfaceType == SurfaceType::xdg_v6)
 	    {
@@ -237,7 +248,7 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
       //TODO
     }
 
-	  output.setFullscreenView(this);
+	  workspace->setFullscreenView(this);
 	  fullscreen = true;
 	}
       else
@@ -260,8 +271,13 @@ void XdgView::xdg_toplevel_request_fullscreen(wl_listener *listener, void *data)
     {
       //TODO
     }
-	  output.setFullscreenView(nullptr);
+	  workspace->setFullscreenView(nullptr);
 	  fullscreen = false;
+   
+	  set_tiled(~0u);
+	  Workspace *w = Server::getInstance().outputManager.getActiveWorkspace();
+	  Commands::switch_window_from_workspace(Workspace::LEFT);
+	  Commands::close_workspace(w);
 	}
     }
 }
@@ -387,36 +403,14 @@ void XdgView::move(wm::WindowNodeIndex, wm::WindowTree &, std::array<FixedPoint<
 
 void XdgView::move(std::array<FixedPoint<-4, int32_t>, 2u> position)
 {
-  wlr_box box[1];
-
-  if (wlr_surface_is_xdg_surface_v6(surface))
-    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xdg_surface(surface))
-    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xwayland_surface(surface))
-  	XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
-
-
-  (x = position[0]) -= FixedPoint<0, int32_t>(box->x);
-  (y = position[1]) -= FixedPoint<0, int32_t>(box->y);
+  x = position[0];
+  y = position[1];
 }
 
 std::array<FixedPoint<-4, int32_t>, 2u> XdgView::getPosition() const noexcept
 {
-  wlr_box box[1];
-
-  if (wlr_surface_is_xdg_surface_v6(surface))
-    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xdg_surface(surface))
-    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), box);
-  else if (wlr_surface_is_xwayland_surface(surface))
-  	XWayland::xwayland_surface_get_geometry(wlr_xwayland_surface_from_wlr_surface(surface), box);
-
-
   std::array<FixedPoint<-4, int32_t>, 2u> result{{x, y}};
 
-  result[0] += FixedPoint<0, int32_t>(box->x);
-  result[1] += FixedPoint<0, int32_t>(box->y);
   return result;
 }
 

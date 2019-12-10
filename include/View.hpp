@@ -23,7 +23,7 @@ enum class SurfaceType
    xdg,
    xdg_v6,
    xwayland,
-   unkonwn
+   unknown
   };
 
 class View

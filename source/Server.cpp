@@ -5,6 +5,7 @@
 #include "Seat.hpp"
 #include "LayerSurface.hpp"
 #include "Output.hpp"
+#include "View.hpp"
 #include "XdgView.hpp"
 #include <unistd.h>
 
@@ -29,18 +30,21 @@ Server::Server()
   , cursor()
   , inputManager()
   , seat()
-  , ipcServer([this]()
-              {
-                std::string feathersSocket = configuration.getOnce("feathers_socket");
-                if (feathersSocket.empty())
-                  feathersSocket = "/tmp/featherssocket";
-                setenv("FEATHERS_SOCKET", feathersSocket.c_str(), true);
-                return feathersSocket;
-              }(), this)
-  , xWayland(new XWayland())
+  // , ipcServer([this]()
+  //             {
+  //               std::string feathersSocket = configuration.getOnce("feathers_socket");
+  //               if (feathersSocket.empty())
+  //                 feathersSocket = "/tmp/featherssocket";
+  //               setenv("FEATHERS_SOCKET", feathersSocket.c_str(), true);
+  //               return feathersSocket;
+  //             }(), this)
+  , xWayland(new XWayland(true))
   , openType(OpenType::dontCare)
 {
   wlr_data_device_manager_create(getWlDisplay());
+
+  compositor_new_surface.notify = [](wl_listener *listener, void *data){ Server::getInstance().handle_compositor_new_surface(listener, data); };
+  wl_signal_add(&compositor->events.new_surface, &compositor_new_surface);
 }
 
 Server::~Server() noexcept = default;
@@ -66,16 +70,20 @@ wm::WindowTree &Server::getActiveWindowTree()
 }
 
 // TODO REFACTO IN ANOTHER CLASS
-void Server::startupCommands() const
+void Server::startupCommands(char *command) const
 {
   // Launch waybar
   if (fork() == 0)
     {
       execl("/bin/sh", "/bin/sh", "-c", "waybar", nullptr);
     }
+  if (fork() == 0)
+  {
+    execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
+  }
 }
 
-void Server::run()
+void Server::run(char *command)
 {
   const char *socket = wl_display_add_socket_auto(getWlDisplay());
   if (!socket)
@@ -95,8 +103,18 @@ void Server::run()
   wlr_log(WLR_INFO, "Running Wayland compositor on WAYLAND_DISPLAY=%s",
 	  socket);
 
-  startupCommands();
+  startupCommands(command);
 
   wlr_xwayland_create(getWlDisplay(), compositor, true);
   wl_display_run(getWlDisplay());
+}
+
+void Server::handle_compositor_new_surface(wl_listener *listener, void *data)
+{
+  wlr_surface *surface = static_cast<wlr_surface *>(data);
+
+  View *view = new View(surface);
+  surface->data = view;
+
+  std::cout << "COMPOTIOR NEW SURFACE:" << surface->role << std::endl;
 }

@@ -59,7 +59,7 @@ namespace wm
     std::array<uint16_t, 2u> getSize() const noexcept;
     std::array<FixedPoint<-4, int32_t>, 2u> getMinSize(WindowNodeIndex index, WindowTree &windowTree) const noexcept;
 
-    static void removeFromParent(WindowTree &windowTree, WindowNodeIndex index);
-    static void removeFromParent(WindowTree &windowTree, WindowNodeIndex index, WindowNodeIndex parent);
+    static void removeFromParent(WindowTree &windowTree, WindowNodeIndex &index);
+    static void removeFromParent(WindowTree &windowTree, WindowNodeIndex &index, WindowNodeIndex parent);
   };
 }

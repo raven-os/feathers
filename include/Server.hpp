@@ -30,7 +30,7 @@ public:
   ~Server() noexcept;
 
 
-  void run();
+  void run(char *command);
 
   conf::Configuration configuration;
 
@@ -75,7 +75,7 @@ public:
   ServerCursor cursor;
   InputManager inputManager;
   Seat seat;
-  IpcServer ipcServer;
+  //IpcServer ipcServer;
 
   XWayland *xWayland;
 
@@ -103,10 +103,13 @@ public:
 
 private:
   LayerSurface *layerSurface = nullptr;
+  wl_listener compositor_new_surface;
+
+  void handle_compositor_new_surface(struct wl_listener *listener, void *data);
 
   Server();
 
-  void startupCommands() const;
+  void startupCommands(char *command) const;
 
   static Server _instance;
 };

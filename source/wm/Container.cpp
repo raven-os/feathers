@@ -259,12 +259,12 @@ namespace wm
     return result;
   }
 
-  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex index, WindowNodeIndex parent)
+  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex &index, WindowNodeIndex parent)
   {
     windowTree.getData(parent).getContainer().removeChild(parent, windowTree, index);
   }
 
-  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex index)
+  void Container::removeFromParent(WindowTree &windowTree, WindowNodeIndex &index)
   {
     removeFromParent(windowTree, index, windowTree.getParent(index));
   }
