@@ -62,9 +62,42 @@ Keyboard::~Keyboard() {
   wl_event_source_remove(key_repeat_source);
 }
 
+void Keyboard::update_shortcuts()
+{
+  Server &server(Server::getInstance());
+
+  for (auto it = shortcuts.begin(); it != shortcuts.end();)
+    {
+      if (server.configuration.consumeChanged(it->second.name.data()))
+	{
+	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
+	  std::vector<std::string> splitShortcut(this->split_shortcut(it->first));
+	  std::string shortcutKeyTmp;
+
+	  for (std::string tmp : splitShortcut) {
+	    if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
+	      shortcutKeyTmp += "+";
+	    if (tmp.length() && tmp[0] == '$')
+	      {
+		shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
+	      }
+	    else
+	      {
+		shortcutKeyTmp += tmp;
+	      }
+	  }
+	  if (shortcutKeyTmp != "")
+	    {
+	      shortcuts[shortcutKeyTmp] = it->second;
+	    }
+	  it = shortcuts.erase(it);
+	}
+    }
+}
+
 void Keyboard::parse_shortcuts()
 {
-  for (auto it = shortcuts.begin(); it != shortcuts.end();) 
+  for (auto it = shortcuts.begin(); it != shortcuts.end();)
   {
     std::string mod = it->first;
     size_t i = mod.find("[");
@@ -85,6 +118,24 @@ void Keyboard::parse_shortcuts()
     else
       ++it;
   }
+}
+
+std::vector<std::string> Keyboard::split_shortcut(std::string key)
+{
+  std::vector<std::string> splitStr;
+  size_t i = 0;
+  size_t j = key.find("+");
+  uint32_t sum = 0;
+  uint32_t mod = 0;
+
+  while (j != std::string::npos) {
+    key[j] = 0;
+    splitStr.push_back(key.data() + i);
+    i = j + 1;
+    j = key.find("+", j + 1);
+  }
+  splitStr.push_back(key.data() + i);
+  return (splitStr);
 }
 
 std::string Keyboard::get_active_binding()
