@@ -7,16 +7,24 @@
 #include <signal.h>
 
 IpcServer::IpcServer(std::string const& socket, Server *server)
-  : ipcServer(socket)
+  : ipcServer(socket, SOCK_NONBLOCK)
   , socket(socket)
   , server(server)
   , clients()
   , acceptThread(&IpcServer::acceptClients, this)
   , processThread(&IpcServer::processClients, this)
   , mutex()
+  , shutdown(false)
 {
   // Ignore broken pipe
   signal(SIGPIPE, SIG_IGN);
+}
+
+IpcServer::~IpcServer()
+{
+  shutdown = true;
+  acceptThread.join();
+  processThread.join();
 }
 
 void IpcServer::acceptClients()
@@ -24,14 +32,16 @@ void IpcServer::acceptClients()
   while (1)
     {
       try {
-        std::unique_ptr<libsocket::unix_stream_client> client = ipcServer.accept2();
+        usleep(10000);
+        if (shutdown)
+          break;
+        std::unique_ptr<libsocket::unix_stream_client> client = ipcServer.accept2(SOCK_NONBLOCK);
         std::cout << "New ipc client" << std::endl;
         mutex.lock();
         clients.emplace_back(std::move(client));
         mutex.unlock();
 
       } catch (const libsocket::socket_exception& e) {
-        std::cerr << e.mesg;
       }
     }
 }
@@ -43,7 +53,9 @@ void IpcServer::processClients()
   unsigned int clientSize = -1;
   while (1)
     {
-      usleep(100);
+      usleep(10000);
+      if (shutdown)
+        break;
       if (clients.empty())
         continue;
       int newSize = server->outputManager.workspaceCount;
