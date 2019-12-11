@@ -53,7 +53,7 @@ Keyboard::Keyboard(wlr_input_device *device)
     {
       shortcuts[default_shortcut.first] = default_shortcut.second;
     }
-  this->parse_shortcuts();
+  parse_shortcuts();
 }
 
 Keyboard::~Keyboard() {
@@ -120,7 +120,7 @@ void Keyboard::update_shortcuts()
 		    }
 		}
 	    }
-	  this->parse_shortcuts();
+	  parse_shortcuts();
 	}
       else
 	shortcuts_tmp[it->first] = it->second;
@@ -174,7 +174,7 @@ std::vector<std::string> Keyboard::split_shortcut(std::string key)
 
 std::string Keyboard::get_active_binding()
 {
-  this->update_shortcuts();
+  update_shortcuts();
   for (auto const & shortcut : shortcuts) {
     std::string key = shortcut.first;
     std::vector<std::string> splitStr;
