@@ -252,8 +252,6 @@ namespace Commands
                             [](auto &w) noexcept {
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
-      if (currentWorkspace == output->getWorkspaces().end())
-	continue;
       if (direction == Workspace::RIGHT ?
           currentWorkspace == output->getWorkspaces().end() - 1 :
           currentWorkspace == output->getWorkspaces().begin())
@@ -276,7 +274,7 @@ namespace Commands
         auto rootNode(windowTree.getRootIndex());
 	{
 	  auto &rootNodeData(windowTree.getData(rootNode));
-
+        
 	  newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
 	}
         newView->set_tiled(~0u);
@@ -284,7 +282,6 @@ namespace Commands
 	nextWorkspace->get()->getViews().emplace_back(std::move(newView));
       }
       server.outputManager.setActiveWorkspace(nextWorkspace->get());
-      return;
     }
   }
 

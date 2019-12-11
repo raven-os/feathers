@@ -18,15 +18,8 @@ View::~View() noexcept = default;
 
 bool View::at(double lx, double ly, wlr_surface **out_surface, double *sx, double *sy)
 {
-  wlr_box viewBox[1];
-
-  if (wlr_surface_is_xdg_surface_v6(surface))
-    wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), viewBox);
-  else if (wlr_surface_is_xdg_surface(surface))
-    wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), viewBox);
-
-  double view_sx = lx - x.getDoubleValue() + viewBox->x;
-  double view_sy = ly - y.getDoubleValue() + viewBox->y;
+  double view_sx = lx - x.getDoubleValue();
+  double view_sy = ly - y.getDoubleValue();
 
   double _sx, _sy;
   wlr_surface *_surface = nullptr;
