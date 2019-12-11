@@ -15,7 +15,7 @@ class IpcServer
 {
 public:
   IpcServer(std::string const& socket, Server *server);
-  ~IpcServer() = default;
+  ~IpcServer();
 
 private:
   void acceptClients();
@@ -31,4 +31,5 @@ private:
   std::thread acceptThread;
   std::thread processThread;
   std::mutex mutex;
+  bool shutdown;
 };
