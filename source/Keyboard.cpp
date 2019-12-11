@@ -49,11 +49,11 @@ Keyboard::Keyboard(wlr_input_device *device)
   default_shortcuts["Ctrl+Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
   default_shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
   default_shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
-  parse_shortcuts();
   for (auto const &default_shortcut : default_shortcuts)
     {
       shortcuts[default_shortcut.first] = default_shortcut.second;
     }
+  this->parse_shortcuts();
 }
 
 Keyboard::~Keyboard() {
@@ -108,6 +108,7 @@ void Keyboard::update_shortcuts()
 		    }
 		}
 	    }
+	  this->parse_shortcuts();
 	}
       else
 	shortcuts_tmp[it->first] = it->second;
