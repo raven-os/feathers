@@ -78,7 +78,6 @@ void Keyboard::update_shortcuts()
 	  std::vector<std::string> splitShortcut(this->split_shortcut(it->first));
 	  std::string shortcutKeyTmp("");
 
-	  std::cout << "Updating shortcut: " << it->second.name << std::endl;
 	  for (std::string tmp : splitShortcut) {
 	    if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
 	      shortcutKeyTmp += "+";
@@ -105,7 +104,6 @@ void Keyboard::update_shortcuts()
 	  }
 	  if (shortcutKeyTmp != "")
 	    {
-	      std::cout << "Shortcut update: " << shortcutKeyTmp << " -> " << it->second.name << std::endl;
 	      shortcuts_tmp[shortcutKeyTmp] = it->second;
 	    }
 	  else
@@ -114,7 +112,6 @@ void Keyboard::update_shortcuts()
 		{
 		  if (default_shortcut.second.name == it->second.name)
 		    {
-		      std::cout << "Shortcut update: " << default_shortcut.first << " -> " << default_shortcut.second.name << std::endl;
 		      shortcuts_tmp[default_shortcut.first] = default_shortcut.second;
 		      break;
 		    }
