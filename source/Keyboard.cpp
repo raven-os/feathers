@@ -20,35 +20,35 @@ Keyboard::Keyboard(wlr_input_device *device)
 {
   key_repeat_source = wl_event_loop_add_timer(Server::getInstance().wl_event_loop, keyboard_handle_repeat, this);
 
+  default_meta_keys["$mod"] = "Alt";
   //debug = true;
-
-  default_shortcuts["Alt+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
-  default_shortcuts["Alt+d"] = {"d-menu", [](void*){ Commands::open_dmenu(); }};
-  default_shortcuts["Alt+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
-  default_shortcuts["Alt+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
-  default_shortcuts["Alt+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
-  default_shortcuts["Alt+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
-  default_shortcuts["Alt+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
-  default_shortcuts["Alt+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
-  default_shortcuts["Alt+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
-  default_shortcuts["Alt+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
-  default_shortcuts["Alt+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
-  default_shortcuts["Alt+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
-  default_shortcuts["Alt+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
-  default_shortcuts["Ctrl+[Alt+Down,Alt+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
-  default_shortcuts["Ctrl+Alt+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
+  default_shortcuts["$mod+Return"] = {"Terminal", [](void*){ Commands::open_terminal(); }};
+  default_shortcuts["$mod+d"] = {"d-menu", [](void*){ Commands::open_dmenu(); }};
+  default_shortcuts["$mod+F4"] = {"destroy", [](void*){ Commands::close_view(); }};
+  default_shortcuts["$mod+F2"] = {"Toggle fullscreen", [](void*){ Commands::toggle_fullscreen(); }};
+  default_shortcuts["$mod+Tab"] = {"Switch window", [](void*){ Commands::switch_window(); }};
+  default_shortcuts["$mod+Space"] = {"Toggle float", [](void*){ Commands::toggle_float_window(); }};
+  default_shortcuts["$mod+E"] = {"Switch position", [](void*){ Commands::switch_container_direction(); }};
+  default_shortcuts["$mod+H"] = {"Open below", [](void*){ Server::getInstance().openType = OpenType::below; }};
+  default_shortcuts["$mod+V"] = {"Open right", [](void*){ Server::getInstance().openType = OpenType::right; }};
+  default_shortcuts["$mod+Up"] = {"Switch focus up", [](void*){ Commands::switch_focus_up(); }};
+  default_shortcuts["$mod+Left"] = {"Switch focus left", [](void*){ Commands::switch_focus_left(); }};
+  default_shortcuts["$mod+Down"] = {"Switch focus Down", [](void*){ Commands::switch_focus_down(); }};
+  default_shortcuts["$mod+Right"] = {"Switch focus Right", [](void*){ Commands::switch_focus_right(); }};
+  default_shortcuts["Ctrl+[$mod+Down,$mod+Right,1,2,3,4,5,6,7,8,9,&,é,\",\',(,-,è,_,ç,)]"] = {"Switch workspace (left to right)", [](void *data){ Commands::switch_workspace(Workspace::RIGHT, data); }};
+  default_shortcuts["Ctrl+$mod+[Up,Left]"] = {"Switch workspace (right to left)", [](void*){ Commands::switch_workspace(Workspace::LEFT, nullptr); }};
   default_shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
   default_shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
-  default_shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(false); }};
+  default_shortcuts["Ctrl+$mod+w"] = {"New workspace", [](void*){ Commands::new_workspace(false); }};
   default_shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(nullptr); }};
-  default_shortcuts["Alt+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
-  default_shortcuts["Alt+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
-  default_shortcuts["Alt+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};
-  default_shortcuts["Alt+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
+  default_shortcuts["$mod+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
+  default_shortcuts["$mod+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
+  default_shortcuts["$mod+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};
+  default_shortcuts["$mod+K"] = {"Move window down", [](void *){ Commands::move_window_down(); }};
   //Allowing keyboard debug
-  default_shortcuts["Ctrl+Alt+D"] = {"Debug", [this](void*){debug = !debug;}};
-  default_shortcuts["Alt+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
-  default_shortcuts["Alt+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
+  default_shortcuts["Ctrl+$mod+D"] = {"Debug", [this](void*){debug = !debug;}};
+  default_shortcuts["$mod+Escape"] = {"Leave", [](void*){ Commands::close_compositor(); }};
+  default_shortcuts["$mod+F1"] = {"Open config editor", [](void*){ Commands::open_config_editor(); }};
   for (auto const &default_shortcut : default_shortcuts)
     {
       shortcuts[default_shortcut.first] = default_shortcut.second;
@@ -84,7 +84,19 @@ void Keyboard::update_shortcuts()
 	      shortcutKeyTmp += "+";
 	    if (tmp.length() && tmp[0] == '$')
 	      {
-		shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
+		std::string meta_key_value(server.configuration.get(tmp.substr(1).data()));
+
+		if (meta_key_value != "")
+		  shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
+		else
+		  {
+		    auto it(default_meta_keys.find(tmp));
+
+		    if (it != default_meta_keys.end())
+		      {
+			shortcutKeyTmp += it->second;
+		      }
+		  }
 	      }
 	    else
 	      {
