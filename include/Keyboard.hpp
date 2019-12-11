@@ -33,10 +33,14 @@ private:
   wl_event_source *key_repeat_source;
   ShortcutState keycodes_states;
   std::string repeatBinding = "";
+  std::map<std::string, std::string> default_meta_keys;
+  std::map<std::string, binding> default_shortcuts;
   std::map<std::string, binding> shortcuts;
 
 private:
   void disarm_key_repeat();
+  void update_shortcuts();
+  std::vector<std::string> split_shortcut(std::string key);
   std::string get_active_binding();
   void keyboard_handle_modifiers(wl_listener *listener, void *data);
   void keyboard_handle_key(wl_listener *listener, void *data);
