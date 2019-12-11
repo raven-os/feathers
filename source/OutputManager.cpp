@@ -52,17 +52,8 @@ void OutputManager::render_surface(wlr_surface *surface, int sx, int sy, void *d
   oy += sy;
   if (!rdata->fullscreen)
     {
-      wlr_box viewBox[1];
-
-      if (wlr_surface_is_xdg_surface_v6(surface))
-	wlr_xdg_surface_v6_get_geometry(wlr_xdg_surface_v6_from_wlr_surface(surface), viewBox);
-      else if (wlr_surface_is_xdg_surface(surface))
-	wlr_xdg_surface_get_geometry(wlr_xdg_surface_from_wlr_surface(surface), viewBox);
-
       ox += view->x.getDoubleValue();
-      ox -= viewBox->x;
       oy += view->y.getDoubleValue();
-      oy -= viewBox->y;
     }
 
   wlr_box box = {
