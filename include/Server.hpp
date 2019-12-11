@@ -29,7 +29,7 @@ public:
   ~Server() noexcept;
 
 
-  void run();
+  void run(char *command);
 
   conf::Configuration configuration;
 
@@ -100,7 +100,7 @@ private:
 
   Server();
 
-  void startupCommands() const;
+  void startupCommands(char *command) const;
 
   static Server _instance;
 };

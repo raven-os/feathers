@@ -260,22 +260,26 @@ namespace Commands
       auto &view = currentWorkspace->get()->getViews().front();
 
       std::unique_ptr<XdgView> newView;
-    
       {
-	auto &windowTree = currentWorkspace->get()->getWindowTree();
+	if (view->windowNode != wm::nullNode) {
+	  auto &windowTree = currentWorkspace->get()->getWindowTree();
 
-	wm::Container::removeFromParent(windowTree, view->windowNode);
+	  wm::Container::removeFromParent(windowTree, view->windowNode);
+	}
 	newView = std::move(view);
         currentWorkspace->get()->getViews().erase(std::find(currentWorkspace->get()->getViews().begin(), currentWorkspace->get()->getViews().end(), view));
       }
       {
         auto &windowTree = nextWorkspace->get()->getWindowTree();
         auto rootNode(windowTree.getRootIndex());
-        auto &rootNodeData(windowTree.getData(rootNode));
+	{
+	  auto &rootNodeData(windowTree.getData(rootNode));
         
-        newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
+	  newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
+	}
         newView->set_tiled(~0u);
-        nextWorkspace->get()->getViews().emplace_back(std::move(newView));
+	newView->workspace = nextWorkspace->get();
+	nextWorkspace->get()->getViews().emplace_back(std::move(newView));
       }
       server.outputManager.setActiveWorkspace(nextWorkspace->get());
     }
@@ -301,17 +305,19 @@ namespace Commands
       }
   }
 
-  void close_workspace()
+  void close_workspace(Workspace *workspace)
   {
     Server &server = Server::getInstance();
 
     if (server.outputManager.workspaceCount == 2)
       return ;
+    if (!workspace)
+      workspace = Server::getInstance().outputManager.getActiveWorkspace();
     for (auto const &output : server.outputManager.getOutputs())
     {
       auto it = std::find_if(output->getWorkspaces().begin(), output->getWorkspaces().end(),
-                            [](auto &w) noexcept {
-                              return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
+                            [workspace](auto &w) noexcept {
+                              return w.get() == workspace;
                             });
       auto newActiveWorkspace = it + (it ==  output->getWorkspaces().begin() ? 1 : -1);
       server.outputManager.setActiveWorkspace(newActiveWorkspace->get());

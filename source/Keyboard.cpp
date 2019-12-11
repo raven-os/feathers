@@ -40,7 +40,7 @@ Keyboard::Keyboard(wlr_input_device *device)
   default_shortcuts["Shift+Right"] = {"Switch window to right workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::RIGHT); }};
   default_shortcuts["Shift+Left"] = {"Switch window to left workspace", [](void*){ Commands::switch_window_from_workspace(Workspace::LEFT); }};
   default_shortcuts["Ctrl+Alt+w"] = {"New workspace", [](void*){ Commands::new_workspace(false); }};
-  default_shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(); }};
+  default_shortcuts["Ctrl+W"] = {"Close workspace", [](void*){ Commands::close_workspace(nullptr); }};
   default_shortcuts["Alt+J"] = {"Move window left", [](void *){ Commands::move_window_left(); }};
   default_shortcuts["Alt+L"] = {"Move window right", [](void *){ Commands::move_window_right(); }};
   default_shortcuts["Alt+I"] = {"Move window up", [](void *){ Commands::move_window_up(); }};

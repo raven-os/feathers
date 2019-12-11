@@ -197,20 +197,28 @@ namespace Commands
 		  return ;
 		}
 	      auto newContainerNode = windowTree.getParent(containerNode);
-	      auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
 
-	      container->removeChild(containerNode, windowTree, viewNode);
 	      if (moveForward)
 		{
-		  newContainer->addChild(newContainerNode, windowTree, containerNode, wm::ClientData{view});
+		  container->removeChild(containerNode, windowTree, viewNode);
+
+		  auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
+		  view->windowNode = newContainer->addChild(newContainerNode, windowTree, containerNode, wm::ClientData{view});
 		}
 	      else if (windowTree.getFirstChild(newContainerNode) != containerNode)
 		{
-		  newContainer->addChild(newContainerNode, windowTree, windowTree.getPrevSibling(containerNode), wm::ClientData{view});
+		  auto prevSibling = windowTree.getPrevSibling(containerNode);
+		  container->removeChild(containerNode, windowTree, viewNode);
+
+		  auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
+		  view->windowNode = newContainer->addChild(newContainerNode, windowTree, prevSibling, wm::ClientData{view});
 		}
 	      else
 		{
-		  newContainer->addChild(newContainerNode, windowTree, wm::ClientData{view});
+		  container->removeChild(containerNode, windowTree, viewNode);
+
+		  auto *newContainer(&windowTree.getData(newContainerNode).getContainer());
+		  view->windowNode = newContainer->addChild(newContainerNode, windowTree, wm::ClientData{view});
 		}
 	      return ;
 	    }

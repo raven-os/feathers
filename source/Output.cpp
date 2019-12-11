@@ -16,6 +16,7 @@
 
 #include "XdgView.hpp"
 #include "LayerSurface.hpp"
+#include <fstream>
 
 Output::Output(struct wlr_output *wlr_output, uint16_t workspaceCount) :
   wlr_output(wlr_output)
@@ -49,7 +50,12 @@ void Output::refreshImage()
 				       STBI_rgb_alpha);
       if (!image)
 	{
-	  image = stbi_load("wallpaper.jpg",
+    std::string file = "./wallpaper.jpg";
+    std::ifstream f(file.c_str());
+    
+    if (!f.good())
+      file = "/usr/share/feathers/wallpaper.jpg";
+    image = stbi_load(file.c_str(),
 			    &width,
 			    &height,
 			    &channels,
