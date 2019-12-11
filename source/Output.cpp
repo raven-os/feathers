@@ -87,7 +87,7 @@ namespace
     if (FixedPoint<0, int> minPos(offset[direction] + (direction ? margin.top : margin.left));
 	(anchor & anchorDir) || (direction ? layerSurface.y : layerSurface.x) < minPos)
       {
-	(direction ? layerSurface.y : layerSurface.x) = minPos;
+        (direction ? layerSurface.y : layerSurface.x) = minPos;
 	if (anchor & oppositeDir)
 	  {
 	    outSize = size[direction] - (direction ? margin.top + margin.bottom : margin.right + margin.left);

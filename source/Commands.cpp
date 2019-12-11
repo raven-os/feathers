@@ -114,8 +114,8 @@ namespace Commands
 	if (view->windowNode != wm::nullNode)
 	  {
 	    wm::Container::removeFromParent(windowTree, view->windowNode);
-	    view->x = 10_FP;
-	    view->y = 10_FP;
+	    view->x = 100_FP;
+	    view->y = 100_FP;
 	    if (wlr_surface_is_xdg_surface_v6(view->surface))
 	      wlr_xdg_toplevel_v6_set_size(wlr_xdg_surface_v6_from_wlr_surface(view->surface), view->previous_size[0], view->previous_size[1]);
 	    else if (wlr_surface_is_xdg_surface(view->surface))
@@ -252,6 +252,8 @@ namespace Commands
                             [](auto &w) noexcept {
                               return w.get() == Server::getInstance().outputManager.getActiveWorkspace();
                             });
+      if (currentWorkspace == output->getWorkspaces().end())
+	continue;
       if (direction == Workspace::RIGHT ?
           currentWorkspace == output->getWorkspaces().end() - 1 :
           currentWorkspace == output->getWorkspaces().begin())
@@ -274,7 +276,7 @@ namespace Commands
         auto rootNode(windowTree.getRootIndex());
 	{
 	  auto &rootNodeData(windowTree.getData(rootNode));
-        
+
 	  newView->windowNode = rootNodeData.getContainer().addChild(rootNode, windowTree, wm::ClientData{newView.get()});
 	}
         newView->set_tiled(~0u);
@@ -282,6 +284,7 @@ namespace Commands
 	nextWorkspace->get()->getViews().emplace_back(std::move(newView));
       }
       server.outputManager.setActiveWorkspace(nextWorkspace->get());
+      return;
     }
   }
 
