@@ -197,8 +197,6 @@ std::vector<std::string> Keyboard::split_shortcut(std::string key)
   std::vector<std::string> splitStr;
   size_t i = 0;
   size_t j = key.find("+");
-  uint32_t sum = 0;
-  uint32_t mod = 0;
 
   while (j != std::string::npos) {
     key[j] = 0;
@@ -215,19 +213,9 @@ std::string Keyboard::get_active_binding()
   update_shortcuts();
   for (auto const & shortcut : shortcuts) {
     std::string key = shortcut.first;
-    std::vector<std::string> splitStr;
-    size_t i = 0;
-    size_t j = key.find("+");
+    std::vector<std::string> splitStr(split_shortcut(shortcut.first));
     uint32_t sum = 0;
     uint32_t mod = 0;
-
-    while (j != std::string::npos) {
-      key[j] = 0;
-      splitStr.push_back(key.data() + i);
-      i = j + 1;
-      j = key.find("+", j + 1);
-    }
-    splitStr.push_back(key.data() + i);
 
     for (std::string tmp : splitStr) {
       if (modifiersLst.find(tmp) != modifiersLst.end())
