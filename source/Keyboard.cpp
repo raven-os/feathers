@@ -54,6 +54,11 @@ Keyboard::Keyboard(wlr_input_device *device)
       shortcuts[default_shortcut.first] = default_shortcut.second;
     }
   parse_shortcuts();
+  replace_meta_keys_for_all();
+  for (auto const &shortcut : shortcuts)
+    {
+      std::cout << "shortcut: " << shortcut.second.name << " = " << shortcut.first << std::endl;
+    }
 }
 
 Keyboard::~Keyboard() {
@@ -65,6 +70,51 @@ Keyboard::~Keyboard() {
   wl_event_source_remove(key_repeat_source);
 }
 
+std::string Keyboard::replace_meta_keys(std::string shortcut)
+{
+  Server &server(Server::getInstance());
+  std::vector<std::string> splitShortcut(this->split_shortcut(shortcut));
+  std::string shortcutKeyTmp("");
+
+  for (std::string tmp : splitShortcut)
+    {
+      if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
+	shortcutKeyTmp += "+";
+      if (tmp.length() && tmp[0] == '$')
+	{
+	  std::string meta_key_value(server.configuration.get(tmp.substr(1).data()));
+
+	  if (meta_key_value != "")
+	    shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
+	  else
+	    {
+	      auto it(default_meta_keys.find(tmp));
+
+	      if (it != default_meta_keys.end())
+		{
+		  shortcutKeyTmp += it->second;
+		}
+	    }
+	}
+      else
+	{
+	  shortcutKeyTmp += tmp;
+	}
+    }
+  return (shortcutKeyTmp);
+}
+
+void Keyboard::replace_meta_keys_for_all()
+{
+  std::map<std::string, binding> shortcuts_tmp;
+
+  for (auto &shortcut: shortcuts)
+    {
+      shortcuts_tmp[replace_meta_keys(shortcut.first)] = shortcut.second;
+    }
+  shortcuts.swap(shortcuts_tmp);
+}
+
 void Keyboard::update_shortcuts()
 {
   Server &server(Server::getInstance());
@@ -72,36 +122,12 @@ void Keyboard::update_shortcuts()
 
   for (auto it = shortcuts.begin(); it != shortcuts.end();)
     {
+      std::cout << "0 Shortcut: " << it->first << std::endl;
       if (server.configuration.consumeChanged(it->second.name.data()))
 	{
 	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
-	  std::vector<std::string> splitShortcut(this->split_shortcut(it->first));
-	  std::string shortcutKeyTmp("");
+	  std::string shortcutKeyTmp(replace_meta_keys(it->first));
 
-	  for (std::string tmp : splitShortcut) {
-	    if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
-	      shortcutKeyTmp += "+";
-	    if (tmp.length() && tmp[0] == '$')
-	      {
-		std::string meta_key_value(server.configuration.get(tmp.substr(1).data()));
-
-		if (meta_key_value != "")
-		  shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
-		else
-		  {
-		    auto it(default_meta_keys.find(tmp));
-
-		    if (it != default_meta_keys.end())
-		      {
-			shortcutKeyTmp += it->second;
-		      }
-		  }
-	      }
-	    else
-	      {
-		shortcutKeyTmp += tmp;
-	      }
-	  }
 	  if (shortcutKeyTmp != "")
 	    {
 	      shortcuts_tmp[shortcutKeyTmp] = it->second;
@@ -120,10 +146,17 @@ void Keyboard::update_shortcuts()
 	  parse_shortcuts();
 	}
       else
-	shortcuts_tmp[it->first] = it->second;
+	{
+	  std::cout << "2 Shortcut: " << it->first << std::endl;
+	  shortcuts_tmp[it->first] = it->second;
+	}
       it++;
     }
   shortcuts.swap(shortcuts_tmp);
+  for (auto const &shortcut : shortcuts)
+    {
+      std::cout << "3 Shortcut: " << shortcut.second.name << " = " << shortcut.first << std::endl;
+    }
 }
 
 void Keyboard::parse_shortcuts()

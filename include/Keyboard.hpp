@@ -39,6 +39,8 @@ private:
 
 private:
   void disarm_key_repeat();
+  std::string replace_meta_keys(std::string shortcut);
+  void replace_meta_keys_for_all();
   void update_shortcuts();
   std::vector<std::string> split_shortcut(std::string key);
   std::string get_active_binding();
