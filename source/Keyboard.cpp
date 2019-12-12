@@ -224,11 +224,11 @@ std::string Keyboard::get_active_binding()
         sum += xkb_keysym_from_name(tmp.c_str(), XKB_KEYSYM_CASE_INSENSITIVE);
     }
 
-    if (debug)
+    if (debug) {
       std::cout << "Shortcuts Code: " << sum << " + " << mod << " -> " << shortcut.second.name << std::endl;
-
-    std::cout << shortcut.first << std::endl;
-    std::cout << keycodes_states.last_raw_modifiers << " " << mod << " " << sum << " " << keycodes_states.sum << std::endl;
+      std::cout << shortcut.first << std::endl;
+      std::cout << keycodes_states.last_raw_modifiers << " " << mod << " " << sum << " " << keycodes_states.sum << std::endl;
+    }
     if (keycodes_states.last_raw_modifiers == mod && sum == keycodes_states.sum)
       return shortcut.first;
   }
