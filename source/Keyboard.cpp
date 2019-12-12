@@ -55,10 +55,6 @@ Keyboard::Keyboard(wlr_input_device *device)
     }
   parse_shortcuts();
   replace_meta_keys_for_all();
-  for (auto const &shortcut : shortcuts)
-    {
-      std::cout << "shortcut: " << shortcut.second.name << " = " << shortcut.first << std::endl;
-    }
 }
 
 Keyboard::~Keyboard() {
@@ -122,7 +118,6 @@ void Keyboard::update_shortcuts()
 
   for (auto it = shortcuts.begin(); it != shortcuts.end();)
     {
-      std::cout << "0 Shortcut: " << it->first << std::endl;
       if (server.configuration.consumeChanged(it->second.name.data()))
 	{
 	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
@@ -147,16 +142,11 @@ void Keyboard::update_shortcuts()
 	}
       else
 	{
-	  std::cout << "2 Shortcut: " << it->first << std::endl;
 	  shortcuts_tmp[it->first] = it->second;
 	}
       it++;
     }
   shortcuts.swap(shortcuts_tmp);
-  for (auto const &shortcut : shortcuts)
-    {
-      std::cout << "3 Shortcut: " << shortcut.second.name << " = " << shortcut.first << std::endl;
-    }
 }
 
 void Keyboard::parse_shortcuts()
