@@ -5,6 +5,7 @@
 # include "ShortcutState.hpp"
 
 #include <map>
+#include <algorithm>
 
 class Server;
 
@@ -39,6 +40,7 @@ private:
 
 private:
   void disarm_key_repeat();
+  void print_shortcuts();
   std::string replace_meta_keys(std::string shortcut);
   void replace_meta_keys_for_all();
   void update_shortcuts();

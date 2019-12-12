@@ -66,6 +66,14 @@ Keyboard::~Keyboard() {
   wl_event_source_remove(key_repeat_source);
 }
 
+void Keyboard::print_shortcuts()
+{
+  for (auto &shortcut: shortcuts)
+    {
+      std::cout << "Shortcut: " << shortcut.first << " = " << shortcut.second.name << std::endl;
+    }
+}
+
 std::string Keyboard::replace_meta_keys(std::string shortcut)
 {
   Server &server(Server::getInstance());
@@ -115,17 +123,22 @@ void Keyboard::update_shortcuts()
 {
   Server &server(Server::getInstance());
   std::map<std::string, binding> shortcuts_tmp;
+  std::vector<std::string> erased;
+  bool updated(false);
 
   for (auto it = shortcuts.begin(); it != shortcuts.end();)
     {
       if (server.configuration.consumeChanged(it->second.name.data()))
 	{
+	  {
+	    erased.push_back(it->second.name);
+	    updated = true;
+	  }
 	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
-	  std::string shortcutKeyTmp(replace_meta_keys(it->first));
 
-	  if (shortcutKeyTmp != "")
+	  if (newShortcutKey != "")
 	    {
-	      shortcuts_tmp[shortcutKeyTmp] = it->second;
+	      shortcuts_tmp[newShortcutKey] = it->second;
 	    }
 	  else
 	    {
@@ -138,15 +151,20 @@ void Keyboard::update_shortcuts()
 		    }
 		}
 	    }
-	  parse_shortcuts();
 	}
-      else
+      else if (std::find(erased.begin(), erased.end(), it->second.name) == erased.end())
 	{
+	  std::cout << it->second.name << std::endl;
 	  shortcuts_tmp[it->first] = it->second;
 	}
       it++;
     }
   shortcuts.swap(shortcuts_tmp);
+  if (updated)
+    {
+      parse_shortcuts();
+      replace_meta_keys_for_all();
+    }
 }
 
 void Keyboard::parse_shortcuts()
