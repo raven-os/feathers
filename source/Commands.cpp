@@ -1,11 +1,12 @@
-# include <cstring>
 # include <unistd.h>
+# include <signal.h>
+# include <cstring>
 # include <iostream>
+# include <fstream>
 
 # include "Commands.hpp"
 # include "Output.hpp"
 # include "XdgView.hpp"
-# include <signal.h>
 
 namespace Commands
 {
@@ -41,33 +42,40 @@ namespace Commands
     Server &server = Server::getInstance();
 
     if (fork() == 0)
-    {
-      std::unordered_map<std::string, std::string> commands;
+      {
+        std::unordered_map<std::string, std::string> commands;
 
-      commands["gnome-terminal"] = "-- $PWD/openConfig.sh";
-      commands["xfce4-terminal"] =  "-e $PWD/openConfig.sh";
-      commands["weston-terminal"] = "--shell=$PWD/openConfig.sh";
-      commands["fake-terminal"] = "fake";
+        std::string configScript("openConfig.sh");
+        std::ifstream file(configScript.c_str());
+        if (!file.good())
+          {
+            configScript = "/usr/share/feathers/openConfig.sh";
+          }
 
-      std::array<std::string, 3u> terminals{
-	{
-	 server.configuration.getOnce("config_terminal"),
-	 server.configuration.getOnce("terminal"),
-	 "weston-terminal"
-	}
-      };
+        commands["gnome-terminal"] = "-- " + configScript;
+        commands["xfce4-terminal"] =  "-e " + configScript;
+        commands["weston-terminal"] = "--shell=" + configScript;
+        commands["fake-terminal"] = "fake";
 
-      std::stringstream command;
+        std::array<std::string, 3u> terminals{{
+          server.configuration.getOnce("config_terminal"),
+          server.configuration.getOnce("terminal"),
+          "weston-terminal"
+        }};
 
-      for (auto &term : terminals)
-	if (!term.empty())
-	  {
-	    command << term << " " << commands[term] << " || ";
-	  }
-      command << "echo";
+        std::stringstream command;
 
-      execl("/bin/bash", "/bin/bash", "-c", command.str().c_str(), nullptr);
-    }
+        for (auto &term : terminals)
+          {
+            if (!term.empty())
+              {
+                command << term << " " << commands[term] << " || ";
+              }
+          }
+        command << "echo";
+
+        execl("/bin/bash", "/bin/bash", "-c", command.str().c_str(), nullptr);
+      }
   }
 
   void toggle_fullscreen() {
