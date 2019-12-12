@@ -54,6 +54,7 @@ Keyboard::Keyboard(wlr_input_device *device)
       shortcuts[default_shortcut.first] = default_shortcut.second;
     }
   parse_shortcuts();
+  replace_meta_keys_for_all();
 }
 
 Keyboard::~Keyboard() {
@@ -65,46 +66,79 @@ Keyboard::~Keyboard() {
   wl_event_source_remove(key_repeat_source);
 }
 
+void Keyboard::print_shortcuts()
+{
+  for (auto &shortcut: shortcuts)
+    {
+      std::cout << "Shortcut: " << shortcut.first << " = " << shortcut.second.name << std::endl;
+    }
+}
+
+std::string Keyboard::replace_meta_keys(std::string shortcut)
+{
+  Server &server(Server::getInstance());
+  std::vector<std::string> splitShortcut(this->split_shortcut(shortcut));
+  std::string shortcutKeyTmp("");
+
+  for (std::string tmp : splitShortcut)
+    {
+      if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
+	shortcutKeyTmp += "+";
+      if (tmp.length() && tmp[0] == '$')
+	{
+	  std::string meta_key_value(server.configuration.get(tmp.substr(1).data()));
+
+	  if (meta_key_value != "")
+	    shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
+	  else
+	    {
+	      auto it(default_meta_keys.find(tmp));
+
+	      if (it != default_meta_keys.end())
+		{
+		  shortcutKeyTmp += it->second;
+		}
+	    }
+	}
+      else
+	{
+	  shortcutKeyTmp += tmp;
+	}
+    }
+  return (shortcutKeyTmp);
+}
+
+void Keyboard::replace_meta_keys_for_all()
+{
+  std::map<std::string, binding> shortcuts_tmp;
+
+  for (auto &shortcut: shortcuts)
+    {
+      shortcuts_tmp[replace_meta_keys(shortcut.first)] = shortcut.second;
+    }
+  shortcuts.swap(shortcuts_tmp);
+}
+
 void Keyboard::update_shortcuts()
 {
   Server &server(Server::getInstance());
   std::map<std::string, binding> shortcuts_tmp;
+  std::vector<std::string> erased;
+  bool updated(false);
 
   for (auto it = shortcuts.begin(); it != shortcuts.end();)
     {
       if (server.configuration.consumeChanged(it->second.name.data()))
 	{
-	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
-	  std::vector<std::string> splitShortcut(this->split_shortcut(it->first));
-	  std::string shortcutKeyTmp("");
-
-	  for (std::string tmp : splitShortcut) {
-	    if (tmp.length() && shortcutKeyTmp.length() && shortcutKeyTmp.back() != '+')
-	      shortcutKeyTmp += "+";
-	    if (tmp.length() && tmp[0] == '$')
-	      {
-		std::string meta_key_value(server.configuration.get(tmp.substr(1).data()));
-
-		if (meta_key_value != "")
-		  shortcutKeyTmp += server.configuration.get(tmp.substr(1).data());
-		else
-		  {
-		    auto it(default_meta_keys.find(tmp));
-
-		    if (it != default_meta_keys.end())
-		      {
-			shortcutKeyTmp += it->second;
-		      }
-		  }
-	      }
-	    else
-	      {
-		shortcutKeyTmp += tmp;
-	      }
+	  {
+	    erased.push_back(it->second.name);
+	    updated = true;
 	  }
-	  if (shortcutKeyTmp != "")
+	  std::string newShortcutKey(server.configuration.get(it->second.name.data()));
+
+	  if (newShortcutKey != "")
 	    {
-	      shortcuts_tmp[shortcutKeyTmp] = it->second;
+	      shortcuts_tmp[newShortcutKey] = it->second;
 	    }
 	  else
 	    {
@@ -117,13 +151,20 @@ void Keyboard::update_shortcuts()
 		    }
 		}
 	    }
-	  parse_shortcuts();
 	}
-      else
-	shortcuts_tmp[it->first] = it->second;
+      else if (std::find(erased.begin(), erased.end(), it->second.name) == erased.end())
+	{
+	  std::cout << it->second.name << std::endl;
+	  shortcuts_tmp[it->first] = it->second;
+	}
       it++;
     }
   shortcuts.swap(shortcuts_tmp);
+  if (updated)
+    {
+      parse_shortcuts();
+      replace_meta_keys_for_all();
+    }
 }
 
 void Keyboard::parse_shortcuts()
@@ -156,8 +197,6 @@ std::vector<std::string> Keyboard::split_shortcut(std::string key)
   std::vector<std::string> splitStr;
   size_t i = 0;
   size_t j = key.find("+");
-  uint32_t sum = 0;
-  uint32_t mod = 0;
 
   while (j != std::string::npos) {
     key[j] = 0;
@@ -174,19 +213,9 @@ std::string Keyboard::get_active_binding()
   update_shortcuts();
   for (auto const & shortcut : shortcuts) {
     std::string key = shortcut.first;
-    std::vector<std::string> splitStr;
-    size_t i = 0;
-    size_t j = key.find("+");
+    std::vector<std::string> splitStr(split_shortcut(shortcut.first));
     uint32_t sum = 0;
     uint32_t mod = 0;
-
-    while (j != std::string::npos) {
-      key[j] = 0;
-      splitStr.push_back(key.data() + i);
-      i = j + 1;
-      j = key.find("+", j + 1);
-    }
-    splitStr.push_back(key.data() + i);
 
     for (std::string tmp : splitStr) {
       if (modifiersLst.find(tmp) != modifiersLst.end())
